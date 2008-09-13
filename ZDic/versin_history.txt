@@ -1,0 +1,23 @@
+
+2007-8-6  v2.34
+Open Sourced from today.
+Update:
+1. Bug fix: Reset when quit this application on some new device
+2. Bug Fix: Voice Speech cannot work on some new device
+3. Bug fix: 5-way Navigator
+==========================================================================
+2004-7-17 V1.93
+
+2004-7-26 V1.92
+
+2004-7-25 V1.90 
+
+2004-7-24 V1.85 
+
+2004-7-23 V1.84 
+
+2004-7-22 V1.83 
+
+2004-7-21 V1.80 
+
+2004-7-17 V1.62 
