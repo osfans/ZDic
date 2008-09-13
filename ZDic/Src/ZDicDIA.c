@@ -156,11 +156,13 @@ static void ZDicDIAResizeForm ( FormType *frmP, RectangleType* fromBoundsP,
             break;
             
         case MainExitButton:
-        case MainJumpPushButton:
-        case MainSelectPushButton:
-        case MainBackHistoryRepeatButton:
-        case MainExportToMemo:
+        //case MainJumpPushButton:
+        //case MainSelectPushButton:
         case MainPlayVoice:
+        case MainExportToMemo:
+        case MainBackHistoryRepeatButton:
+        case MainSelectPushButton:
+        case MainJumpPushButton:
             // Change x position
             FrmGetObjectPosition ( frmP, i, &x, &y );
             FrmSetObjectPosition ( frmP, i, x + widthDelta, y );
@@ -224,7 +226,11 @@ Boolean ZDicDIADisplayChange ( AppGlobalType* global )
         case DAForm:
         	// adjust the bround and set new form bround
         	DAFormAdjustFormBounds ( global, frmP, curBounds, displayBounds );
-            break;            
+            break; 
+        
+        case DAFormLarge:
+        	DAFormAdjustFormBounds ( global, frmP, curBounds, displayBounds );
+            break;          
         }
         // save input area state
         global->diaPinInputAreaState = PINGetInputAreaState ();

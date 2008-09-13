@@ -75,7 +75,7 @@ BEGIN
      MESSAGE "Dictionary not installed."
      BUTTONS "OK" 
 END
-
+ 
 ALERT ID NoEnoughMemoryAlert 
 WARNING
 BEGIN
@@ -94,32 +94,38 @@ END
 
 FORM ID MainForm AT (0 0 160 160)
 	SAVEBEHIND NOFRAME
-	MENUID MainMenuBar SAVEBEHIND
+	MENUID MainMenuBar SAVEBEHIND     
 BEGIN
 	TITLE "ZDic-must long than 16 bytes"
-	GRAFFITISTATEINDICATOR AT (135 1)
-	
-	FIELD ID MainWordField  AT (27 149 61 AUTO) MAXCHARS 255 EDITABLE UNDERLINED
-	FIELD ID MainDescriptionField AT (61 15 91 133) MULTIPLELINES MAXCHARS 8192  NONEDITABLE HASSCROLLBAR
-	SCROLLBAR ID MainDescScrollBar   AT (153 15 7 132)  VALUE 0 MIN 0 MAX 0 PAGESIZE 0
+	GRAFFITISTATEINDICATOR AT (135 2)
 
-	BUTTON "Goto" ID MainGotoButton   AT (104 149 26 10)
-	BUTTON "Clear" ID MainNewButton  AT (133 149 26 10)	
-	REPEATBUTTON "\3" MainBackHistoryRepeatButton AT (98 0 12 12) NOFRAME FONT 3
-	PUSHBUTTON  "S" MainSelectPushButton AT (112 1 10 10) GROUP 1
-	PUSHBUTTON  "J" ID MainJumpPushButton  AT (123 1 10 10) GROUP 1
-	BUTTON "x" ID MainExitButton  AT (145 1 14 10) 
-
-	POPUPTRIGGER "" ID MainHistoryTrigger  AT (88 148 15 14)
-	LIST ""   ID MainHistoryPopupList  AT (24 146 81 2) VISIBLEITEMS 0 NONUSABLE
+	FIELD ID MainWordField  AT (11 149 104 AUTO) MAXCHARS 255 EDITABLE UNDERLINED
+	FIELD ID MainDescriptionField AT (62 15 89 133) MULTIPLELINES MAXCHARS 8192  NONEDITABLE HASSCROLLBAR
+	SCROLLBAR ID MainDescScrollBar   AT (153 15 7 133)  VALUE 0 MIN 0 MAX 0 PAGESIZE 0
 	
-	BUTTON "Word :" ID MainWordButton  AT (0 150 26 12) NOFRAME
-	REPEATBUTTON "\10" ID MainWordListUpRepeatButton  AT (0 17 61 8) FONT 3 NOFRAME
-	REPEATBUTTON "\7" ID MainWordListDownRepeatButton   AT (0 137 61 8) FONT 3 NOFRAME
+	BUTTON "Go" ID MainGotoButton   AT (131 149 12 10)
+	BUTTON "Clr" ID MainNewButton  AT (146 149 12 10)
+		
+	REPEATBUTTON "\3" MainBackHistoryRepeatButton AT (98 1 12 12) NOFRAME FONT 3
+	
+	PUSHBUTTON  "S" MainSelectPushButton AT (112 2 10 10) GROUP 1
+	PUSHBUTTON  "J" ID MainJumpPushButton  AT (123 2 10 10) GROUP 1
+
+	BUTTON "P" ID MainPlayVoice  AT (65 2 14 10) NONUSABLE
+	
+	BUTTON "x" ID MainExitButton  AT (145 2 14 10) 
+
+	POPUPTRIGGER "" ID MainHistoryTrigger  AT (115 148 15 14)
+	LIST ""   ID MainHistoryPopupList  AT (11 146 104 2) VISIBLEITEMS 0 NONUSABLE
+	
+	BUTTON "W:" ID MainWordButton  AT (0 150 10 12) NOFRAME
+	REPEATBUTTON "\10" ID MainWordListUpRepeatButton  AT (0 17 61 9) FONT 3 NOFRAME
+	REPEATBUTTON "\7" ID MainWordListDownRepeatButton   AT (1 137 61 9) FONT 3 NOFRAME
 	LIST ""      ID MainWordList  AT (1 26 59 112) VISIBLEITEMS 10
 	
-	BUTTON "E" ID MainExportToMemo   AT (82 1 14 10) 
-	BUTTON "P" ID MainPlayVoice  AT (65 1 14 10) NONUSABLE
+	BUTTON "E" ID MainExportToMemo   AT (82 2 14 10) 
+
+	LIST "" ID lstMainPopup      AT (0 16 80 90) VISIBLEITEMS 8 NONUSABLE
 END
 
 FORM ID AboutForm AT (2 2 156 156)
@@ -127,14 +133,13 @@ FORM ID AboutForm AT (2 2 156 156)
     DEFAULTBTNID AboutOKButton  SAVEBEHIND MODAL
 BEGIN
 	TITLE "About ZDic"
-	FORMBITMAP AT (67 22) BITMAP AboutMarkBitmapFamily
-	LABEL "ZDic ™ v2.33" AUTOID AT (CENTER 44) FONT 7
-	LABEL "Copyright © 2003-2004 neisoo" AUTOID AT (23 64)
-	LABEL "Thank you for using ZDic!" AUTOID AT (CENTER 84) FONT 2
-	LABEL "zhongyh6686@163.com" AUTOID AT (CENTER 113) FONT 0
+	LABEL "ZDic 2.41" AUTOID AT (CENTER 34) FONT 7
+	LABEL "Copyright © 2003-2004 neisoo" AUTOID AT (CENTER 61)
+	LABEL "Thank you for using ZDic!" AUTOID AT (CENTER 80) FONT 2
+	LABEL "JEMYZHANG(v2.34)" AUTOID AT (35 101)
+	LABEL "ÍõÃÉ¿Â BobGreen (after v2.34)" AUTOID AT (CENTER 112)
 	BUTTON "OK" ID AboutOKButton AT (58 133 40 12)
 	
-	LABEL "This is freeware!" AUTOID AT (CENTER 101)
 END
 
 FORM ID PrefsForm AT (2 2 156 156)
@@ -143,32 +148,62 @@ FORM ID PrefsForm AT (2 2 156 156)
     DEFAULTBTNID PrefsCancelButton SAVEBEHIND   MODAL
 BEGIN
     TITLE "Dict Options"
-    BUTTON "Done" ID PrefsDoneButton  AT (6 138 40 12)
-    LABEL "Dictionary:" ID PrefsDictLabel   AT (6 19) FONT 1
-	LABEL "Phonetic:" ID PrefsPhoneticLabel  AT (85 19) FONT 1
-	LABEL "Font:" ID PrefsFontLabel  AT (85 91) FONT 1
+    BUTTON "Done" ID PrefsDoneButton  AT (4 142 30 12)
+    LABEL "Dictionary:" ID PrefsDictLabel   AT (3 14) FONT 1
+	LABEL "Phonetic" ID PrefsPhoneticLabel  AT (85 14) FONT 1
+	LABEL "ZDic DA Font:" ID PrefsFontDALabel   AT (85 90) FONT 1
 
-	LIST "One" "Two" "Three" ID PrefsDictList  AT (5 32 75 101) VISIBLEITEMS 9
-	LIST "GMX" "efan(KingSoft)" "lazyworm" "mutant(KK)" ID PrefsPhoneticList  AT (85 32 66 46) VISIBLEITEMS 4
-	PUSHBUTTON  "Standard" ID PrefsFontStandardPushButton   AT (85 106 66 12) GROUP 1 FONT 0
-	PUSHBUTTON  "Large" ID PrefsFontLargePushButton  AT (85 119 66 12) FONT 0 GROUP 1
-	BUTTON "Up" ID PrefsUpButton  AT (53 138 40 12)
-	BUTTON "Down" ID PrefsDownButton  AT (100 138 40 12)
+	LIST "One" "Two" "Three" ID PrefsDictList  AT (3 26 80 101) VISIBLEITEMS 9
+	PUSHBUTTON  "A" ID PrefsFontSmallDAPushButton      AT (113 102 12 12) GROUP 2 FONT 0
+	PUSHBUTTON  "A" ID PrefsFontLargeDAPushButton    AT (126 102 12 12) FONT 2 GROUP 2
+	BUTTON "\1" ID PrefsUpButton  AT (4 128 37 10) FONT 5
+	BUTTON "\2" ID PrefsDownButton  AT (45 128 37 10) FRAME FONT 5
+	BUTTON "Shortcut List" ID btnShortcut   AT (45 142 59 12)
+	BUTTON "Popup List" ID btnPopup    AT (107 142 46 12)
+	POPUPTRIGGER "Dict Menu" ID triggerDictMenu  AT (86 127 69 AUTO)
+LIST  "All Dicts" "Shortcut List" "Popup List"      ID lstDictMenu  AT (PREVLEFT PREVBOTTOM+1 PREVWIDTH 35) VISIBLEITEMS 3 NONUSABLE 
+POPUPLIST ID triggerDictMenu  lstDictMenu
+	LABEL "Dict Menu:" AUTOID AT (86 115) FONT 1
+	POPUPTRIGGER "Select Item" ID triggerPhonetic  AT (85 25 66 AUTO)
+LIST  "GMX" "efan(KingSoft)" "lazyworm" "mutant(KK)" ID PrefsPhoneticList    AT (PREVLEFT PREVBOTTOM+1 PREVWIDTH 46) VISIBLEITEMS 4 NONUSABLE 
+POPUPLIST ID triggerPhonetic  PrefsPhoneticList
+		FIELD ID fldMenuShortcut   AT (121 37 15 13) MAXCHARS 1 EDITABLE AUTOSHIFT UNDERLINED
+	BUTTON "Set" ID btnSetMenuShortcut  AT (137 37 17 12)
+	
+	LABEL "Menu+" AUTOID AT (85 37) FONT 1
+	GRAFFITISTATEINDICATOR AT (147 116)
+	PUSHBUTTON  "A" ID PrefsFontSmallTinyDAPushButton      AT (87 102 12 12) GROUP 2 FONT 0
+	PUSHBUTTON  "A" ID PrefsFontLargeTinyDAPushButton    AT (100 102 12 12) FONT 2 GROUP 2
+	LABEL "ZDic Font:" ID PrefsFontLabel  AT (85 65) FONT 1
+	PUSHBUTTON  "A" ID PrefsFontSmallPushButton    AT (113 77 12 12) GROUP 1 FONT 0
+	PUSHBUTTON  "A" ID PrefsFontLargePushButton  AT (126 77 12 12) FONT 2 GROUP 1
+	PUSHBUTTON  "A" ID PrefsFontSmallTinyPushButton     AT (87 77 12 12) GROUP 1 FONT 0
+	PUSHBUTTON  "A" ID PrefsFontLargeTinyPushButton   AT (100 77 12 12) FONT 2 GROUP 1
+	
 END
 
 FORM ID DetailsForm AT ( 2 2 156 156 )
 	SAVEBEHIND MODAL SAVEBEHIND 
 BEGIN
     TITLE "Preferences"
-	CHECKBOX "Get word from Clipboard at start" ID DetailsGetClipBoardAtStart  AT (4 17 AUTO AUTO)
-	CHECKBOX "Enable incremental search" ID DetailsEnableIncSearch  AT (4 87 AUTO AUTO)
-	CHECKBOX "Search word for single tap" ID DetailsEnableSingleTap   AT (4 31 AUTO AUTO)
-	CHECKBOX "Highlight word field" ID DetailsEnableHighlightWord   AT (4 45 AUTO AUTO)
-	CHECKBOX "Try lower case on search failed" DetailsEnableTryLowerSearch AT (4 59 AUTO AUTO)
-	CHECKBOX "Disable font inside (need reload)" DetailsDisablePhoneticFont AT (4 73 AUTO AUTO)
-	CHECKBOX "Automatic speech" DetailsEnableAutoSpeech AT (4 113 AUTO AUTO)
-	BUTTON "Done" ID DetailsDoneButton   AT (6 138 40 12)
-	SLIDER DetailSearchDelay AT (50 99 100 12) MIN 0 MAX 10 PAGESIZE 1 VALUE 5
+	CHECKBOX "Get word from Clipboard at start" ID DetailsGetClipBoardAtStart  AT (4 15 AUTO AUTO)
+	CHECKBOX "Enable incremental search" ID DetailsEnableIncSearch  AT (4 75 AUTO AUTO)
+	CHECKBOX "Search word for single tap" ID DetailsEnableSingleTap   AT (4 27 AUTO AUTO)
+	CHECKBOX "Highlight word field" ID DetailsEnableHighlightWord   AT (4 39 AUTO AUTO)
+	CHECKBOX "Try lower case on search failed" DetailsEnableTryLowerSearch AT (4 51 AUTO AUTO)
+	CHECKBOX "Disable font inside (need reload)" DetailsDisablePhoneticFont AT (4 63 AUTO AUTO)
+	CHECKBOX "Automatic speech" DetailsEnableAutoSpeech AT (4 101 AUTO AUTO)
+	BUTTON "Done" ID DetailsDoneButton   AT (6 140 40 12)
+	SLIDER DetailSearchDelay AT (50 86 100 12) MIN 0 MAX 10 PAGESIZE 1 VALUE 5
+		BUTTON "Custom Keys" ID DetailsCustomKeys  AT (79 140 70 12)
+	POPUPTRIGGER "Type" ID triggerMenuType  AT (55 125 60 12)
+LIST  "Numerical" "Alphabetic" "User Defined" ID lstMenuType  AT (PREVLEFT PREVBOTTOM+1 PREVWIDTH 35) VISIBLEITEMS 3 NONUSABLE 
+POPUPLIST ID triggerMenuType  lstMenuType
+	LABEL "Menu Type:" AUTOID AT (4 125)
+	POPUPTRIGGER "DA size" ID triggerDAsize  AT (37 113 50 AUTO)
+LIST  "Small DA" "Large DA" "Fullscreen" ID lstDAsize   AT (PREVLEFT PREVBOTTOM+1 PREVWIDTH 35) VISIBLEITEMS 3 NONUSABLE 
+POPUPLIST ID triggerDAsize  listDAsize
+	LABEL "DA Size:" AUTOID AT (4 113)
 	END
 
 
@@ -201,22 +236,6 @@ BEGIN
     BITMAP "icon-sm-16-30x18.bmp" BPP 16 TRANSPARENT 0 255 0 DENSITY 2
 END
 
-BITMAPFAMILYEX ID AboutMarkBitmapFamily
-COMPRESS
-BEGIN
-    BITMAP "icon-lg-01-22.bmp" BPP 1
-    BITMAP "icon-lg-08-22.bmp" BPP 8 TRANSPARENTINDEX 210 DENSITY 72
-    BITMAP "icon-lg-16-44.bmp" BPP 16 TRANSPARENT 0 255 0 DENSITY 144
-END
-
-//BITMAPFAMILYEX ID GotoBitmapFamily
-//COMPRESS
-//BEGIN
-//    BITMAP "goto-01-15.bmp" BPP 1
-//    BITMAP "goto-08-15.bmp" BPP 8 TRANSPARENTINDEX 52 DENSITY 72
-//    BITMAP "goto-16-30.bmp" BPP 16 TRANSPARENT 0 255 0 DENSITY 144
-//END
-
 STRING ID lazy2GMXString   FILE "lazy2GMX.txt"
 STRING ID efan2GMXString   FILE "efan2GMX.txt"
 STRING ID mutant2GMXString   FILE "mutant2GMX.txt"
@@ -227,22 +246,46 @@ INTEGER ID DAFormOriginX					7
 INTEGER ID DAFormOriginY					7
 INTEGER ID DefaultIncSearchDelay			5
 
-FORM ID DAForm  AT ( 6 7 149 72 )
-	SAVEBEHIND MODAL
-	MENUID MainMenuBar 
+FORM ID DAForm  AT ( 6 7 149 85 )
+	SAVEBEHIND 
+	MENUID MainMenuBar MODAL 
 BEGIN
-	FIELD ID DAWordField  AT (15 60 48 12) MAXCHARS 255 EDITABLE UNDERLINED        
-	FIELD DADescriptionField AT (1 1 138 57) MAXCHARS 4096 NONEDITABLE MULTIPLELINES
-	BUTTON "M" ID DAMoreButton   AT (133 59 14 11)		
+	 
+	FIELD ID DAWordField  AT (15 73 60 12) MAXCHARS 255 EDITABLE UNDERLINED        
+	FIELD DADescriptionField AT (1 14 138 57) MAXCHARS 4096  MULTIPLELINES   EDITABLE HASSCROLLBAR 
+	BUTTON "M" ID DAMoreButton   AT (136 72 10 11)		
 		
-	SCROLLBAR ID DADescriptionScrollBar   AT (141 10 7 48) USABLE VALUE 0 MIN 0 MAX 0 PAGESIZE 0
-	GRAFFITISTATEINDICATOR AT (89 61)
-	PUSHBUTTON  "C" ID DAClipboardPushButton  AT (66 60 10 10) GROUP 1
-	PUSHBUTTON  "S" ID DASelectPushButton  AT (77 60 10 10) GROUP 1
-	REPEATBUTTON "\20" ID DAMoveRepeatButton  AT (139 2 8 8) FONT 3 NOFRAME
-	BUTTON "W :" ID DANextDict  AT (0 60 14 12) NOFRAME
-    BUTTON "P" ID DAPlayVoice  AT (99 59 14 11) NONUSABLE
-	BUTTON "E" ID DAExportToMemo   AT (116 59 14 11)
+	SCROLLBAR ID DADescriptionScrollBar   AT (141 14 7 56) USABLE VALUE 0 MIN 0 MAX 0 PAGESIZE 0
+	GRAFFITISTATEINDICATOR AT (100 74)
+	PUSHBUTTON  "C" ID DAClipboardPushButton  AT (76 73 10 10) 
+	PUSHBUTTON  "J" ID DAJumpPushButton   AT (88 73 10 10) 
+	REPEATBUTTON "\20" ID DAMoveRepeatButton  AT (138 1 10 10) FONT 3 NOFRAME
+	BUTTON "W:" ID DANextDict  AT (0 73 14 12) NOFRAME
+    BUTTON "P" ID DAPlayVoice  AT (110 72 10 11) NONUSABLE
+	BUTTON "E" ID DAExportToMemo   AT (123 72 10 11)
+	LIST "" ID lstDAPopup   AT (0 13 80 57) VISIBLEITEMS 5 NONUSABLE
+	LABEL "Title" ID lblDATitle  AT (1 1) FONT 1
+END
+
+FORM ID DAFormLarge  AT ( 6 7 149 149 )
+	SAVEBEHIND 
+	MENUID MainMenuBar MODAL 
+BEGIN
+	 
+	FIELD ID DAWordField  AT (15 137 60 12) MAXCHARS 255 EDITABLE UNDERLINED        
+	FIELD DADescriptionField AT (1 14 138 121) MAXCHARS 4096  MULTIPLELINES  HASSCROLLBAR EDITABLE 
+	BUTTON "M" ID DAMoreButton   AT (136 136 10 11)		
+		
+	SCROLLBAR ID DADescriptionScrollBar   AT (141 14 7 120) USABLE VALUE 0 MIN 0 MAX 0 PAGESIZE 0
+	GRAFFITISTATEINDICATOR AT (100 138)
+	PUSHBUTTON  "C" ID DAClipboardPushButton  AT (76 137 10 10) 
+	PUSHBUTTON  "J" ID DAJumpPushButton   AT (88 137 10 10) 
+	REPEATBUTTON "\20" ID DAMoveRepeatButton  AT (138 1 10 10) FONT 3 NOFRAME
+	BUTTON "W:" ID DANextDict  AT (0 137 14 12) NOFRAME
+    BUTTON "P" ID DAPlayVoice  AT (110 136 10 11) NONUSABLE
+	BUTTON "E" ID DAExportToMemo   AT (123 136 10 11)
+	LIST "" ID lstDAPopup   AT (0 13 80 90) VISIBLEITEMS 8 NONUSABLE
+	LABEL "Title" ID lblDATitle  AT (1 1) FONT 1
 END
 
 FORM ID ProcessForm AT ( 2 75 156 83 )
@@ -258,3 +301,94 @@ LAUNCHERCATEGORY ID 1000  "Main"
 DATA "data" ID SugarMemoDefaultDBImage  "ZDicPad.pdb"
 DATA "data" ID SugarMemoDefaultRecordHead  "SugarMemoDefaultRecordHead.bin"
 STRING ID SugarMemoDBName "ZDic Pad"        
+
+FORM ID CustomKeyForm   AT ( 7 7 146 147 )
+  NOFRAME MODAL DEFAULTBTNID btnCustomKeyOK HELPID 1000
+BEGIN
+        TITLE "Custom Key"
+	BUTTON "Pronounce" ID btnPlaySound  AT (3 33 49 12)
+	BUTTON "Word List" ID btnWordList  AT (33 17 43 12)
+	BUTTON "History" ID btnHistory   AT (79 17 35 12)
+	CHECKBOX "Opt+" ID cbOptUD  AT (3 64 AUTO AUTO)
+	
+	CHECKBOX "Opt+" ID cbOptLR   AT (3 78 AUTO AUTO)
+	
+	CHECKBOX "U/D" ID cbUD  AT (42 64 AUTO AUTO)
+	CHECKBOX "L/R" ID cbLR  AT (42 78 AUTO AUTO)
+	CHECKBOX "Switch U/D L/R Functions" ID cbSwitchUDLR  AT (3 92 AUTO AUTO)
+	BUTTON "OK" ID btnCustomKeyOK  AT (4 132 44 12)
+	BUTTON "Next Dict" ID btnOneKeyChgDic  AT (52 49 43 12)
+	POPUPTRIGGER "Select Item" ID triggerSelectKey   AT (54 106 85 AUTO)
+LIST   "Pronounce" "Show Word List" "Show History" "Change Dictionary" "Clear Input" "Go Back" "Export" "Shortcut List" "Popup List" "Search All Dicts"                   ID listSelectKey     AT (PREVLEFT PREVBOTTOM-125 PREVWIDTH 112) VISIBLEITEMS 10 NONUSABLE 
+POPUPLIST ID triggerSelectKey   listSelectKey
+	LABEL "Select:" AUTOID AT (26 106)
+	LABEL ":UD func" ID lblUD  AT (76 64)
+	LABEL ":LR func" ID lblLR  AT (76 78)
+	LABEL "Opt+Select:" AUTOID AT (4 118)
+	POPUPTRIGGER "Select Item" ID triggerOptSelectKey  AT (54 118 85 AUTO)
+LIST  "Pronounce" "Show Word List" "Show History" "Change Dictionary" "Clear Input" "Go Back" "Export" "Shortcut List" "Popup List" "Search All Dicts"                     ID listOptSelectKey  AT (PREVLEFT PREVBOTTOM+1 PREVWIDTH 112) VISIBLEITEMS 10 NONUSABLE 
+POPUPLIST ID triggerOptSelectKey  listOptSelectKey
+	BUTTON "Enlarge DA" ID btnEnlargeDA   AT (3 49 46 AUTO)
+	BUTTON "Export" ID btnExport   AT (109 33 33 12)
+	BUTTON "Clear Input" ID btnClearField   AT (55 33 51 12)
+	BUTTON "Back" ID btnGoBack     AT (117 17 25 AUTO)
+	LABEL "Keys:" AUTOID AT (3 17) FONT 1
+	BUTTON "Search All" ID btnSearchAll  AT (98 49 45 AUTO)
+END
+
+FORM ID frmSetKeyTips  AT ( 29 96 100 50 )
+MODAL
+BEGIN
+	TITLE "Set Custom Key"
+	LABEL "Waiting for key...." AUTOID AT (15 18)
+	BUTTON "Clear The Key" ID btnClearKey  AT (16 34 AUTO AUTO)
+END
+
+STRING ID 1000 "\"Custom Key\" Tips\r\n\t\"Select Key\" is five-way navigational pad\'s center key and also is Clie\'s jog push.\r\n "                                                                                                                                                                                                                                                 
+
+FORM ID DictShortcutForm  AT ( 2 2 156 156 )
+FRAME   SAVEBEHIND MODAL
+BEGIN
+	 TITLE "Set Shortcut List"
+        
+	LIST ""   ID DictList   AT (2 29 75 79) VISIBLEITEMS 7
+	LABEL "Dictionarys:" AUTOID AT (3 16) FONT 1
+	CHECKBOX "In Shortcut" ID cbShortcutShow  AT (2 110 65 12)
+	BUTTON "Set Key" ID btnSetShortcutKey  AT (112 124 40 12)
+	BUTTON "Set Launch Key" ID btnSetLaunchShortcutKey    AT (75 141 78 12)
+	BUTTON "OK" ID btnShortcutOK  AT (3 141 50 12)
+	LIST ""   ID ShortcutList   AT (79 29 75 79) VISIBLEITEMS 7
+	LABEL "Shortcuts:" AUTOID AT (79 16) FONT 1
+	BUTTON "\1" ID ShortcutUpButton   AT (80 110 35 10) FONT 5
+	BUTTON "\2" ID ShortcutDownButton   AT (118 110 35 10) FRAME FONT 5
+		
+	LABEL "Note:" AUTOID AT (2 124) FONT 0
+	
+	FIELD ID fldShortcutNote  AT (25 124 41 13) MAXCHARS 8 EDITABLE UNDERLINED
+	GRAFFITISTATEINDICATOR AT (64 142)
+	BUTTON "Set Note" ID btnSetShortcutNote    AT (69 124 40 AUTO)
+END
+
+FORM ID DictShortcutPopForm  AT ( 34 19 92 125 )
+FRAME   SAVEBEHIND  MODAL
+BEGIN
+        
+	LIST "One" "Two" "Three" ID PopShortcutList    AT (2 2 88 123) VISIBLEITEMS 11
+	//TABLE PopShortcutTable AT (2 2 80 120) ROWS 10 COLUMNS 1 COLUMNWIDTHS 80 
+END
+
+FORM ID DictPopupForm  AT ( 2 2 156 156 )
+FRAME   SAVEBEHIND MODAL
+BEGIN
+	 TITLE "Set Popup List"
+        
+	LIST ""   ID DictList   AT (2 29 75 90) VISIBLEITEMS 8
+	LABEL "Dictionarys:" AUTOID AT (3 16) FONT 1
+	CHECKBOX "In Popup List" ID cbPopupShow  AT (2 121 73 12)
+	BUTTON "Set Launch Key" ID btnSetLaunchPopupKey    AT (74 141 78 12)
+	BUTTON "OK" ID btnPopupOK  AT (3 141 50 12)
+	LIST ""   ID lstPopup  AT (79 29 75 90) VISIBLEITEMS 8
+	LABEL "Popup List:" AUTOID AT (79 16) FONT 1
+	BUTTON "\1" ID PopupUpButton   AT (80 121 35 10) FONT 5
+	BUTTON "\2" ID PopupDownButton   AT (118 121 35 10) FRAME FONT 5
+	END

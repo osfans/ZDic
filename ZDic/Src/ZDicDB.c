@@ -519,11 +519,16 @@ Err ZDicLookupWordListInit(WinDirectionType direction, Boolean init)
 	AppGlobalType	*global;
 	UInt8			*explainPtr;
 	UInt32			explainLen;
-	UInt8			*p;
+	UInt8			*p,maxworditem;
 	Int16			item, i;
 	Err				err = errNone;
 
 	global = AppGetGlobal();
+	
+	if(global->prefs.font == global->font.smallTinyFontID ||global->prefs.font == global->font.largeTinyFontID)
+    	maxworditem = MAX_WORD_ITEM_TINY;
+    if(global->prefs.font == global->font.smallFontID ||global->prefs.font == global->font.largeFontID)
+    	maxworditem = MAX_WORD_ITEM;
 
 	if (init)
 	    global->wordlist = global->descript;
@@ -540,7 +545,7 @@ Err ZDicLookupWordListInit(WinDirectionType direction, Boolean init)
 		case winUp:
 		{
 			// first we seek backword two page, but we not use it.
-			for (item = 0; item < 2 * MAX_WORD_ITEM - 2; item++)
+			for (item = 0; item < 2 * maxworditem - 2; item++)
 			{
 				err = ZDicLookupBackward(&explainPtr, &explainLen, &global->wordlist);
 			}
@@ -548,39 +553,81 @@ Err ZDicLookupWordListInit(WinDirectionType direction, Boolean init)
 		}
 	}
 
-	// Get word list.
-	global->wordlistBuf.itemUsed = 0;
-	for (item = 0; item < MAX_WORD_ITEM; item++)
-	{
-		if (item == 0)
+	if(global->prefs.font == global->font.smallTinyFontID ||global->prefs.font == global->font.largeTinyFontID)
+    {
+		// Get word list.
+		global->wordlisttinyBuf.itemUsed = 0;
+		
+		for (item = 0; item < maxworditem; item++)
 		{
-			err = ZDicLookupCurrent(&explainPtr, &explainLen, &global->wordlist);
+			if (item == 0)
+			{
+				err = ZDicLookupCurrent(&explainPtr, &explainLen, &global->wordlist);
+			}
+			else
+			{
+				err = ZDicLookupForward(&explainPtr, &explainLen, &global->wordlist);
+			}
+			if (err)
+			{
+				return item > 0 ? errNone : ~errNone;
+			}
+
+			p = explainPtr;
+
+			// get key word.
+			i = 0;
+			while (p[i] != chrHorizontalTabulation && p[i] != chrNull && i < MAX_WORD_LEN)
+			{
+				global->wordlisttinyBuf.itemBuf[item][i] = p[i];
+				i++;
+			}
+			global->wordlisttinyBuf.itemBuf[item][i] = chrNull;
+			global->wordlisttinyBuf.itemUsed++;
+			global->wordlisttinyBuf.itemPtr[item] = &global->wordlisttinyBuf.itemBuf[item][0];
+			global->wordlisttinyBuf.itemBlkIndex[item] = global->wordlist.blkIndex;
+			global->wordlisttinyBuf.itemHead[item] = global->wordlist.head;
+			global->wordlisttinyBuf.itemTail[item] = global->wordlist.tail;
 		}
-		else
+    }
+    else if(global->prefs.font == global->font.smallFontID ||global->prefs.font == global->font.largeFontID)
+    {
+    			// Get word list.
+		global->wordlistBuf.itemUsed = 0;
+		
+		for (item = 0; item < maxworditem; item++)
 		{
-			err = ZDicLookupForward(&explainPtr, &explainLen, &global->wordlist);
-		}
-		if (err)
-		{
-			return item > 0 ? errNone : ~errNone;
+			if (item == 0)
+			{
+				err = ZDicLookupCurrent(&explainPtr, &explainLen, &global->wordlist);
+			}
+			else
+			{
+				err = ZDicLookupForward(&explainPtr, &explainLen, &global->wordlist);
+			}
+			if (err)
+			{
+				return item > 0 ? errNone : ~errNone;
+			}
+
+			p = explainPtr;
+
+			// get key word.
+			i = 0;
+			while (p[i] != chrHorizontalTabulation && p[i] != chrNull && i < MAX_WORD_LEN)
+			{
+				global->wordlistBuf.itemBuf[item][i] = p[i];
+				i++;
+			}
+			global->wordlistBuf.itemBuf[item][i] = chrNull;
+			global->wordlistBuf.itemUsed++;
+			global->wordlistBuf.itemPtr[item] = &global->wordlistBuf.itemBuf[item][0];
+			global->wordlistBuf.itemBlkIndex[item] = global->wordlist.blkIndex;
+			global->wordlistBuf.itemHead[item] = global->wordlist.head;
+			global->wordlistBuf.itemTail[item] = global->wordlist.tail;
 		}
 
-		p = explainPtr;
-
-		// get key word.
-		i = 0;
-		while (p[i] != chrHorizontalTabulation && p[i] != chrNull && i < MAX_WORD_LEN)
-		{
-			global->wordlistBuf.itemBuf[item][i] = p[i];
-			i++;
-		}
-		global->wordlistBuf.itemBuf[item][i] = chrNull;
-		global->wordlistBuf.itemUsed++;
-		global->wordlistBuf.itemPtr[item] = &global->wordlistBuf.itemBuf[item][0];
-		global->wordlistBuf.itemBlkIndex[item] = global->wordlist.blkIndex;
-		global->wordlistBuf.itemHead[item] = global->wordlist.head;
-		global->wordlistBuf.itemTail[item] = global->wordlist.tail;
-	}
+    }
 	
 	return errNone;
 }
@@ -611,34 +658,67 @@ Err ZDicLookupWordListSelect(UInt16 select, UInt8 **explainPtr, UInt32 *explainL
 	
 	global = AppGetGlobal();
 
-	if (select >= global->wordlistBuf.itemUsed)
-		return ~errNone;
+	if(global->prefs.font == global->font.smallTinyFontID ||global->prefs.font == global->font.largeTinyFontID)
+    {
+		if (select >= global->wordlisttinyBuf.itemUsed)
+			return ~errNone;
 
-	if (global->wordlistBuf.itemBlkIndex[select] != global->descript.blkIndex)
-	{
+		if (global->wordlisttinyBuf.itemBlkIndex[select] != global->descript.blkIndex)
+		{
 
-		// get dict record and decode it to text.
-		err = ZDicGetDictRecord (global->wordlistBuf.itemBlkIndex[select], &str, &recSize);
-		if (err) return err;
-	
-		if (global->compressFlag == 0)
-		{
-			MemMove (&global->descript.decodeBuf[0], str, recSize);
-			global->descript.decodeSize = recSize;
-		}
-		else
-		{
-			LZSS_Decoder((unsigned char *)str, recSize, (unsigned char *)&global->descript.decodeBuf[0], &global->descript.decodeSize);
-		}
-		global->descript.decodeBuf[global->descript.decodeSize] = chrNull;
-		ZDicReleaseDictRecord(str);
+			// get dict record and decode it to text.
+			err = ZDicGetDictRecord (global->wordlisttinyBuf.itemBlkIndex[select], &str, &recSize);
+			if (err) return err;
 		
-		global->descript.blkIndex = global->wordlistBuf.itemBlkIndex[select];		
-	}
-	
-	global->descript.head = global->wordlistBuf.itemHead[select];
-	global->descript.tail = global->wordlistBuf.itemTail[select];
-	
+			if (global->compressFlag == 0)
+			{
+				MemMove (&global->descript.decodeBuf[0], str, recSize);
+				global->descript.decodeSize = recSize;
+			}
+			else
+			{
+				LZSS_Decoder((unsigned char *)str, recSize, (unsigned char *)&global->descript.decodeBuf[0], &global->descript.decodeSize);
+			}
+			global->descript.decodeBuf[global->descript.decodeSize] = chrNull;
+			ZDicReleaseDictRecord(str);
+			
+			global->descript.blkIndex = global->wordlisttinyBuf.itemBlkIndex[select];		
+		}
+		
+		global->descript.head = global->wordlisttinyBuf.itemHead[select];
+		global->descript.tail = global->wordlisttinyBuf.itemTail[select];
+    }
+    else if(global->prefs.font == global->font.smallFontID ||global->prefs.font == global->font.largeFontID)
+    {
+    	if (select >= global->wordlistBuf.itemUsed)
+			return ~errNone;
+
+		if (global->wordlistBuf.itemBlkIndex[select] != global->descript.blkIndex)
+		{
+
+			// get dict record and decode it to text.
+			err = ZDicGetDictRecord (global->wordlistBuf.itemBlkIndex[select], &str, &recSize);
+			if (err) return err;
+		
+			if (global->compressFlag == 0)
+			{
+				MemMove (&global->descript.decodeBuf[0], str, recSize);
+				global->descript.decodeSize = recSize;
+			}
+			else
+			{
+				LZSS_Decoder((unsigned char *)str, recSize, (unsigned char *)&global->descript.decodeBuf[0], &global->descript.decodeSize);
+			}
+			global->descript.decodeBuf[global->descript.decodeSize] = chrNull;
+			ZDicReleaseDictRecord(str);
+			
+			global->descript.blkIndex = global->wordlistBuf.itemBlkIndex[select];		
+		}
+		
+		global->descript.head = global->wordlistBuf.itemHead[select];
+		global->descript.tail = global->wordlistBuf.itemTail[select];
+
+    }
 	*explainPtr = &global->descript.decodeBuf[global->descript.head];
 	*explainLen = global->descript.tail - global->descript.head;
 
@@ -687,7 +767,7 @@ static Err PrvZDicDBGetAllDict(UInt32 type, UInt32 creator, ZDicDBDictInfoType *
 
 	global = AppGetGlobal();
 	pathName = global->pathName;
-	dbListP->itemNumber = 0;
+	dbListP->totalNumber = 0;
 	
 	//////////////////////////////////////////////////////////////
 	//
@@ -701,12 +781,12 @@ static Err PrvZDicDBGetAllDict(UInt32 type, UInt32 creator, ZDicDBDictInfoType *
 	if (status == true && dbCount > 0)
 	{
 		dbListIDsP = MemHandleLock (dbListIDsH);		
-		for (index = 0; index < dbCount && dbListP->itemNumber < MAX_DICT_NUM; index++)
+		for (index = 0; index < dbCount && dbListP->totalNumber < MAX_DICT_NUM; index++)
 		{
-			StrCopy (&dbListP->dictName[dbListP->itemNumber][0], &dbListIDsP[index].name[0]);
-			StrCopy (&dbListP->displayName[dbListP->itemNumber][0], &dbListIDsP[index].name[0]);
-			dbListP->volRefNum[dbListP->itemNumber] = vfsInvalidVolRef;
-			dbListP->itemNumber++;
+			StrCopy (&dbListP->dictName[dbListP->totalNumber][0], &dbListIDsP[index].name[0]);
+			StrCopy (&dbListP->displayName[dbListP->totalNumber][0], &dbListIDsP[index].name[0]);
+			dbListP->volRefNum[dbListP->totalNumber] = vfsInvalidVolRef;
+			dbListP->totalNumber++;
 		}
 		MemHandleUnlock (dbListIDsH);
 		MemHandleFree (dbListIDsH);
@@ -757,7 +837,7 @@ static Err PrvZDicDBGetAllDict(UInt32 type, UInt32 creator, ZDicDBDictInfoType *
 
 		dirIterator = vfsIteratorStart;
 		while (dirIterator != vfsIteratorStop
-			&& dbListP->itemNumber < MAX_DICT_NUM)
+			&& dbListP->totalNumber < MAX_DICT_NUM)
 		{
 			info.nameP = nameBuf;	// point to local buffer
 			info.nameBufLen = 256;
@@ -771,7 +851,7 @@ static Err PrvZDicDBGetAllDict(UInt32 type, UInt32 creator, ZDicDBDictInfoType *
 			if (StrLen(info.nameP) >= MAX_DICTNAME_LEN)
 				continue;
 			
-			StrCopy (&dbListP->dictName[dbListP->itemNumber][0], info.nameP);
+			StrCopy (&dbListP->dictName[dbListP->totalNumber][0], info.nameP);
 
 			// Check the file whether is special file by type and creator.
 			StrCopy(pathName, ZDIC_DICT_PATH);
@@ -780,15 +860,15 @@ static Err PrvZDicDBGetAllDict(UInt32 type, UInt32 creator, ZDicDBDictInfoType *
 			if (err)
 				continue;
 				
-			err = VFSFileDBInfo (fileRef, &dbListP->displayName[dbListP->itemNumber][0]/*name*/, NULL/*attributes*/,
+			err = VFSFileDBInfo (fileRef, &dbListP->displayName[dbListP->totalNumber][0]/*name*/, NULL/*attributes*/,
 				NULL/*version*/, NULL/*crDate*/, NULL/*modDateP*/,
 				NULL/*bckUpDate*/, NULL/*modNum*/, NULL/*appInfoH*/,
 				NULL/*sortInfoH*/, &fileType/*type*/, &fileCreator/*creator*/,
 				NULL/*numRecords*/);
 			if (err == errNone && creator == fileCreator && type == fileType)
 			{
-				dbListP->volRefNum[dbListP->itemNumber] = volRefNum[index];	
-				dbListP->itemNumber++;
+				dbListP->volRefNum[dbListP->totalNumber] = volRefNum[index];	
+				dbListP->totalNumber++;
 			}
 			VFSFileClose(fileRef);
 		}
@@ -1518,6 +1598,199 @@ Err ZDicDBInitIndexRecord(void)
 	return err;
 }
 
+void PrvZDicDBGetAllPopup(ZDicDBDictPopupInfoType *dbListP)
+{
+	AppGlobalType				*global;
+	ZDicDBDictInfoType			*dictInfo;
+	UInt16						i,j;
+	
+	global = AppGetGlobal();
+	dictInfo = &global->prefs.dictInfo;
+	
+	dbListP->totalNumber = 0;
+	
+	for(i=0,j=0;i<MAX_DICT_NUM && dictInfo->dictName[i][0] != chrNull;i++)
+	{
+		if(dictInfo->showInPopup[ i ])
+		{
+			dbListP->dictIndex[j] = i;
+			j++;
+		}
+	}
+	
+	dbListP->totalNumber = j;
+}
+
+void ZDicDBInitPopupList()
+{
+	AppGlobalType				*global;
+	ZDicDBDictInfoType 			*dictInfo;
+	ZDicDBDictPopupInfoType		*dblist, *popupInfo;
+	UInt16						i,j;
+	Int16						counter;
+	
+	global = AppGetGlobal();
+	dblist = &global->data.popupInfoList;
+	dictInfo = &global->prefs.dictInfo;
+	popupInfo = &global->prefs.popupInfo;
+	
+	popupInfo->totalNumber = 0;
+	
+	PrvZDicDBGetAllPopup(dblist);
+	
+	if (dblist != NULL && dblist->totalNumber > 0)
+	{
+		//从旧list里提取出新list也有的，并往前排列
+		for (i = 0, j = 0; i < MAX_DICT_NUM && popupInfo->dictIndex[i] != -1; i++)//i遍历旧list
+		{
+			for (counter = 0; counter < dblist->totalNumber; counter++)//counter遍历临时list
+			{
+				if (popupInfo->dictIndex[i] == dblist->dictIndex[counter])//发现相同则break
+					break;
+			}
+			
+			if (counter < dblist->totalNumber)//如果之前一步后的counter在新list的中间某处
+			{
+				dblist->dictIndex[counter] = -1;//临时list，非新增项标注为-1
+				if (i != j)//j比i小时，说明旧list里有新list里所没有的，那把后面的复制到前面去。
+				{
+					popupInfo->dictIndex[j] = popupInfo->dictIndex[i];
+				}
+				
+				j++;//新list标号前进一个
+			}
+		}
+		
+		//旧list里末尾添加新list里新增的
+		if (j < MAX_DICT_NUM)
+		{
+			for (counter = 0; counter < dblist->totalNumber && j < MAX_DICT_NUM; counter++)
+			{
+				if (dblist->dictIndex[counter] != -1)
+				{
+					popupInfo->dictIndex[j] = dblist->dictIndex[counter];
+					j++;
+				}
+			}	
+		}
+		
+		//如果没达到上限，则给最后一项后面赋-1
+		if (j < MAX_DICT_NUM)
+			popupInfo->dictIndex[j] = -1;
+		
+		
+		//
+		i = 0;
+		while (popupInfo->dictIndex[i] != -1 &&  i < MAX_DICT_NUM)
+		{
+			global->popuplistItem[i] = &dictInfo->displayName[popupInfo->dictIndex[i]][0];
+			i++;
+		}
+		
+		popupInfo->totalNumber = i;
+	}
+
+	if (popupInfo->curIndex >= popupInfo->totalNumber)
+		popupInfo->curIndex = 0;
+}
+
+
+void PrvZDicDBGetAllShortcut(ZDicDBDictShortcutInfoType *dbListP)
+{
+	AppGlobalType				*global;
+	ZDicDBDictInfoType			*dictInfo;
+	UInt16						i,j;
+	
+	global = AppGetGlobal();
+	dictInfo = &global->prefs.dictInfo;
+	
+	dbListP->totalNumber = 0;
+	
+	for(i=0,j=0;i<MAX_DICT_NUM && dictInfo->dictName[i][0] != chrNull;i++)
+	{
+		if(dictInfo->showInShortcut[ i ])
+		{
+			dbListP->dictIndex[j] = i;
+			j++;
+		}
+	}
+	
+	dbListP->totalNumber = j;
+}
+
+void ZDicDBInitShortcutList()
+{
+	AppGlobalType				*global;
+	ZDicDBDictInfoType 			*dictInfo;
+	ZDicDBDictShortcutInfoType	*dblist, *shortcutInfo;
+	UInt16						i,j;
+	Int16						counter;
+	
+	global = AppGetGlobal();
+	dblist = &global->data.shortcutInfoList;
+	dictInfo = &global->prefs.dictInfo;
+	shortcutInfo = &global->prefs.shortcutInfo;
+	
+	shortcutInfo->totalNumber = 0;
+	
+	PrvZDicDBGetAllShortcut(dblist);
+	
+	if (dblist != NULL && dblist->totalNumber > 0)
+	{
+		//从旧list里提取出新list也有的，并往前排列
+		for (i = 0, j = 0; i < MAX_DICT_NUM && shortcutInfo->dictIndex[i] != -1; i++)//i遍历旧list
+		{
+			for (counter = 0; counter < dblist->totalNumber; counter++)//counter遍历临时list
+			{
+				if (shortcutInfo->dictIndex[i] == dblist->dictIndex[counter])//发现相同则break
+					break;
+			}
+			
+			if (counter < dblist->totalNumber)//如果之前一步后的counter在新list的中间某处
+			{
+				dblist->dictIndex[counter] = -1;//临时list，非新增项标注为-1
+				if (i != j)//j比i小时，说明旧list里有新list里所没有的，那把后面的复制到前面去。
+				{
+					shortcutInfo->dictIndex[j] = shortcutInfo->dictIndex[i];
+				}
+				
+				j++;//新list标号前进一个
+			}
+		}
+		
+		//旧list里末尾添加新list里新增的
+		if (j < MAX_DICT_NUM)
+		{
+			for (counter = 0; counter < dblist->totalNumber && j < MAX_DICT_NUM; counter++)
+			{
+				if (dblist->dictIndex[counter] != -1)
+				{
+					shortcutInfo->dictIndex[j] = dblist->dictIndex[counter];
+					j++;
+				}
+			}	
+		}
+		
+		//如果没达到上限，则给最后一项后面赋-1
+		if (j < MAX_DICT_NUM)
+			shortcutInfo->dictIndex[j] = -1;
+		
+		
+		//
+		i = 0;
+		while (shortcutInfo->dictIndex[i] != -1 &&  i < MAX_DICT_NUM)
+		{
+			global->shortcutlistItem[i] = &dictInfo->displayName[shortcutInfo->dictIndex[i]][0];
+			i++;
+		}
+		
+		shortcutInfo->totalNumber = i;
+	}
+
+	if (shortcutInfo->curIndex >= shortcutInfo->totalNumber)
+		shortcutInfo->curIndex = 0;
+}
+
 /***********************************************************************
  *
  * FUNCTION: ZDicDBInitDictList
@@ -1546,18 +1819,18 @@ Int16 ZDicDBInitDictList(UInt32 type, UInt32 creator)
 	global = AppGetGlobal();
 	dblist = &global->data.dictInfoList;
 	dictInfo = &global->prefs.dictInfo;
-	dictInfo->itemNumber = 0;
+	dictInfo->totalNumber = 0;
 	
 	// Get all dictionary in ram and card.
 	err = PrvZDicDBGetAllDict (type, creator, dblist);
-	if (err == errNone && dblist != NULL && dblist->itemNumber > 0)
+	if (err == errNone && dblist != NULL && dblist->totalNumber > 0)
 	{
 		Int16 i, j;
 		
 		// check valid of the old list at first.
 		for (i = 0, j = 0; i < MAX_DICT_NUM && dictInfo->dictName[i][0] != chrNull; i++)
 		{
-			for (counter = 0; counter < dblist->itemNumber; counter++)
+			for (counter = 0; counter < dblist->totalNumber; counter++)
 			{
 				// the volume reference number may be changed after reset or reinsert card
 				// so we only compare file name.
@@ -1566,7 +1839,7 @@ Int16 ZDicDBInitDictList(UInt32 type, UInt32 creator)
 			}
 			
 			// if the dictionary is no exist then remove it from list.
-			if (counter < dblist->itemNumber)
+			if (counter < dblist->totalNumber)
 			{
 				// the dictionary already in list so we do nothing for it.
 				dblist->dictName[counter][0] = chrNull;
@@ -1588,7 +1861,7 @@ Int16 ZDicDBInitDictList(UInt32 type, UInt32 creator)
 		// then we should append new dictionary behind.
 		if (j < MAX_DICT_NUM)
 		{			
-			for (counter = 0; counter < dblist->itemNumber && j < MAX_DICT_NUM; counter++)
+			for (counter = 0; counter < dblist->totalNumber && j < MAX_DICT_NUM; counter++)
 			{
 				if (dblist->dictName[counter][0] != chrNull)
 				{
@@ -1614,17 +1887,17 @@ Int16 ZDicDBInitDictList(UInt32 type, UInt32 creator)
 			i++;
 		}
 		
-		dictInfo->itemNumber = i;
+		dictInfo->totalNumber = i;
 	}
 
-	if (dictInfo->curMainDictIndex >= dictInfo->itemNumber)
+	if (dictInfo->curMainDictIndex >= dictInfo->totalNumber)
 		dictInfo->curMainDictIndex = 0;
 
-	if (dictInfo->curDADictIndex >= dictInfo->itemNumber)
+	if (dictInfo->curDADictIndex >= dictInfo->totalNumber)
 		dictInfo->curDADictIndex = 0;
 
 
-	return dictInfo->itemNumber;
+	return dictInfo->totalNumber;
 }
 
 
