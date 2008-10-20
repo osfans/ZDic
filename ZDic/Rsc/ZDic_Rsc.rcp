@@ -7,6 +7,268 @@
 GENERATEHEADER "ZDic_Rsc.h"
 RESETAUTOID 1000
 
+TRANSLATION "zhTW"
+//by alancc00 @ hi-pda
+BEGIN
+"Dictionary" = "Ãã¨å"
+"All Dictionaries" = "©Ò¦³Ãã¨å"
+"All Dicts" = "©Ò¦³Ãã¨å"
+"Edit" = "½s¿è"
+"Undo" = "´_­ì"
+"Cut" = "°Å¤U"
+"Copy" = "½Æ»s"
+"Paste" = "¶K¤W"
+"Select All" = "¥þ¿ï"
+"Keyboard" = "Áä½L"
+
+"Options" = "¿ï¶µ"
+"Preferences... " = "°Ñ¼Æ³]¸m..."
+"Dict Options... " = "Ãã¨å¿ï¶µ..."
+"Export Options... " = "¾É¥X¿ï¶µ..."
+"Goto Word" = "¸õ¦Üµü±ø"
+"Clear Input" = "²MªÅ¿é¤J®Ø"
+"Clear History" = "²M°£¾ú¥v"
+"Change Case" = "§ó§ï¤j¤p¼g"
+"Display/Hide List" = "¤Á´«¦CªíÅã¥Ü"
+"Export to Memo" = "¾É¥X¦Ü°O¨Æ¥»"
+"Export to SugarMemo" = "¾É¥X¦Ü SugarMemo"
+"About ZDic" = "Ãö©ó ZDic"
+"System Incompatible" = "¨t²Î¤£¬Û®e"
+"System Version 3.0 or greater is required to run this application." = "¥»µ{¦¡»Ý¹B¦æ©ó 3.0¤Î¥H¤Wª©¥»ªº¨t²Î"
+"OK" = "½T©w"
+"Dictionary Not Found" = "¥¼µo²{Ãã¨å"
+"Dictionary not installed." = "Ãã¨å¥¼¦w¸Ë"
+"Alert" = "Äµ§i"
+"Not Enough Memory!" = "°O¾ÐÅé¤£¨¬¡I"
+"ZDic font share library not found!" = "¥¼µo²{ZDic ¦rÅé¦@¥Î®w¡I"
+"ZDic-must long than 16 bytes" = "ZDic ¥²¶·ªø©ó 16 ¦ì¤¸²Õ"
+"W:" = "µü"
+"Go" = "¬d"
+"Clr" = "²M"
+
+"Thank you for using ZDic!" = "·PÁÂ§A¨Ï¥Î ZDic¡I"
+
+"Dict Options" = "Ãã¨å¿ï¶µ"
+"Done" = "§¹¦¨"
+"Dictionary:" = "Ãã¨å¡G"
+"Phonetic" = "­µ¼Ð"
+"ZDic DA Font:" = "ZDic DA ¦rÅé"
+
+"Shortcut List" = "§Ö±¶¦Cªí"
+"Popup List" = "¼u¥X¦Cªí"
+"Dict Menu" = "Ãã¨å¥Ø¿ý"
+"Dict Menu:" = "Ãã¨å¥Ø¿ý¡G"
+"Select Item" = "¿ï¾Ü¶µ¥Ø"
+"Set" = "³]¸m"
+
+"ZDic Font:" = "ZDic ¦rÅé¡G"
+"Preferences" = "°Ñ¼Æ³]¸m"
+"Get word from Clipboard at start" = "±Ò°Ê®É±q°Å¶KªO¤¤Àò¨úµü»y"
+"Enable incremental search" = "±Ò¥Î¼W¶q·j´M"
+"Search word for single tap" = "¤@Áä·j´M"
+"Highlight word field" = "°ª«GÅã¥Üµü»y®Ø" 
+"Try lower case on search failed" = "ÀË¯Á¤£¨ì®É¹Á¸Õ¤p¼g¦r¥À" 
+"Disable font inside (need reload)" = "¸T¥Î¤º³¡¦rÅé¡]»Ý­«±Ò¡^"
+"Automatic speech" = "¦Û°Êµo­µ"
+"Custom Keys" = "¦Û©w¸q«öÁä" 
+"Type" = "Ãþ«¬"
+"Menu Type:" = "µæ³æÃþ«¬¡G"
+"Numerical" = "¼Æ¦r"
+"Alphabetic" = "¦r¥À"
+"User Defined" = "¦Û©w¸q"
+"DA size" = "DA ¤Ø¤o"
+"DA Size:" = "DA ¤Ø¤o¡G"
+"Large DA" = "¤j DA"
+"Small DA" = "¤p DA"
+"Fullscreen" = "¥þ«Ì"
+"Export Options" = "¾É¥X¿ï¶µ"
+"Cancel" = "¨ú®ø"
+"Category:" = "¤ÀÃþ¡G"
+
+"Private:" = "¨p¤H°O¿ý¡G"
+"Memo pad" = "°O¨Æ¥»"
+
+"Title" = "¼ÐÃD"
+"Generating Index" = "¥¿¦b¥Í¦¨¯Á¤Þ"
+
+"Custom Key" = "¦Û©w¸q«öÁä"
+"Pronounce" = "®ÔÅª"
+"Word List" = "µü»y¦Cªí"
+"History" = "¾ú¥v"
+
+"U/D" = "¤W¤U"
+"L/R" = "¥ª¥k"
+"Switch U/D L/R Functions" = "¤Á´« ¤W/¤U ¥ª/¥k §@¥Î"
+"Change Dictionary" = "¤Á´«Ãã¨å"
+":Change Dics" = "¤Á´«Ãã¨å"
+":Change Wrds" = "¤Á´«µü±ø"
+"Next Dict" = "¤U¤@Ãã¨å"
+"Select:" = "¿ï¾Ü¡G"
+":UD func" = "¡G¤W¤U§@¥Î"
+":LR func" = "¡G¥ª¥k§@¥Î"
+"Opt+Select:" = "OPt+¿ï¾Ü¡G"
+"Enlarge DA" = "©ñ¤j DA"
+"Export" = "¾É¥X"
+"Back" = "ªð¦^"
+"Go Back" = "ªð¦^"
+"Search All Dicts" = "·j´M©Ò¦³Ãã¨å"
+"Show Word List" = "Åã¥Üµü»y¦Cªí"
+"Show History" = "Åã¥ÜÀË¯Á¾ú¥v"
+"Keys:" = "«öÁä:"
+"Search All" = "·j´M¥þ³¡"
+"Set Custom Key" = "³]©w¦Û©w¸q«öÁä"
+"Waiting for key...." = "µ¥«Ý«öÁä ..."
+"Clear The Key" = "²M°£Áä"
+"\"Custom Key\" Tips\r\n\t\"Select Key\" is five-way navigational pad\'s center key and also is Clie\'s jog push.\r\n "= "¡§¦Û©w¸q«öÁä¡¨´£¥Ü\r\n\t¡§¿ï¾ÜÁä¡¨¬O¤­¦VÁäªº¤¤¶¡Áä¡A©Î¬O Clie ªº·n±ì¡C\r\n"
+"Set Shortcut List" = "³]©w§Ö±¶¦Cªí"
+"Dictionarys:" = "¦r¨å¡G"
+"In Shortcut" = "¥]§t"
+"Set Key" = "³]©wÁä"
+"Set Launch Key" = "³]©w±Ò°ÊÁä"
+"Shortcuts:" = "§Ö±¶¦Cªí¡G"
+"Note:" = "µùÄÀ¡G"
+"Set Note" = "³]©wµùÄÀ"
+"Set Popup List" = "³]©w¼u¥X¦Cªí"
+"In Popup List" = "¥]§t" 
+"Popup List:" = "¼u¥X¦Cªí¡G"
+"Main" = "¥D­n"
+END
+
+TRANSLATION "zhCN"
+BEGIN
+ "Dictionary" = "´Êµä"  
+ "All Dictionaries" = "ËùÓÐ´Êµä"
+ "All Dicts" = "ËùÓÐ´Êµä" 
+ "Edit" = "±à¼­"  
+ "Undo" = "³·Ïû"  
+ "Cut" = "¼ôÇÐ"  
+ "Copy" = "¸´ÖÆ"  
+ "Paste" = "Õ³Ìù"  
+ "Select All" = "È«Ñ¡"  
+ "Keyboard" = "¼üÅÌ"  
+ 
+ "Options" = "Ñ¡Ïî"  
+ "Preferences... " = "²ÎÊýÉèÖÃ..."  
+ "Dict Options... " = "´ÊµäÑ¡Ïî..."    
+ "Export Options... " = "µ¼³öÑ¡Ïî..."  
+ "Goto Word" = "ÌøÖÁ´ÊÌõ"  
+ "Clear Input" = "Çå¿ÕÊäÈë¿ò"  
+ "Clear History" = "Çå³ýÀúÊ·"  
+ "Change Case" = "¸ü¸Ä´óÐ¡Ð´"  
+ "Display/Hide List" = "ÇÐ»»ÁÐ±íÏÔÊ¾"  
+ "Export to Memo" = "µ¼³öÖÁ¼ÇÊÂ±¾"    
+ "Export to SugarMemo" = "µ¼³öÖÁ SugarMemo"  
+ "About ZDic" = "¹ØÓÚ ZDic"  
+ "System Incompatible" = "ÏµÍ³²»¼æÈÝ"  
+ "System Version 3.0 or greater is required to run this application." = "±¾³ÌÐòÐèÔËÐÐÓÚ 3.0¼°ÒÔÉÏ°æ±¾µÄÏµÍ³"  
+ "OK" = "È·¶¨"  
+ "Dictionary Not Found" = "Î´·¢ÏÖ´Êµä"  
+ "Dictionary not installed." = "´ÊµäÎ´°²×°"  
+ "Alert" = "¾¯¸æ"  
+ "Not Enough Memory!" = "ÄÚ´æ²»×ã£¡"  
+ "ZDic font share library not found!" = "ZDic ×ÖÌå¹²Ïí¿âÎ´·¢ÏÖ£¡"  
+ "ZDic-must long than 16 bytes" = "ZDic ±ØÐë³¤ÓÚ 16 ×Ö½Ú"  
+ "Go" = "²é"  
+ "Clr" = "Çå"   
+ 
+  
+ "W:" = "´Ê"   
+ 
+ 
+ "Thank you for using ZDic!" = "¸ÐÐ»ÄãÊ¹ÓÃ ZDic£¡"  
+ 
+ 
+ "Dict Options" = "´ÊµäÑ¡Ïî"  
+ "Done" = "Íê³É"  
+ "Dictionary:" = "´Êµä£º"  
+ "Phonetic" = "Òô±ê"  
+ "ZDic DA Font:" = "ZDic DA ×ÖÌå"   
+ 
+ 
+ "Shortcut List" = "¿ì½ÝÁÐ±í"  
+ "Popup List" = "µ¯³öÁÐ±í"  
+ "Dict Menu" = "´ÊµäÄ¿Â¼"  
+ "Dict Menu:" = "´ÊµäÄ¿Â¼£º"  
+ "Select Item" = "Ñ¡ÔñÏîÄ¿"    
+ "Set" = "ÉèÖÃ"  
+ 
+ "ZDic Font:" = "ZDic ×ÖÌå£º"  
+ "Preferences" = "²ÎÊýÉèÖÃ"    
+ "Get word from Clipboard at start" = "Æô¶¯Ê±´Ó¼ôÇÐ°åÖÐ»ñÈ¡´ÊÓï"  
+ "Enable incremental search" = "ÆôÓÃÔöÁ¿ËÑË÷"  
+ "Search word for single tap" = "Ò»¼üËÑË÷"  
+ "Highlight word field" = "¸ßÁÁÏÔÊ¾´ÊÓï¿ò"    
+ "Try lower case on search failed" = "¼ìË÷²»µ½Ê±³¢ÊÔÐ¡Ð´×ÖÄ¸"    
+ "Disable font inside (need reload)" = "½ûÓÃÄÚ²¿×ÖÌå£¨ÐèÖØÆô£©"  
+ "Automatic speech" = "×Ô¶¯·¢Òô"  
+ "Custom Keys" = "×Ô¶¨Òå°´¼ü"    
+ "Type" = "ÀàÐÍ"  
+ "Menu Type:" = "²Ëµ¥ÀàÐÍ£º"
+ "Numerical" = "Êý×Ö"
+ "Alphabetic" = "×ÖÄ¸"
+ "User Defined" = "×Ô¶¨Òå"  
+ "DA size" = "DA ³ß´ç"    
+ "DA Size:" = "DA ³ß´ç£º"
+ "Large DA" = "´ó DA"
+ "Small DA" = "Ð¡ DA"
+ "Fullscreen" = "È«ÆÁ"  
+ "Export Options" = "µ¼³öÑ¡Ïî"  
+ "Cancel" = "È¡Ïû"  
+ "Category:" = "·ÖÀà£º"    
+ 
+ "Private:" = "Ë½ÈË¼ÇÂ¼£º"    
+ "Memo pad" = "¼ÇÊÂ±¾"  
+   
+ 
+ "Title" = "±êÌâ"  
+ "Generating Index" = "ÕýÔÚÉú³ÉË÷Òý"    
+ 
+   
+ "Custom Key" = "×Ô¶¨Òå°´¼ü"    
+ "Pronounce" = "ÀÊ¶Á"    
+ "Word List" = "´ÊÓïÁÐ±í"  
+ "History" = "ÀúÊ·"  
+ 
+ "U/D" = "ÉÏÏÂ"  
+ "L/R" = "×óÓÒ"  
+ "Switch U/D L/R Functions" = "ÇÐ»» ÉÏ/ÏÂ ×ó/ÓÒ ¹¦ÄÜ"
+ "Change Dictionary" = "ÇÐ»»´Êµä"
+ ":Change Dics" = "ÇÐ»»´Êµä"
+ ":Change Wrds" = "ÇÐ»»´ÊÌõ"  
+ "Next Dict" = "ÏÂÒ»´Êµä"  
+ "Select:" = "Ñ¡Ôñ£º"  
+ ":UD func" = "£ºÉÏÏÂ¹¦ÄÜ"  
+ ":LR func" = "£º×óÓÒ¹¦ÄÜ"  
+ "Opt+Select:" = "OPt+Ñ¡Ôñ£º"    
+ "Enlarge DA" = "·Å´ó DA"  
+ "Export" = "µ¼³ö"  
+ "Back" = "·µ»Ø"
+ "Go Back" = "·µ»Ø"
+ "Search All Dicts" = "ËÑË÷ËùÓÐ´Êµä"
+ "Show Word List" = "ÏÔÊ¾´ÊÓïÁÐ±í"
+ "Show History" = "ÏÔÊ¾¼ìË÷ÀúÊ·"  
+ "Keys:" = "°´¼ü:"  
+ "Search All" = "ËÑË÷È«²¿"  
+ "Set Custom Key" = "Éè¶¨×Ô¶¨Òå°´¼ü"    
+ "Waiting for key...." = "µÈ´ý°´¼ü ..."  
+ "Clear The Key" = "Çå³ý¼ü"
+ "\"Custom Key\" Tips\r\n\t\"Select Key\" is five-way navigational pad\'s center key and also is Clie\'s jog push.\r\n "  = "\¡°×Ô¶¨Òå°´¼ü¡±ÌáÊ¾\r\n\t\¡°Ñ¡Ôñ¼ü¡±ÊÇÎåÏò¼üµÄÖÐ¼ä¼ü£¬»òÊÇ Clie µÄÒ¡¸Ë¡£\r\n"      
+ "Set Shortcut List" = "Éè¶¨¿ì½ÝÁÐ±í"  
+ "Dictionarys:" = "×Öµä£º"  
+ "In Shortcut" = "°üº¬"        
+ "Set Key" = "ÉèÖÃ¼ü"  
+ "Set Launch Key" = "ÉèÖÃÆô¶¯¼ü"  
+ "Shortcuts:" = "¿ì½ÝÁÐ±í£º"    
+ "Note:" = "×¢ÊÍ£º"    
+ "Set Note" = "ÉèÖÃ×¢ÊÍ"    
+ "Set Popup List" = "ÉèÖÃµ¯³öÁÐ±í"  
+ "In Popup List" = "°üº¬"    
+ "Popup List:" = "µ¯³öÁÐ±í£º"
+ 
+ "Main" = "Ö÷Òª" 
+
+END
+
 MENU ID MainMenuBar
 BEGIN
 	PULLDOWN "Dictionary"
@@ -75,7 +337,7 @@ BEGIN
      MESSAGE "Dictionary not installed."
      BUTTONS "OK" 
 END
- 
+
 ALERT ID NoEnoughMemoryAlert 
 WARNING
 BEGIN
@@ -83,7 +345,7 @@ BEGIN
      MESSAGE "Not Enough Memory!"
      BUTTONS "OK" 
 END
-
+ 
 ALERT ID NoFontAlert 
 WARNING
 BEGIN
@@ -96,35 +358,54 @@ FORM ID MainForm AT (0 0 160 160)
 	SAVEBEHIND NOFRAME
 	MENUID MainMenuBar SAVEBEHIND     
 BEGIN
-	TITLE "ZDic-must long than 16 bytes"
-	GRAFFITISTATEINDICATOR AT (135 2)
-
-	FIELD ID MainWordField  AT (11 149 104 AUTO) MAXCHARS 255 EDITABLE UNDERLINED
+	 TITLE "ZDic-must long than 16 bytes"
+	
+	GRAFFITISTATEINDICATOR AT (144 15)
+	BUTTON "" MainToolbarBtBg AT (12 147 124 13)  NOFRAME  BITMAPID InputBitmapFamily SELECTEDBITMAPID InputBitmapFamily GRAPHICAL DISABLED 
+	//FORMBITMAP AT (12 147) BITMAP InputBitmapFamily
+	FORMBITMAP AT (0 13) BITMAP ToolbarUpBitmapFamily
+	FORMBITMAP AT (0 0) BITMAP MenuBitmapFamily
+	FORMBITMAP AT (9 0) BITMAP BtnHeadBitmapFamily
+	FORMBITMAP AT (62 0) BITMAP BtnEndBitmapFamily
+	//FORMBITMAP AT (87 0) BITMAP DictBitmapFamily
+	
+	FIELD ID MainWordField  AT (12 148 60 Auto) MAXCHARS 255 EDITABLE 
 	FIELD ID MainDescriptionField AT (62 15 89 133) MULTIPLELINES MAXCHARS 8192  NONEDITABLE HASSCROLLBAR
-	SCROLLBAR ID MainDescScrollBar   AT (153 15 7 133)  VALUE 0 MIN 0 MAX 0 PAGESIZE 0
+	SCROLLBAR ID MainDescScrollBar   AT (153 15 7 132)  VALUE 0 MIN 0 MAX 0 PAGESIZE 0
+
+	BUTTON  "S" ID MainSelectPushButton AT (10 0 13 13) NOFRAME BITMAPID SelectJumpBitmapFamily SELECTEDBITMAPID SelectJumpBitmapFamily GRAPHICAL
+	BUTTON  "J" ID MainJumpPushButton  AT (10 0 13 13) NOFRAME BITMAPID JumpSelectBitmapFamily SELECTEDBITMAPID JumpSelectBitmapFamily GRAPHICAL
+
+	BUTTON  "voiceon" ID MainAutoVoiceOnButton AT (23 0 13 13) NOFRAME BITMAPID AutoSpeechOnBitmapFamily SELECTEDBITMAPID AutoSpeechOnBitmapFamily GRAPHICAL
+	BUTTON  "voiceoff" ID MainAutoVoiceOffButton  AT (23 0 13 13) NOFRAME BITMAPID AutoSpeechOffBitmapFamily SELECTEDBITMAPID AutoSpeechOffBitmapFamily GRAPHICAL
+
+	BUTTON  "searchon" ID MainAutoSearchOnButton AT (36 0 13 13) NOFRAME BITMAPID AutoSearchOnBitmapFamily SELECTEDBITMAPID AutoSearchOnBitmapFamily GRAPHICAL
+	BUTTON  "searchoff" ID MainAutoSearchOffButton  AT (36 0 13 13) NOFRAME BITMAPID AutoSearchOffBitmapFamily SELECTEDBITMAPID AutoSearchOffBitmapFamily GRAPHICAL
+
+	BUTTON  "About" ID MainAboutButton  AT (49 0 13 13) NOFRAME BITMAPID AboutBitmapFamily SELECTEDBITMAPID AboutBitmapFamily GRAPHICAL
+
+	BUTTON "P" ID MainPlayNoneVoice  AT (63 0 24 13) NOFRAME  BITMAPID PlayNoneBitmapFamily SELECTEDBITMAPID PlayNoneBitmapFamily GRAPHICAL 
+	BUTTON "P" ID MainPlayVoice  AT (63 0 24 13) NOFRAME  BITMAPID PlayBitmapFamily SELECTEDBITMAPID PlayBitmapFamily GRAPHICAL  
 	
-	BUTTON "Go" ID MainGotoButton   AT (131 149 12 10)
-	BUTTON "Clr" ID MainNewButton  AT (146 149 12 10)
+	BUTTON "H" ID MainHistoryTrigger  AT (72 147 7 13) NOFRAME GRAPHICAL BITMAPID HistoryBitmapFamily SELECTEDBITMAPID HistoryBitmapFamily 
+	LIST ""   ID MainHistoryPopupList  AT (13 135 81 2) VISIBLEITEMS 0 NONUSABLE
 		
-	REPEATBUTTON "\3" MainBackHistoryRepeatButton AT (98 1 12 12) NOFRAME FONT 3
+	BUTTON "Word :" ID MainWordButton  AT (0 147 12 13) NOFRAME  BITMAPID WordListBitmapFamily SELECTEDBITMAPID WordListBitmapFamily GRAPHICAL   
+	REPEATBUTTON "\10" ID MainWordListUpRepeatButton  AT (0 16 61 8) FONT 3 NOFRAME
+	REPEATBUTTON "\7" ID MainWordListDownRepeatButton   AT (0 136 61 8) FONT 3 NOFRAME
+	LIST ""      ID MainWordList  AT (1 25 59 112) VISIBLEITEMS 10
 	
-	PUSHBUTTON  "S" MainSelectPushButton AT (112 2 10 10) GROUP 1
-	PUSHBUTTON  "J" ID MainJumpPushButton  AT (123 2 10 10) GROUP 1
-
-	BUTTON "P" ID MainPlayVoice  AT (65 2 14 10) NONUSABLE
+	BUTTON "Goto" ID MainGotoButton   AT (79 147 15 13) NOFRAME  BITMAPID FindBitmapFamily SELECTEDBITMAPID FindBitmapFamily GRAPHICAL
+	BUTTON "Clear" ID MainNewButton  AT (94 147 13 13)	NOFRAME  BITMAPID ClearBitmapFamily SELECTEDBITMAPID ClearBitmapFamily GRAPHICAL
 	
-	BUTTON "x" ID MainExitButton  AT (145 2 14 10) 
-
-	POPUPTRIGGER "" ID MainHistoryTrigger  AT (115 148 15 14)
-	LIST ""   ID MainHistoryPopupList  AT (11 146 104 2) VISIBLEITEMS 0 NONUSABLE
+	REPEATBUTTON "R" ID MainBackHistoryRepeatButton AT (108 147 13 13) NOFRAME  BITMAPID RecallWordBitmapFamily SELECTEDBITMAPID RecallWordBitmapFamily GRAPHICAL
+	BUTTON "C" ID MainCapChange   AT (121 147 13 13) NOFRAME  BITMAPID CapBitmapFamily SELECTEDBITMAPID CapBitmapFamily GRAPHICAL
+	BUTTON "E" ID MainExportToMemo   AT (134 147 13 13) NOFRAME  BITMAPID ExportBitmapFamily SELECTEDBITMAPID ExportBitmapFamily GRAPHICAL
+	BUTTON "S" ID MainSettingButton AT (147 147 13 13) NOFRAME  BITMAPID SettingBitmapFamily SELECTEDBITMAPID SettingBitmapFamily GRAPHICAL
+	BUTTON "S" ID MainBtnHeadButton AT (107 147 1 13) NOFRAME  BITMAPID BtnHeadBitmapFamily SELECTEDBITMAPID BtnHeadBitmapFamily GRAPHICAL
 	
-	BUTTON "W:" ID MainWordButton  AT (0 150 10 12) NOFRAME
-	REPEATBUTTON "\10" ID MainWordListUpRepeatButton  AT (0 17 61 9) FONT 3 NOFRAME
-	REPEATBUTTON "\7" ID MainWordListDownRepeatButton   AT (1 137 61 9) FONT 3 NOFRAME
-	LIST ""      ID MainWordList  AT (1 26 59 112) VISIBLEITEMS 10
-	
-	BUTTON "E" ID MainExportToMemo   AT (82 2 14 10) 
-
+	BUTTON "" ID DictSelButton  AT (87 0 126 13) NOFRAME  BITMAPID DictBitmapFamily SELECTEDBITMAPID DictBitmapFamily GRAPHICAL DISABLED
+	BUTTON "x" ID MainExitButton  AT (147 0 13 13)  NOFRAME  BITMAPID CloseBitmapFamily SELECTEDBITMAPID CloseBitmapFamily GRAPHICAL 
 	LIST "" ID lstMainPopup      AT (0 16 80 90) VISIBLEITEMS 8 NONUSABLE
 END
 
@@ -133,13 +414,14 @@ FORM ID AboutForm AT (2 2 156 156)
     DEFAULTBTNID AboutOKButton  SAVEBEHIND MODAL
 BEGIN
 	TITLE "About ZDic"
-	LABEL "ZDic 2.41" AUTOID AT (CENTER 34) FONT 7
-	LABEL "Copyright © 2003-2004 neisoo" AUTOID AT (CENTER 61)
-	LABEL "Thank you for using ZDic!" AUTOID AT (CENTER 80) FONT 2
-	LABEL "JEMYZHANG(v2.34)" AUTOID AT (35 101)
-	LABEL "ÍõÃÉ¿Â BobGreen (after v2.34)" AUTOID AT (CENTER 112)
+	LABEL "ZDic 2.42" AUTOID AT (CENTER 34) FONT 7
+	LABEL "Copyright © 2003-2004 neisoo" AUTOID AT (CENTER 57)
+	LABEL "Thank you for using ZDic!" AUTOID AT (CENTER 76) FONT 2
+	LABEL "JEMYZHANG(v2.34)" AUTOID AT (35 95)
+	LABEL "BobGreen (after v2.34)" AUTOID AT (CENTER 108)
 	BUTTON "OK" ID AboutOKButton AT (58 133 40 12)
 	
+	LABEL "osfans (v2.42)" AUTOID AT (CENTER 120)
 END
 
 FORM ID PrefsForm AT (2 2 156 156)
@@ -222,69 +504,93 @@ BEGIN
 	PUSHBUTTON  "SugarMemo" ID ExportOptionsSugarMemo  AT (66 19 60 AUTO) GROUP 1
 END
 
-ICONFAMILYEX
+ICONFAMILYEX COMPRESS
 BEGIN
     BITMAP "icon-lg-01-22.bmp" BPP 1 
     BITMAP "icon-lg-08-22.bmp" BPP 8 TRANSPARENTINDEX 210
     BITMAP "icon-lg-16-44.bmp" BPP 16 TRANSPARENT 0 255 0 DENSITY 2
 END
 
-SMALLICONFAMILYEX
+SMALLICONFAMILYEX COMPRESS
 BEGIN
     BITMAP "icon-sm-01-15x09.bmp" BPP 1 
     BITMAP "icon-sm-08-15x09.bmp" BPP 8 TRANSPARENTINDEX 210
     BITMAP "icon-sm-16-30x18.bmp" BPP 16 TRANSPARENT 0 255 0 DENSITY 2
 END
 
+//BITMAPFAMILYEX ID GotoBitmapFamily
+//COMPRESS
+//BEGIN
+//    BITMAP "goto-01-15.bmp" BPP 1
+//    BITMAP "goto-08-15.bmp" BPP 8 TRANSPARENTINDEX 52 DENSITY 72
+//    BITMAP "goto-16-30.bmp" BPP 16 TRANSPARENT 0 255 0 DENSITY 144
+//END
+
 STRING ID lazy2GMXString   FILE "lazy2GMX.txt"
 STRING ID efan2GMXString   FILE "efan2GMX.txt"
 STRING ID mutant2GMXString   FILE "mutant2GMX.txt"
 STRING ID sugarMemo2GMXString   FILE "SugarMemo2GMX.txt"
 
-INTEGER ID DictionaryNameMaxLenInPixels    51
+INTEGER ID DictionaryNameMaxLenInPixels    56
 INTEGER ID DAFormOriginX					7
 INTEGER ID DAFormOriginY					7
 INTEGER ID DefaultIncSearchDelay			5
 
 FORM ID DAForm  AT ( 6 7 149 85 )
 	SAVEBEHIND 
-	MENUID MainMenuBar MODAL 
+	MENUID MainMenuBar  FRAME MODAL DEFAULTBTNID DAMoreButton 
 BEGIN
-	 
-	FIELD ID DAWordField  AT (15 73 60 12) MAXCHARS 255 EDITABLE UNDERLINED        
-	FIELD DADescriptionField AT (1 14 138 57) MAXCHARS 4096  MULTIPLELINES   EDITABLE HASSCROLLBAR 
-	BUTTON "M" ID DAMoreButton   AT (136 72 10 11)		
-		
-	SCROLLBAR ID DADescriptionScrollBar   AT (141 14 7 56) USABLE VALUE 0 MIN 0 MAX 0 PAGESIZE 0
-	GRAFFITISTATEINDICATOR AT (100 74)
-	PUSHBUTTON  "C" ID DAClipboardPushButton  AT (76 73 10 10) 
-	PUSHBUTTON  "J" ID DAJumpPushButton   AT (88 73 10 10) 
-	REPEATBUTTON "\20" ID DAMoveRepeatButton  AT (138 1 10 10) FONT 3 NOFRAME
-	BUTTON "W:" ID DANextDict  AT (0 73 14 12) NOFRAME
-    BUTTON "P" ID DAPlayVoice  AT (110 72 10 11) NONUSABLE
-	BUTTON "E" ID DAExportToMemo   AT (123 72 10 11)
-	LIST "" ID lstDAPopup   AT (0 13 80 57) VISIBLEITEMS 5 NONUSABLE
+	//BUTTON "" DAToolbarBtBg AT (0 59 149 13)  NOFRAME  BITMAPID BgBottomBitmapFamily SELECTEDBITMAPID BgBottomBitmapFamily GRAPHICAL DISABLED 
+	BUTTON "" DAWordFieldBG AT (12 72 60 13)  NOFRAME  BITMAPID InputBitmapFamily SELECTEDBITMAPID InputBitmapFamily GRAPHICAL DISABLED
+	FIELD ID DAWordField  AT (12 73 60 Auto) MAXCHARS 255 EDITABLE        
+	FIELD DADescriptionField AT (1 14 138 57) MAXCHARS 4096  MULTIPLELINES EDITABLE HASSCROLLBAR  
+	BUTTON "M" ID DAMoreButton   AT (136 72 13 13) NOFRAME  BITMAPID DAMaxBitmapFamily SELECTEDBITMAPID DAMaxBitmapFamily GRAPHICAL	
+	FORMBITMAP AT (89 72) BITMAP BtnHeadBitmapFamily
+	FORMBITMAP AT (135 72) BITMAP BtnEndBitmapFamily
+	
+	SCROLLBAR ID DADescriptionScrollBar   AT (141 14 7 57) USABLE VALUE 0 MIN 0 MAX 0 PAGESIZE 0
+	GRAFFITISTATEINDICATOR AT (129 2)
+	REPEATBUTTON "\20" ID DAMoveRepeatButton  AT (139 2 8 8) FONT 3 NOFRAME
+	BUTTON "W :" ID DANextDict  AT (0 72 12 13) NOFRAME BITMAPID DAChangeDicBitmapFamily SELECTEDBITMAPID DAChangeDicBitmapFamily GRAPHICAL
+    BUTTON "P" ID DAPlayVoice  AT (72 72 17 13) NOFRAME BITMAPID DAPlayBitmapFamily SELECTEDBITMAPID DAPlayBitmapFamily GRAPHICAL
+    BUTTON "P" ID DAPlayNoneVoice  AT (72 72 17 13) NOFRAME BITMAPID DAPlayNoneBitmapFamily SELECTEDBITMAPID DAPlayNoneBitmapFamily GRAPHICAL
+	//BUTTON "S" ID DABtnHeadButton AT (102 72 1 13) NOFRAME  BITMAPID BtnHeadBitmapFamily SELECTEDBITMAPID BtnHeadBitmapFamily GRAPHICAL
+	BUTTON "C" ID DAClipboardPushButton  AT (103 72 19 13) NOFRAME BITMAPID DAClipModeClipBitmapFamily SELECTEDBITMAPID DAClipModeClipBitmapFamily GRAPHICAL
+	BUTTON "S" ID DASelectPushButton  AT (103 72 19 13) NOFRAME BITMAPID DAClipModeSelectBitmapFamily SELECTEDBITMAPID DAClipModeSelectBitmapFamily GRAPHICAL
+	BUTTON "E" ID DAExportToMemo   AT (122 72 13 13) NOFRAME  BITMAPID ExportBitmapFamily SELECTEDBITMAPID ExportBitmapFamily GRAPHICAL 
+	//BUTTON "S" ID DABtnEndButton AT (135 72 1 13) NOFRAME  BITMAPID BtnEndBitmapFamily SELECTEDBITMAPID BtnEndBitmapFamily GRAPHICAL
+	BUTTON  "S" ID DANoJumpPushButton AT (90 72 13 13) NOFRAME BITMAPID SelectJumpBitmapFamily SELECTEDBITMAPID SelectJumpBitmapFamily GRAPHICAL
+	BUTTON  "J" ID DAJumpPushButton  AT (90 72 13 13) NOFRAME BITMAPID JumpSelectBitmapFamily SELECTEDBITMAPID JumpSelectBitmapFamily GRAPHICAL
+	LIST "" ID lstDAPopup       AT (0 14 80 46) VISIBLEITEMS 4 NONUSABLE
 	LABEL "Title" ID lblDATitle  AT (1 1) FONT 1
 END
 
 FORM ID DAFormLarge  AT ( 6 7 149 149 )
 	SAVEBEHIND 
-	MENUID MainMenuBar MODAL 
+	MENUID MainMenuBar  FRAME MODAL DEFAULTBTNID DAMoreButton 
 BEGIN
-	 
-	FIELD ID DAWordField  AT (15 137 60 12) MAXCHARS 255 EDITABLE UNDERLINED        
-	FIELD DADescriptionField AT (1 14 138 121) MAXCHARS 4096  MULTIPLELINES  HASSCROLLBAR EDITABLE 
-	BUTTON "M" ID DAMoreButton   AT (136 136 10 11)		
-		
-	SCROLLBAR ID DADescriptionScrollBar   AT (141 14 7 120) USABLE VALUE 0 MIN 0 MAX 0 PAGESIZE 0
-	GRAFFITISTATEINDICATOR AT (100 138)
-	PUSHBUTTON  "C" ID DAClipboardPushButton  AT (76 137 10 10) 
-	PUSHBUTTON  "J" ID DAJumpPushButton   AT (88 137 10 10) 
-	REPEATBUTTON "\20" ID DAMoveRepeatButton  AT (138 1 10 10) FONT 3 NOFRAME
-	BUTTON "W:" ID DANextDict  AT (0 137 14 12) NOFRAME
-    BUTTON "P" ID DAPlayVoice  AT (110 136 10 11) NONUSABLE
-	BUTTON "E" ID DAExportToMemo   AT (123 136 10 11)
-	LIST "" ID lstDAPopup   AT (0 13 80 90) VISIBLEITEMS 8 NONUSABLE
+	//BUTTON "" DAToolbarBtBg AT (0 131 149 13)  NOFRAME  BITMAPID BgBottomBitmapFamily SELECTEDBITMAPID BgBottomBitmapFamily GRAPHICAL DISABLED 
+	BUTTON "" DAWordFieldBG AT (12 136 60 13)  NOFRAME  BITMAPID InputBitmapFamily SELECTEDBITMAPID InputBitmapFamily GRAPHICAL DISABLED
+	FIELD ID DAWordField  AT (12 137 60 Auto) MAXCHARS 255 EDITABLE        
+	FIELD DADescriptionField AT (1 14 138 121) MAXCHARS 4096  MULTIPLELINES EDITABLE HASSCROLLBAR  
+	BUTTON "M" ID DAMoreButton   AT (136 136 13 13) NOFRAME  BITMAPID DAMaxBitmapFamily SELECTEDBITMAPID DAMaxBitmapFamily GRAPHICAL	
+	FORMBITMAP AT (89 136) BITMAP BtnHeadBitmapFamily
+	FORMBITMAP AT (135 136) BITMAP BtnEndBitmapFamily
+	
+	SCROLLBAR ID DADescriptionScrollBar   AT (141 14 7 121) USABLE VALUE 0 MIN 0 MAX 0 PAGESIZE 0
+	GRAFFITISTATEINDICATOR AT (130 2)
+	REPEATBUTTON "\20" ID DAMoveRepeatButton  AT (139 2 8 8) FONT 3 NOFRAME
+	BUTTON "W :" ID DANextDict  AT (0 136 12 13) NOFRAME BITMAPID DAChangeDicBitmapFamily SELECTEDBITMAPID DAChangeDicBitmapFamily GRAPHICAL
+    BUTTON "P" ID DAPlayVoice  AT (72 136 17 13) NOFRAME BITMAPID DAPlayBitmapFamily SELECTEDBITMAPID DAPlayBitmapFamily GRAPHICAL
+    BUTTON "P" ID DAPlayNoneVoice  AT (72 136 17 13) NOFRAME BITMAPID DAPlayNoneBitmapFamily SELECTEDBITMAPID DAPlayNoneBitmapFamily GRAPHICAL
+	//BUTTON "S" ID DABtnHeadButton AT (102 136 1 13) NOFRAME  BITMAPID BtnHeadBitmapFamily SELECTEDBITMAPID BtnHeadBitmapFamily GRAPHICAL
+	BUTTON "C" ID DAClipboardPushButton  AT (103 136 19 13) NOFRAME BITMAPID DAClipModeClipBitmapFamily SELECTEDBITMAPID DAClipModeClipBitmapFamily GRAPHICAL
+	BUTTON "S" ID DASelectPushButton  AT (103 136 19 13) NOFRAME BITMAPID DAClipModeSelectBitmapFamily SELECTEDBITMAPID DAClipModeSelectBitmapFamily GRAPHICAL
+	BUTTON "E" ID DAExportToMemo   AT (122 136 13 13) NOFRAME  BITMAPID ExportBitmapFamily SELECTEDBITMAPID ExportBitmapFamily GRAPHICAL 
+	//BUTTON "S" ID DABtnEndButton AT (135 136 1 13) NOFRAME  BITMAPID BtnEndBitmapFamily SELECTEDBITMAPID BtnEndBitmapFamily GRAPHICAL
+	BUTTON  "S" ID DANoJumpPushButton AT (90 136 13 13) NOFRAME BITMAPID SelectJumpBitmapFamily SELECTEDBITMAPID SelectJumpBitmapFamily GRAPHICAL
+	BUTTON  "J" ID DAJumpPushButton  AT (90 136 13 13) NOFRAME BITMAPID JumpSelectBitmapFamily SELECTEDBITMAPID JumpSelectBitmapFamily GRAPHICAL
+	LIST "" ID lstDAPopup       AT (0 14 80 90) VISIBLEITEMS 8 NONUSABLE
 	LABEL "Title" ID lblDATitle  AT (1 1) FONT 1
 END
 
@@ -302,8 +608,203 @@ DATA "data" ID SugarMemoDefaultDBImage  "ZDicPad.pdb"
 DATA "data" ID SugarMemoDefaultRecordHead  "SugarMemoDefaultRecordHead.bin"
 STRING ID SugarMemoDBName "ZDic Pad"        
 
+
+BITMAPFAMILYEX ID WordListBitmapFamily  COMPRESS
+BEGIN     
+	BITMAP "WordList-16-24X26.bmp" BPP 16 DENSITY 144
+END
+
+/*
+BITMAPFAMILYEX ID ToolbarBtBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "toolbar-bottom-16-450X26.bmp" BPP 16 DENSITY 144
+END
+*/
+BITMAPFAMILYEX ID HistoryBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "history-16-14X26.bmp" BPP 16 DENSITY 144
+END
+
+
+BITMAPFAMILYEX ID ClearBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "clear-16-26X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID FindBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "find-16-30X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID ToolbarUpBitmapFamily  COMPRESS
+BEGIN
+        
+	BITMAP "toolbar-up-16-448X4.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID RecallWordBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "recall-16-26X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID ExportBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "export-16-26X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID CloseBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "close-16-26X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID MenuBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "menu-16-18X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID PlayBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "play-16-48X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID PlayNoneBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "playnone-16-48X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID InputBitmapFamily COMPRESS 
+BEGIN
+
+	BITMAP "input-16-248X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID DictBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "dict-16-252X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID SelectJumpBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "sw-jumpoff-16-26X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID JumpSelectBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "sw-jumpon-16-26X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID AboutBitmapFamily COMPRESS
+BEGIN
+        
+	BITMAP "about-16-26X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID AutoSpeechOnBitmapFamily   COMPRESS
+BEGIN
+        
+	BITMAP "sw-voiceon-16-26X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID AutoSpeechOffBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "sw-voiceoff-16-26X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID AutoSearchOnBitmapFamily   COMPRESS
+BEGIN
+        
+	BITMAP "sw-autosearchon-16-26X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID AutoSearchOffBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "sw-autosearchoff-16-26X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID CapBitmapFamily  COMPRESS
+BEGIN
+        
+	BITMAP "sw-cap-16-26X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID SettingBitmapFamily  COMPRESS
+BEGIN
+        
+	BITMAP "setting-16-26X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID BtnHeadBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "btn-head-16-2X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID BtnEndBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "btn-end-16-2X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID DAChangeDicBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "da-changdict-16-24X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID DAPlayBitmapFamily  COMPRESS
+BEGIN
+        
+	BITMAP "da-play-16-34X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID DAPlayNoneBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "da-playnone-16-34X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID DAMaxBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "da-max-16-26X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID DAClipModeSelectBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "da-clipmode-s-16-38X26.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID DAClipModeClipBitmapFamily  COMPRESS
+BEGIN
+        
+	BITMAP "da-clipmode-c-16-38X26.bmp" BPP 16 DENSITY 144
+END
+/*
+BITMAPFAMILYEX ID BgBottomBitmapFamily COMPRESS 
+BEGIN
+        
+	BITMAP "bgbottom-16-298X26.bmp" BPP 16 DENSITY 2
+END
+*/
+
 FORM ID CustomKeyForm   AT ( 7 7 146 147 )
-  NOFRAME MODAL DEFAULTBTNID btnCustomKeyOK HELPID 1000
+  NOFRAME MODAL DEFAULTBTNID btnCustomKeyOK HELPID CustomKeyTips
 BEGIN
         TITLE "Custom Key"
 	BUTTON "Pronounce" ID btnPlaySound  AT (3 33 49 12)
@@ -344,7 +845,7 @@ BEGIN
 	BUTTON "Clear The Key" ID btnClearKey  AT (16 34 AUTO AUTO)
 END
 
-STRING ID 1000 "\"Custom Key\" Tips\r\n\t\"Select Key\" is five-way navigational pad\'s center key and also is Clie\'s jog push.\r\n "                                                                                                                                                                                                                                                 
+STRING ID CustomKeyTips "\"Custom Key\" Tips\r\n\t\"Select Key\" is five-way navigational pad\'s center key and also is Clie\'s jog push.\r\n "                                                                                                                                                                                                                                                 
 
 FORM ID DictShortcutForm  AT ( 2 2 156 156 )
 FRAME   SAVEBEHIND MODAL
@@ -392,3 +893,6 @@ BEGIN
 	BUTTON "\1" ID PopupUpButton   AT (80 121 35 10) FONT 5
 	BUTTON "\2" ID PopupDownButton   AT (118 121 35 10) FRAME FONT 5
 	END
+	
+STRING ID ChangewString ":Change Wrds" 
+STRING ID ChangedString ":Change Dics"
