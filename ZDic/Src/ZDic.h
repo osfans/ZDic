@@ -22,7 +22,7 @@
 #define MAX_LINE_LEN		3
 #define MAX_WORD_LEN		32
 #define MAX_WORD_ITEM		10
-#define MAX_WORD_ITEM_TINY	14
+//#define MAX_WORD_ITEM_TINY	14
 #define MAX_HIS_FAR			13
 #define MAX_DICT_NUM		24
 #define MAX_DICTNAME_LEN	dmDBNameLength				//  dmDBNameLength for pdb name, 256 for vfs filename and terminal by chrNull.
@@ -36,7 +36,7 @@
 #define ZDIC_DICT_MENUID	3000
 
 #define ZDIC_READ_BUFFER_SIZE	1024						// read buffer for ZDicGetDictBlockIdxByWord
-#define ZDIC_MAX_RECORD_SIZE	4096						// 4K max record size.
+#define ZDIC_MAX_RECORD_SIZE	0x4000						// 4K max record size.
 #define ZDIC_INDEX_BUFFER_ITEM	256
 
 #define TIMES_PRE_SECOND        10
@@ -81,12 +81,6 @@ typedef struct
 	Int8			dictIndex[MAX_DICT_NUM];
 } ZDicDBDictShortcutInfoType;
 
-typedef struct
-{
-	Int8			totalNumber;
-	Int8			curIndex;	
-	Int8			dictIndex[MAX_DICT_NUM];
-} ZDicDBDictPopupInfoType;
 
 typedef struct ZDicPreferenceType
 {
@@ -94,7 +88,7 @@ typedef struct ZDicPreferenceType
 	FontID	fontDA;											// current DA font.
 	ZDicDBDictInfoType	dictInfo;							// all dictionary information.
 	ZDicDBDictShortcutInfoType shortcutInfo;				// all dictionary's shortcut information
-	ZDicDBDictPopupInfoType popupInfo;						// all dictionary's popup information
+	ZDicDBDictShortcutInfoType popupInfo;						// all dictionary's popup information
 	Char	history[MAX_HIS_FAR][MAX_WORD_LEN + 1];			// history list
 	
 	Boolean	isTreo;
@@ -107,8 +101,6 @@ typedef struct ZDicPreferenceType
 	Boolean useSystemFont;						            // true if disable phonetic font support(use system standar font).
 	Boolean enableJumpSearch;								// true if enable jump search else false.
 	Boolean enableAutoSpeech;                               // true if enable automatic speech.
-	//Boolean daEditable;
-	//Boolean enableTinyFont;
 	
 	UInt8	dictMenu;										// Dict Menu use which list
 	UInt8	menuType;										// Dict Menu use which type
@@ -189,7 +181,7 @@ extern ZDicPreferenceType g_prefs;
 #define updateDictionaryChanged	1
 #define updateFontChanged		2
 
-#define CACHE_SIZE		4096
+#define CACHE_SIZE	0x4000
 
 typedef struct {
 	Int32		decodeSize;					// valid date size in decodeBuf
@@ -210,7 +202,8 @@ typedef struct
 	UInt16		itemTail[MAX_WORD_ITEM];
 } ZDicWordListType;
 
-typedef struct
+
+/*typedef struct
 {
 	UInt16		itemUsed;
 	Char		*itemPtr[MAX_WORD_ITEM_TINY];
@@ -218,8 +211,7 @@ typedef struct
 	UInt16		itemBlkIndex[MAX_WORD_ITEM_TINY];
 	UInt16		itemHead[MAX_WORD_ITEM_TINY];
 	UInt16		itemTail[MAX_WORD_ITEM_TINY];
-} ZDicWordListTinyType;
-
+} ZDicWordListTinyType;*/
 
 typedef struct AppGlobalObj{
     // initial count
@@ -267,7 +259,7 @@ typedef struct AppGlobalObj{
 	
 	// wordlist
 	ZDicWordListType		wordlistBuf;			// word list item buffer.
-	ZDicWordListTinyType	wordlisttinyBuf;
+	//ZDicWordListTinyType	wordlisttinyBuf;
 
 	Char		dictTriggerName[MAX_DICTNAME_LEN + 1]; // use for display tigger text
 
@@ -289,7 +281,7 @@ typedef struct AppGlobalObj{
 		UInt8				readBuf[ZDIC_READ_BUFFER_SIZE];				// read buffer for ZDicGetDictBlockIdxByWord
 		ZDicDBDictInfoType	dictInfoList;
 		ZDicDBDictShortcutInfoType shortcutInfoList;
-		ZDicDBDictPopupInfoType popupInfoList;
+		ZDicDBDictShortcutInfoType popupInfoList;
 		UInt8				recordBuf[ZDIC_MAX_RECORD_SIZE];			// use for PrvZDicVFSGetRowRecord
 	}data;
 	

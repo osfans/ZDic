@@ -145,6 +145,7 @@ Err ZDicLookup(const UInt8 *wordStr, UInt16 *matchs, UInt8 **explainPtr, UInt32 
 	Err				err;
 	
 	ErrNonFatalDisplayIf(wordStr == NULL, "Can not find empty string");
+	ErrNonFatalDisplayIf((wordStr[0] == 0xff) && (wordStr[1] == 0xff), "Can not find empty string");
 	
 	*explainPtr = NULL;
 	*explainLen = 0;
@@ -169,15 +170,7 @@ FOUND_BLOCK:
 		err = ZDicGetDictRecord (blkIndex, &str, &recSize);
 		if (err) return err;
 
-		if (global->compressFlag == 0)
-		{
-			MemMove (&descript->decodeBuf[0], str, recSize);
-			descript->decodeSize = recSize;
-		}
-		else
-		{
-			LZSS_Decoder((unsigned char *)str, recSize, (unsigned char *)&descript->decodeBuf[0], &descript->decodeSize);
-		}
+		Decoder(global->compressFlag, (unsigned char *)str, recSize, (unsigned char *)&descript->decodeBuf[0], &descript->decodeSize);
 		descript->decodeBuf[descript->decodeSize] = chrNull;
 		ZDicReleaseDictRecord(str);
 		
@@ -199,15 +192,8 @@ FOUND_BLOCK:
 		err = ZDicGetDictRecord (blkIndex, &str, &recSize);
 		if (err) return err;
 
-		if (global->compressFlag == 0)
-		{
-			MemMove (&descript->decodeBuf[0], str, recSize);
-			descript->decodeSize = recSize;
-		}
-		else
-		{
-			LZSS_Decoder((unsigned char *)str, recSize, (unsigned char *)&descript->decodeBuf[0], &descript->decodeSize);
-		}
+		Decoder(global->compressFlag,(unsigned char *)str, recSize, (unsigned char *)&descript->decodeBuf[0], &descript->decodeSize);
+		
 		descript->decodeBuf[descript->decodeSize] = chrNull;
 		ZDicReleaseDictRecord(str);
 
@@ -303,15 +289,9 @@ READ_NEXT_BLOCK:
 
 		descript->blkIndex++;
 
-		if (global->compressFlag == 0)
-		{
-			MemMove (&descript->decodeBuf[0], str, recSize);
-			descript->decodeSize = recSize;
-		}
-		else
-		{		
-			LZSS_Decoder((unsigned char *)str, recSize, (unsigned char *)&descript->decodeBuf[0], &descript->decodeSize);
-		}
+	
+		Decoder(global->compressFlag,(unsigned char *)str, recSize, (unsigned char *)&descript->decodeBuf[0], &descript->decodeSize);
+		
 		descript->decodeBuf[descript->decodeSize] = chrNull;
 		ZDicReleaseDictRecord(str);
 		
@@ -412,15 +392,9 @@ READ_NEXT_WORD:
 
 		descript->blkIndex--;
 
-		if (global->compressFlag == 0)
-		{
-			MemMove (buf, str, recSize);
-			descript->decodeSize = recSize;
-		}
-		else
-		{
-			LZSS_Decoder((unsigned char *)str, recSize, (unsigned char *)buf, &descript->decodeSize);
-		}
+
+		Decoder(global->compressFlag,(unsigned char *)str, recSize, (unsigned char *)buf, &descript->decodeSize);
+
 		buf[descript->decodeSize] = chrNull;
 		ZDicReleaseDictRecord(str);
 		
@@ -525,9 +499,9 @@ Err ZDicLookupWordListInit(WinDirectionType direction, Boolean init)
 
 	global = AppGetGlobal();
 	
-	if(global->prefs.font == global->font.smallTinyFontID ||global->prefs.font == global->font.largeTinyFontID)
-    	maxworditem = MAX_WORD_ITEM_TINY;
-    if(global->prefs.font == global->font.smallFontID ||global->prefs.font == global->font.largeFontID)
+	//if(global->prefs.font == global->font.smallTinyFontID ||global->prefs.font == global->font.largeTinyFontID)
+    //	maxworditem = MAX_WORD_ITEM_TINY;
+    //if(global->prefs.font == global->font.smallFontID ||global->prefs.font == global->font.largeFontID)
     	maxworditem = MAX_WORD_ITEM;
 
 	if (init)
@@ -553,7 +527,7 @@ Err ZDicLookupWordListInit(WinDirectionType direction, Boolean init)
 		}
 	}
 
-	if(global->prefs.font == global->font.smallTinyFontID ||global->prefs.font == global->font.largeTinyFontID)
+	/*if(global->prefs.font == global->font.smallTinyFontID ||global->prefs.font == global->font.largeTinyFontID)
     {
 		// Get word list.
 		global->wordlisttinyBuf.itemUsed = 0;
@@ -591,7 +565,7 @@ Err ZDicLookupWordListInit(WinDirectionType direction, Boolean init)
 		}
     }
     else if(global->prefs.font == global->font.smallFontID ||global->prefs.font == global->font.largeFontID)
-    {
+    {*/
     			// Get word list.
 		global->wordlistBuf.itemUsed = 0;
 		
@@ -625,10 +599,45 @@ Err ZDicLookupWordListInit(WinDirectionType direction, Boolean init)
 			global->wordlistBuf.itemBlkIndex[item] = global->wordlist.blkIndex;
 			global->wordlistBuf.itemHead[item] = global->wordlist.head;
 			global->wordlistBuf.itemTail[item] = global->wordlist.tail;
-		}
+		//}
 
     }
+    /*
+	// Get word list.
+	global->wordlistBuf.itemUsed = 0;
 	
+	for (item = 0; item < maxworditem; item++)
+	{
+		if (item == 0)
+		{
+			err = ZDicLookupCurrent(&explainPtr, &explainLen, &global->wordlist);
+		}
+		else
+		{
+			err = ZDicLookupForward(&explainPtr, &explainLen, &global->wordlist);
+		}
+		if (err)
+		{
+			return item > 0 ? errNone : ~errNone;
+		}
+
+		p = explainPtr;
+
+		// get key word.
+		i = 0;
+		while (p[i] != chrHorizontalTabulation && p[i] != chrNull && i < MAX_WORD_LEN)
+		{
+			global->wordlistBuf.itemBuf[item][i] = p[i];
+			i++;
+		}
+		global->wordlistBuf.itemBuf[item][i] = chrNull;
+		global->wordlistBuf.itemUsed++;
+		global->wordlistBuf.itemPtr[item] = &global->wordlistBuf.itemBuf[item][0];
+		global->wordlistBuf.itemBlkIndex[item] = global->wordlist.blkIndex;
+		global->wordlistBuf.itemHead[item] = global->wordlist.head;
+		global->wordlistBuf.itemTail[item] = global->wordlist.tail;
+	}
+	*/
 	return errNone;
 }
 
@@ -658,7 +667,7 @@ Err ZDicLookupWordListSelect(UInt16 select, UInt8 **explainPtr, UInt32 *explainL
 	
 	global = AppGetGlobal();
 
-	if(global->prefs.font == global->font.smallTinyFontID ||global->prefs.font == global->font.largeTinyFontID)
+	/*if(global->prefs.font == global->font.smallTinyFontID ||global->prefs.font == global->font.largeTinyFontID)
     {
 		if (select >= global->wordlisttinyBuf.itemUsed)
 			return ~errNone;
@@ -670,15 +679,9 @@ Err ZDicLookupWordListSelect(UInt16 select, UInt8 **explainPtr, UInt32 *explainL
 			err = ZDicGetDictRecord (global->wordlisttinyBuf.itemBlkIndex[select], &str, &recSize);
 			if (err) return err;
 		
-			if (global->compressFlag == 0)
-			{
-				MemMove (&global->descript.decodeBuf[0], str, recSize);
-				global->descript.decodeSize = recSize;
-			}
-			else
-			{
-				LZSS_Decoder((unsigned char *)str, recSize, (unsigned char *)&global->descript.decodeBuf[0], &global->descript.decodeSize);
-			}
+
+			Decoder(global->compressFlag,(unsigned char *)str, recSize, (unsigned char *)&global->descript.decodeBuf[0], &global->descript.decodeSize);
+			
 			global->descript.decodeBuf[global->descript.decodeSize] = chrNull;
 			ZDicReleaseDictRecord(str);
 			
@@ -689,7 +692,7 @@ Err ZDicLookupWordListSelect(UInt16 select, UInt8 **explainPtr, UInt32 *explainL
 		global->descript.tail = global->wordlisttinyBuf.itemTail[select];
     }
     else if(global->prefs.font == global->font.smallFontID ||global->prefs.font == global->font.largeFontID)
-    {
+    {*/
     	if (select >= global->wordlistBuf.itemUsed)
 			return ~errNone;
 
@@ -700,15 +703,9 @@ Err ZDicLookupWordListSelect(UInt16 select, UInt8 **explainPtr, UInt32 *explainL
 			err = ZDicGetDictRecord (global->wordlistBuf.itemBlkIndex[select], &str, &recSize);
 			if (err) return err;
 		
-			if (global->compressFlag == 0)
-			{
-				MemMove (&global->descript.decodeBuf[0], str, recSize);
-				global->descript.decodeSize = recSize;
-			}
-			else
-			{
-				LZSS_Decoder((unsigned char *)str, recSize, (unsigned char *)&global->descript.decodeBuf[0], &global->descript.decodeSize);
-			}
+
+			Decoder(global->compressFlag,(unsigned char *)str, recSize, (unsigned char *)&global->descript.decodeBuf[0], &global->descript.decodeSize);
+			
 			global->descript.decodeBuf[global->descript.decodeSize] = chrNull;
 			ZDicReleaseDictRecord(str);
 			
@@ -718,7 +715,36 @@ Err ZDicLookupWordListSelect(UInt16 select, UInt8 **explainPtr, UInt32 *explainL
 		global->descript.head = global->wordlistBuf.itemHead[select];
 		global->descript.tail = global->wordlistBuf.itemTail[select];
 
-    }
+    //}
+/*
+	if (select >= global->wordlistBuf.itemUsed)
+		return ~errNone;
+
+	if (global->wordlistBuf.itemBlkIndex[select] != global->descript.blkIndex)
+	{
+
+		// get dict record and decode it to text.
+		err = ZDicGetDictRecord (global->wordlistBuf.itemBlkIndex[select], &str, &recSize);
+		if (err) return err;
+	
+		if (global->compressFlag == 0)
+		{
+			MemMove (&global->descript.decodeBuf[0], str, recSize);
+			global->descript.decodeSize = recSize;
+		}
+		else
+		{
+			LZSS_Decoder((unsigned char *)str, recSize, (unsigned char *)&global->descript.decodeBuf[0], &global->descript.decodeSize);
+		}
+		global->descript.decodeBuf[global->descript.decodeSize] = chrNull;
+		ZDicReleaseDictRecord(str);
+		
+		global->descript.blkIndex = global->wordlistBuf.itemBlkIndex[select];		
+	}
+	
+	global->descript.head = global->wordlistBuf.itemHead[select];
+	global->descript.tail = global->wordlistBuf.itemTail[select];
+*/
 	*explainPtr = &global->descript.decodeBuf[global->descript.head];
 	*explainLen = global->descript.tail - global->descript.head;
 
@@ -1598,7 +1624,7 @@ Err ZDicDBInitIndexRecord(void)
 	return err;
 }
 
-void PrvZDicDBGetAllPopup(ZDicDBDictPopupInfoType *dbListP)
+void PrvZDicDBGetAllPopup(ZDicDBDictShortcutInfoType *dbListP)
 {
 	AppGlobalType				*global;
 	ZDicDBDictInfoType			*dictInfo;
@@ -1625,7 +1651,7 @@ void ZDicDBInitPopupList()
 {
 	AppGlobalType				*global;
 	ZDicDBDictInfoType 			*dictInfo;
-	ZDicDBDictPopupInfoType		*dblist, *popupInfo;
+	ZDicDBDictShortcutInfoType		*dblist, *popupInfo;
 	UInt16						i,j;
 	Int16						counter;
 	

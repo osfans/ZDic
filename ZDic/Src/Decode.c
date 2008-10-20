@@ -14,8 +14,9 @@
 #include <PalmOSGlue.h>
 
 #include "Decode.h"
+#include "SysZlib.h"
 
-#define CACHE_SIZE		4096
+#define CACHE_SIZE		0x4000
 
 // 定义共用常数
 #define LOOK_SIZE		(497)					// 搜寻视窗大小
@@ -48,7 +49,8 @@ typedef struct {
 } OutputType;
 
 typedef OutputType *OutputPtr;
-
+int LZSS_Decoder(const unsigned char *src, long src_length,
+	unsigned char *dst, long *dst_length);
 
 // get bits number for load var.
 static int use_bits(long var)
@@ -199,4 +201,20 @@ DECODE_END:
 	*dst_length = write_index;
 
 	return 0;
+}
+// None/LZSS/ZLib 
+void Decoder(int compressFlag, const unsigned char *src, long src_length,
+	unsigned char *dst, long *dst_length)
+{
+	if(compressFlag == 0){
+		MemMove(dst,src,src_length);
+		*dst_length = src_length;
+	}
+	else if (compressFlag == 1)LZSS_Decoder(src, src_length, dst, dst_length);
+	else{//compressFlag == 2
+		ZLSetup;
+		*dst_length=(uLongf)(CACHE_SIZE);		
+		ZLibuncompress(ZLibRef, (Bytef *)dst, (uLongf *)dst_length, (const Bytef *) src,(uLong) src_length);
+		ZLTeardown;
+	}
 }

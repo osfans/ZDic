@@ -149,6 +149,11 @@ static void ZDicDIAResizeForm ( FormType *frmP, RectangleType* fromBoundsP,
         case MainGotoButton:
         case MainHistoryPopupList:
         case MainHistoryTrigger:
+        case MainBackHistoryRepeatButton:
+        case MainCapChange:
+        case MainExportToMemo:
+        case MainSettingButton:
+        case MainBtnHeadButton:
             // Change x, y position.
             FrmGetObjectPosition ( frmP, i, &x, &y );
             FrmSetObjectPosition ( frmP, i, x + widthDelta, y +
@@ -159,16 +164,13 @@ static void ZDicDIAResizeForm ( FormType *frmP, RectangleType* fromBoundsP,
         //case MainJumpPushButton:
         //case MainSelectPushButton:
         case MainPlayVoice:
-        case MainExportToMemo:
-        case MainBackHistoryRepeatButton:
-        case MainSelectPushButton:
-        case MainJumpPushButton:
             // Change x position
             FrmGetObjectPosition ( frmP, i, &x, &y );
             FrmSetObjectPosition ( frmP, i, x + widthDelta, y );
             break;
             
         case MainWordButton:
+        case MainToolbarBtBg:
             // Change y position.
             FrmGetObjectBounds ( frmP, i, &objBounds );
             objBounds.topLeft.y += heightDelta;
@@ -183,7 +185,7 @@ static void ZDicDIAResizeForm ( FormType *frmP, RectangleType* fromBoundsP,
             FrmSetObjectBounds ( frmP, i, &objBounds );
             fldP = (FieldType*) FrmGetObjectPtr ( frmP, i );
             FldRecalculateField ( fldP, false );
-            break;            
+            break;
         }
     }
     
