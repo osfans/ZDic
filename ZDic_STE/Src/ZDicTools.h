@@ -20,4 +20,7 @@ extern Err ZDicToolsOpenSMTLib(UInt16 *refNumP);
 extern Err ZDicToolsCloseSMTLib(UInt16 refNum);
 extern void * GetObjectPtr(UInt16 objectID);
 extern void ZDicToolsWinGetBounds(WinHandle winH, RectangleType* rP);
+extern Err ZDicLib_CloseLibrary(UInt16 refNum, UInt32 clientContext);
+extern Err ZDicLib_OpenLibrary(UInt16 *refNumP, UInt32 * clientContextP);
+
 #endif // _ZDIC_TOOLS_H

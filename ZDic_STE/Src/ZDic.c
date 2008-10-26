@@ -4872,7 +4872,14 @@ static Boolean DAFormDoCommand( UInt16 command )
     AppGlobalType *	global;
 
     global = AppGetGlobal();
-
+	
+	if ( command == 10002 && STEHasTextSelection( global->smtLibRefNum, global->smtEngineRefNum ) ) //优先复制词典正文选中部分
+    {
+    	STECopySelectionToClipboard( global->smtLibRefNum, global->smtEngineRefNum );
+    	handled = true;
+    	return handled;
+    }
+    
     if ( //command == DictionarysDictAll || 
          command >= ZDIC_DICT_MENUID )
     {

@@ -12,6 +12,7 @@
 
 /* Our library public definitions (library API) */
 #define BUILDING_ZDICLIB
+#include "ZDicLib_Rsc.h"
 #include "ZDicLib.h"
 #include "ZDicLibPrivate.h"
 #include "Decode.h"
@@ -2143,11 +2144,12 @@ static Err PrvZDicDBInitIndexRecord(DmOpenRef dbP, const Char *dbName)
 	UInt32		strOffset, writeOffset;
 	Char		markStr[] = INDEX_RECORD_MARKER;	// index record marker
 	ZDicIndexRecHeadType	idxHead;
-	//FormPtr		frmP, curFormP;
-	//ControlType	*controlP;
+	FormPtr		frmP, curFormP;
+	ControlType	*controlP;
 	Char		*messageP;
 	UInt32		cacheIdx;
 	AppGlobalType	*global;
+	DmOpenRef   zdicLibRef;
 	
 	global = PrvAppGetGlobal();
 	cacheP = global->data.readBuf;
@@ -2204,10 +2206,12 @@ static Err PrvZDicDBInitIndexRecord(DmOpenRef dbP, const Char *dbName)
 	PrvZDicDBWriteCache (idxP, &writeOffset, &idxHead, sizeof(idxHead), cacheP, &cacheIdx);
 
 	// Display process form.
-	//curFormP = FrmGetActiveForm ();
-	//frmP = FrmInitForm (ProcessForm);
-	//FrmSetActiveForm (frmP);
-	//controlP = FrmGetObjectPtr (frmP, FrmGetObjectIndex (frmP, ProcessFormProcessButton));
+	// We need open the ZDic Library database at first
+	zdicLibRef = DmOpenDatabaseByTypeCreator(ZDicLibTypeID, ZDicLibCreatorID, dmModeReadOnly);	
+	curFormP = FrmGetActiveForm ();
+	frmP = FrmInitForm (ProcessForm);
+	FrmSetActiveForm (frmP);
+	controlP = FrmGetObjectPtr (frmP, FrmGetObjectIndex (frmP, ProcessFormProcessButton));
 
 	// build index list.
 	step = 101;
@@ -2216,8 +2220,6 @@ static Err PrvZDicDBInitIndexRecord(DmOpenRef dbP, const Char *dbName)
 		if (step != (idx * 100) / (strNumber))
 		{
 			step = (idx * 100) / (strNumber);
-			
-			/*
 			StrPrintF (messageP, "%s : %d %%", dbName, step);
 			if (idx == 1)
 			{
@@ -2228,7 +2230,6 @@ static Err PrvZDicDBInitIndexRecord(DmOpenRef dbP, const Char *dbName)
 			{
 				CtlDrawControl (controlP);
 			}
-			*/
 		}
 		
 		// skip head string.
@@ -2245,10 +2246,11 @@ static Err PrvZDicDBInitIndexRecord(DmOpenRef dbP, const Char *dbName)
 	PrvZDicDBWriteCache (idxP, &writeOffset, NULL, 0, cacheP, &cacheIdx);
 	
 	// Erease sort dialog
-	//FrmEraseForm (frmP);
-	//FrmDeleteForm (frmP);
-	//FrmSetActiveForm (curFormP);
-	
+	FrmEraseForm (frmP);
+	FrmDeleteForm (frmP);
+	FrmSetActiveForm (curFormP);
+	DmCloseDatabase(zdicLibRef);
+			
 	MemHandleUnlock (idxH);
 	MemHandleUnlock (recH);
 	DmReleaseRecord (dbP, recIdx, true);
@@ -2456,7 +2458,7 @@ static Err PrvZDicVFSInitIndexFile(UInt16 volRefNum, const Char *fileName)
 	Char			*pathName;
 	FileRef			fileRef, idxRef;
 	AppGlobalType	*global;
-	
+	DmOpenRef       zdicLibRef;
 	
 	////////////////////////////////////////////////////////////////////
 	//
@@ -2510,8 +2512,8 @@ static Err PrvZDicVFSInitIndexFile(UInt16 volRefNum, const Char *fileName)
 		UInt32		readCacheIdx = ZDIC_READ_BUFFER_SIZE;
 		UInt32		*writeCacheP;
 		UInt32		writeCacheIdx = 0;
-		//FormPtr		frmP, curFormP;
-		//ControlType	*controlP;
+		FormPtr		frmP, curFormP;
+		ControlType	*controlP;
 		Char		*messageP;
 		
 		readCacheP = global->data.readBuf;
@@ -2547,13 +2549,12 @@ static Err PrvZDicVFSInitIndexFile(UInt16 volRefNum, const Char *fileName)
 		VFSFileWrite (idxRef, sizeof(idxHead), &idxHead, NULL);
 
 		// Display process form.
-		
-		// Share library seems cannot load its form resource from current running application???
-		
-		//curFormP = FrmGetActiveForm ();
-		//frmP = FrmInitForm (ProcessForm);
-		//FrmSetActiveForm (frmP);
-		//controlP = FrmGetObjectPtr (frmP, FrmGetObjectIndex (frmP, ProcessFormProcessButton));
+		// We need open the ZDic Library database at first
+		zdicLibRef = DmOpenDatabaseByTypeCreator(ZDicLibTypeID, ZDicLibCreatorID, dmModeReadOnly);	
+		curFormP = FrmGetActiveForm ();
+		frmP = FrmInitForm (ProcessForm);
+		FrmSetActiveForm (frmP);
+		controlP = FrmGetObjectPtr (frmP, FrmGetObjectIndex (frmP, ProcessFormProcessButton));
 
 		// Now build index list.
 		step = 101;
@@ -2591,9 +2592,10 @@ static Err PrvZDicVFSInitIndexFile(UInt16 volRefNum, const Char *fileName)
 		PrvZDicVFSWriteCache (idxRef, NULL, writeCacheP, &writeCacheIdx);
 		
 		// Erease process form.
-		//FrmEraseForm (frmP);
-		//FrmDeleteForm (frmP);
-		//FrmSetActiveForm (curFormP);
+		FrmEraseForm (frmP);
+		FrmDeleteForm (frmP);
+		FrmSetActiveForm (curFormP);
+		DmCloseDatabase(zdicLibRef);
 			
 	}while (0);
 
