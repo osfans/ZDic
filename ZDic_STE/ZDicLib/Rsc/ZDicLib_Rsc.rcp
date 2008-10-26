@@ -1,0 +1,10 @@
+GENERATEHEADER "ZDicLib_Rsc.h"
+RESETAUTOID 1000
+
+FORM ID ProcessForm AT ( 2 75 156 83 )
+MODAL
+BEGIN
+    TITLE "Generating Index"
+	BUTTON "XXXX: 36/100" ID ProcessFormProcessButton  AT (6 37 144 15) NOFRAME
+END
+
