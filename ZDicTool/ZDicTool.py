@@ -8,6 +8,7 @@ PDBHeaderStructLength=calcsize(PDBHeaderStructString)
 padding='\0\0'
 
 enc = sys.getfilesystemencoding()
+enc = 'gbk' if enc == 'UTF-8' else enc
   
 class ZDic:
     def __init__(self,compressFlag=2,recordSize=0x4000):
@@ -77,10 +78,10 @@ class ZDic:
 
     def fromPath(self, path):
         files = []        
-        if os.path.isfile(path):
-            files = [path]            
-        elif os.path.isdir(path):
-            files = glob.glob(os.path.join(path, '*.*'))            
+        if os.path.isdir(path):
+            files = glob.glob(os.path.join(path, '*.*'))
+        else:
+            files = [path] 
         self.lines = {}
         for path in files:
             ext=os.path.splitext(path)[1].lower()
@@ -113,8 +114,7 @@ class ZDic:
             else: #TXT dic
                 f=open(path,'rU')
                 for i in f:
-                    i = i.rstrip()
-                    i.replace(' /// ', '\t', 1)
+                    i = i.rstrip().replace(' /// ', '\t', 1)
                     if '\t' in i:
                         word, mean = i.split('\t', 1)
                         self.lines[word] = self.ste(mean)               
@@ -145,10 +145,11 @@ class ZDic:
                             tmpline=line
                             line=''
                         else:
-                            if '//STE' in line[blen-40:blen+40]:
-                                steindex=line[blen-40:blen+40].index('//STE')
-                                if steindex<=40:
-                                    blen=blen-40+steindex
+                            if '//STE' in line[blen-40:blen+4]: #split form //STE
+                                steindex=line[blen-40:blen+4].index('//STE')
+                                blen=blen-40+steindex
+                            elif '\\n' == line[blen-1:blen+1]: # split from \n
+                                blen=blen-1
                             tmpline=line[:blen]
                             line=line[blen:]
                             try:
@@ -238,7 +239,8 @@ class ZDic:
 
 def log(msg):
     print '[%s]%s'%(time.strftime('%X'), msg)
-    
+
+#sys.argv = [sys.argv[0], '-t', 'yue.pdb', 'yue.txt']    
 if __name__ == '__main__':    
     opts, argv = getopt.getopt(sys.argv[1:], 'bt')
     if len(argv) == 2:
