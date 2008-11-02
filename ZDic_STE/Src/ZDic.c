@@ -104,8 +104,8 @@ static void AppendStr(Char *data)//append data rendered with STE
 	StrCat(head,stePurpleFont);
 	StrCat(head,steBoldFont);
 	while(data[j]!='\n')j++;
-	data[j]=0;
-	StrCat(head,data);
+	StrNCopy(&head[32], data, j);
+	head[j + 32] = chrNull;
 
 	STEAppendTextToEngine(global->smtLibRefNum, global->smtEngineRefNum, head, false);
 	i=j+1;
@@ -114,8 +114,10 @@ static void AppendStr(Char *data)//append data rendered with STE
 			Char ipa[2000]="";
 			ipaS++;
 			i++;
-			while(data[i]!=*ipaS && i<100)i++;
-			if (i<100){
+			while(data[i]!=*ipaS && i < MAX_IPA_LEN)i++;
+			if (i < MAX_IPA_LEN){
+				StrNCopy(global->phonetic, data, i+1);
+				global->phonetic[i+1] = chrNull;
 				for(k=j+1;k<=i;k++){
 					if(data[k]!=0){
 						Char id[5]="";
@@ -131,10 +133,12 @@ static void AppendStr(Char *data)//append data rendered with STE
 				}
 				STEAppendTextToEngine(global->smtLibRefNum, global->smtEngineRefNum, ipa, false); //render ipa
 				j=(data[i+1]=='\n')?i+1:i;
-			}
+			}else global->phonetic[0] = chrNull;
 			break;
-		}else ipaS+=2;
-		
+		}else{
+			 ipaS+=2;
+			 global->phonetic[0] = chrNull;
+		}		
 	}
 	STEAppendTextToEngine(global->smtLibRefNum, global->smtEngineRefNum, data+j+1, false);//render body text
 }
@@ -4965,6 +4969,7 @@ static Boolean DAFormDoCommand( UInt16 command )
             	STESetCurrentTextSelection(global->smtLibRefNum, global->smtEngineRefNum, 1, 0, kSelectUntilEnd);
             	buf = STEGetSelectedText(global->smtLibRefNum, global->smtEngineRefNum);
             	STEClearCurrentSelection(global->smtLibRefNum, global->smtEngineRefNum);
+            	if (global->phonetic[0])StrNCopy( &buf[0], global->phonetic, StrLen(global->phonetic));
             }
             command==OptionsExportMemo ? ExportToMemo(buf) : ExportToSugarMemo(buf);
             MemPtrFree(buf);
@@ -6901,6 +6906,7 @@ static Boolean MainFormDoCommand( UInt16 command )
             	STESetCurrentTextSelection(global->smtLibRefNum, global->smtEngineRefNum, 1, 0, kSelectUntilEnd);
             	buf = STEGetSelectedText(global->smtLibRefNum, global->smtEngineRefNum);
             	STEClearCurrentSelection(global->smtLibRefNum, global->smtEngineRefNum);
+            	if (global->phonetic[0]) StrNCopy( &buf[0], global->phonetic, StrLen(global->phonetic));
             }
             command==OptionsExportMemo? ExportToMemo(buf):ExportToSugarMemo(buf);
             MemPtrFree(buf);

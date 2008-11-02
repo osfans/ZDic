@@ -13,6 +13,7 @@
 #define MAX_DICTNAME_LEN	dmDBNameLength				//  dmDBNameLength for pdb name, 256 for vfs filename and terminal by chrNull.
 #define MAX_DESCFIELD_SIZE	(1024 * 8)
 #define MAX_SHORTCUTNOTE_LEN	8
+#define MAX_IPA_LEN	100
 
 #define ZDIC_DICT_IDX_EXT	".idx"
 #define ZDIC_DICT_PATH		"/PALM/PROGRAMS/MSFILES/"	// path of dictionary in card.
@@ -292,6 +293,7 @@ typedef struct AppGlobalObj{
 	}data;
 	
 	Char		optflag;						//option key flag, 0: not pressed, 1: pressed once 2: always on
+	Char 		phonetic[MAX_IPA_LEN + MAX_WORD_LEN + 1];					//ipa phonetic
 	
 } AppGlobalType;
 
