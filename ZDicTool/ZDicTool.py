@@ -24,20 +24,19 @@ class ZDic:
     def trim(self,s):
         s = s.decode('utf-8').encode(enc,'replace').replace("&amp;", "&").replace("&lt;", "<").replace("&gt;", ">")\
                 .replace("&apos;", "'").replace("&quot;", '"').replace("&nbsp;", " ")
-        s=re.compile('(</?(p|font|br|tr|td|table|div|span|ref|small).*?>)|(\[\[[a-z]{2,3}(-.*?)?:.*?\]\])|(<!--.*?-->)',\
+        s = re.compile('(</?(p|font|br|tr|td|table|div|span|ref|small).*?>)|(\[\[[a-z]{2,3}(-[a-z]*?)?:[^\]]*?\]\])|(<!--.*?-->)',\
                         re.I|re.DOTALL).sub('',s)
         return s
 
     def ste(self,s):       
-        s=s.replace('<hr>','//STEHORIZONTALLINE//\n')\
+        s = s.replace('<hr>','//STEHORIZONTALLINE//\n')\
                 .replace('<center>','//STECENTERALIGN//').replace('</center>','\n')\
                 .replace('<u>',"//STEHYPERLINK=").replace('</u>',"\1//")\
                 .replace('<i>',"//STEBOLDFONT//").replace('</i>',"//STESTDFONT//")\
                 .replace('<b>',"//STEBOLDFONT//").replace('</b>',"//STESTDFONT//")\
                 .replace('<big>',"//STEBOLDFONT//").replace('</big>',"//STESTDFONT//")       
-        s=re.sub('\[\[([^\[/]*?)\]\]',"//STEHYPERLINK=\g<1>\1//", s)        
-        s=re.sub('\n{3,}','\n\n',s)
-        s=s.replace('\n',r'\n')
+        s = re.sub('\[\[([^\[/]*?)\]\]',"//STEHYPERLINK=\g<1>\1//", s)        
+        s = re.sub('\n{3,}','\n\n',s).replace('\n',r'\n')
         return s
 
     def unste(self,s):    
@@ -221,26 +220,34 @@ class ZDic:
     def p2t(self, path, patho):
         "pdb=>byteList"
         f = open(path, 'rb')
-        t = open(patho, 'wb')
+        
         f.seek(PDBHeaderStructLength - 4)
-        self.bnum = unpack('>l',f.read(4))[0]
-        f.seek(8, 1)
+        self.bnum= unpack('>l',f.read(4))[0]
+        firstOffset = unpack('>L', f.read(4))[0]
+        f.seek(4, 1)
         startOffset = unpack('>L', f.read(4))[0]
-        for i in range(1, self.bnum - 1):
-            f.seek(PDBHeaderStructLength + (i + 1) * 8)
-            endOffset = unpack('>L',f.read(4))[0]
+        f.seek(firstOffset + 7)
+        self.compressFlag = ord(f.read(1))
+        if self.compressFlag == 1:
+            f.close()
+            os.system('DeKDic.exe %s' % path)
+            os.system('ren %s.tab %s' %(path, patho))
+        else:
+            t = open(patho, 'wb')
+            for i in range(1, self.bnum - 1):
+                f.seek(PDBHeaderStructLength + (i + 1) * 8)
+                endOffset = unpack('>L',f.read(4))[0]
+                f.seek(startOffset)
+                t.write(self.unste(f.read(endOffset - startOffset).decode('zlib')))
+                startOffset = endOffset
             f.seek(startOffset)
-            t.write(self.unste(f.read(endOffset - startOffset).decode('zlib')))
-            startOffset = endOffset
-        f.seek(startOffset)
-        t.write(self.unste(f.read().decode('zlib')))
-        t.close()
-        f.close()
+            t.write(self.unste(f.read().decode('zlib')))
+            t.close()
+            f.close()
 
 def log(msg):
     print '[%s]%s'%(time.strftime('%X'), msg)
-
-#sys.argv = [sys.argv[0], '-t', 'yue.pdb', 'yue.txt']    
+    
 if __name__ == '__main__':    
     opts, argv = getopt.getopt(sys.argv[1:], 'bt')
     if len(argv) == 2:
