@@ -97,6 +97,7 @@ typedef struct ZDicPreferenceType
 	UInt8	dictMenu;										// Dict Menu use which list
 	UInt8	menuType;										// Dict Menu use which type
 	UInt8	daSize;											// DA window Size
+	UInt8	fontColor;
 	PointType	daFormLocation;								// location of DA form.
 	UInt16	incSearchDelay;									// incremental search delay.
 	

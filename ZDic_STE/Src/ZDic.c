@@ -95,17 +95,21 @@ static void DAHyperlinkCallback(UInt32 refNum)//da window hyperlink callback
 static void AppendStr(Char *data)//append data rendered with STE
 {
 	AppGlobalPtr global;
-	Char head[100]="";
+	Char head[100]="", *body;
 	UInt32 i=0,j=0,k=0;
+	UInt16 fmtLen, dataLen;
+		
 	Char *ipaS="//[]";//ipa script between/ / or []
+	Char steColorFont[8][18]={steBlackFont, steBlueFont, steRedFont, steGreenFont,\
+						   steYellowFont, stePurpleFont, steOrangeFont, steGrayFont};
 	
 	global = AppGetGlobal();
-	
-	StrCat(head,stePurpleFont);
-	StrCat(head,steBoldFont);
+	StrCat(head,steColorFont[global->prefs.fontColor >> 4 & 0x7]);
+	if(global->prefs.fontColor >> 7 )StrCat(head, steBoldFont);
 	while(data[j]!='\n')j++;
-	StrNCopy(&head[32], data, j);
-	head[j + 32] = chrNull;
+	fmtLen=StrLen(head);
+	StrNCopy(&head[fmtLen], data, j);
+	head[j + fmtLen] = chrNull;
 
 	STEAppendTextToEngine(global->smtLibRefNum, global->smtEngineRefNum, head, false);
 	i=j+1;
@@ -139,8 +143,25 @@ static void AppendStr(Char *data)//append data rendered with STE
 			 ipaS+=2;
 			 global->phonetic[0] = chrNull;
 		}		
+	}	
+	
+	dataLen = StrLen(data+j+1);
+	body = ( Char * ) MemPtrNew( dataLen + 50);
+	if ( body == NULL )//render body text
+		STEAppendTextToEngine(global->smtLibRefNum, global->smtEngineRefNum, data+j+1, false);
+	else{
+		fmtLen = StrLen(steColorFont[global->prefs.fontColor & 0x7]);
+		StrNCopy(body, steColorFont[global->prefs.fontColor & 0x7], fmtLen);
+		if(global->prefs.fontColor & 0x8){
+			UInt16 boldLen = StrLen(steBoldFont);
+			StrNCopy(body + fmtLen, steBoldFont, boldLen);
+			fmtLen += boldLen;
+		}
+		StrNCopy(body + fmtLen, data+j+1, dataLen);
+		body[dataLen + fmtLen] = chrNull;
+		STEAppendTextToEngine(global->smtLibRefNum, global->smtEngineRefNum, body, false);
+		MemPtrFree(body);
 	}
-	STEAppendTextToEngine(global->smtLibRefNum, global->smtEngineRefNum, data+j+1, false);//render body text
 }
 
 static void RenderStr(Char *data)//render data with STE from the beginning
@@ -3616,8 +3637,8 @@ static void PrefFormInit( FormType *frmP )
 {
     AppGlobalType	* global;
     ZDicDBDictInfoType	*dictInfo;
-    ListType	*lstP,*lstP2,*lstP3;
-    ControlType	*triP2,*triP3;
+    ListType	*lstP,*lstP2,*lstP3,*lstP4;
+    ControlType	*triP2,*triP3,*triP4,*triP5;
     FieldType *fldP;
     Int16	itemNum;
     Err     err;
@@ -3630,6 +3651,10 @@ static void PrefFormInit( FormType *frmP )
     
     triP2 = GetObjectPtr(triggerDictMenu);
     lstP2 = GetObjectPtr(lstDictMenu);
+    
+    lstP4 = GetObjectPtr(lstFontColor);    
+    triP4 = GetObjectPtr(triggerHeadColor);
+    triP5 = GetObjectPtr(triggerBodyColor);
     
     lstP = GetObjectPtr( PrefsDictList );
     
@@ -3702,7 +3727,11 @@ static void PrefFormInit( FormType *frmP )
     
     LstSetSelection(lstP2,global->prefs.dictMenu);
 	CtlSetLabel(triP2,LstGetSelectionText(lstP2,global->prefs.dictMenu));
-
+	
+	CtlSetLabel(triP4,LstGetSelectionText(lstP4, (global->prefs.fontColor >> 4) & 0x7));
+	CtlSetLabel(triP5,LstGetSelectionText(lstP4, global->prefs.fontColor & 0x7));
+	CtlSetValue ( GetObjectPtr ( chkHeadBold ), global->prefs.fontColor >> 7 );		
+	CtlSetValue ( GetObjectPtr ( chkBodyBold ), global->prefs.fontColor & 0x8 );
     return ;
 }
 
@@ -3954,8 +3983,8 @@ static void PrefMoveDictionary( WinDirectionType direction )
 static Boolean PrefFormHandleEvent( FormType *frmP, EventType *eventP, Boolean *exit )
 {
     Boolean	handled = false;
-    ListType	*lstP,*lstP2;
-    ControlType	*triP,*triP2;
+    ListType	*lstP,*lstP2,*lstP3;
+    ControlType	*triP,*triP2,*triP3,*triP4;
     FieldType *fldP;
     AppGlobalType	*global;
     ZDicDBDictInfoType	*dictInfo;
@@ -3972,6 +4001,11 @@ static Boolean PrefFormHandleEvent( FormType *frmP, EventType *eventP, Boolean *
 	
 	triP2 = GetObjectPtr(triggerPhonetic);
 	lstP2 = GetObjectPtr( PrefsPhoneticList );
+	
+	triP3 =  GetObjectPtr(triggerHeadColor);
+	triP4 =  GetObjectPtr(triggerBodyColor);
+	
+	lstP3 = GetObjectPtr(lstFontColor);
 	
     switch ( eventP->eType )
 	{
@@ -3992,6 +4026,7 @@ static Boolean PrefFormHandleEvent( FormType *frmP, EventType *eventP, Boolean *
 	                *exit = true;
 	                handled = true;
 	                break;
+	                
 	            case PrefsUpButton:
 	                PrefMoveDictionary ( winUp );
 	                handled = true;
@@ -4000,14 +4035,17 @@ static Boolean PrefFormHandleEvent( FormType *frmP, EventType *eventP, Boolean *
 	                PrefMoveDictionary ( winDown );
 	                handled = true;
 	                break;
+	                
 	            case btnShortcut:
 	            	SetShortcutEventHandler();
 	            	handled = true;
 	            	break;
+	            	
 	            case btnPopup:
 	            	SetPopupEventHandler();
 	            	handled = true;
 	            	break;
+	            	
 	            case triggerDictMenu:
 					LstPopupList(lstP);
 					CtlSetLabel(triP,LstGetSelectionText(lstP,LstGetSelection(lstP)));
@@ -4022,12 +4060,39 @@ static Boolean PrefFormHandleEvent( FormType *frmP, EventType *eventP, Boolean *
 				    }
 					handled = true;
 					break;
+
 				case triggerPhonetic:
 					LstPopupList(lstP2);
 					CtlSetLabel(triP2,LstGetSelectionText(lstP2,LstGetSelection(lstP2)));
 					dictInfo->phonetic[ dictInfo->curMainDictIndex ] = LstGetSelection(lstP2);
 					handled = true;
 					break;
+				
+				case triggerHeadColor:
+					LstSetSelection(lstP3,global->prefs.fontColor >> 4);
+					LstPopupList(lstP3);					
+					CtlSetLabel(triP3,LstGetSelectionText(lstP3,LstGetSelection(lstP3)));
+					global->prefs.fontColor = LstGetSelection(lstP3) << 4 | (global->prefs.fontColor & 0x8f);
+					handled = true;
+					break;
+									
+				case triggerBodyColor:
+					LstSetSelection(lstP3,global->prefs.fontColor & 0x0f);
+					LstPopupList(lstP3);					
+					CtlSetLabel(triP4,LstGetSelectionText(lstP3,LstGetSelection(lstP3)));
+					global->prefs.fontColor = LstGetSelection(lstP3) | (global->prefs.fontColor & 0xf8);
+					handled = true;
+					break;
+					
+				case chkHeadBold:
+					global->prefs.fontColor = global->prefs.fontColor & 0x7f | ( CtlGetValue ( GetObjectPtr ( chkHeadBold ) ) != 0 ? 0x80 : 0 );
+					handled = true;
+					break;
+					
+				case chkBodyBold:
+					global->prefs.fontColor = global->prefs.fontColor & 0xf7 | ( CtlGetValue ( GetObjectPtr ( chkBodyBold ) ) != 0 ? 0x08 : 0 );
+					handled = true;
+					break;					
 				
 				case btnSetMenuShortcut:
 					chrP = FldGetTextPtr(fldP);

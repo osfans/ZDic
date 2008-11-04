@@ -184,7 +184,6 @@ BEGIN
  "Phonetic" = "音标"  
  "ZDic DA Font:" = "ZDic DA 字体"   
  
- 
  "Shortcut List" = "快捷列表"  
  "Popup List" = "弹出列表"  
  "Dict Menu" = "词典目录"  
@@ -479,17 +478,23 @@ POPUPLIST ID triggerPhonetic  PrefsPhoneticList
 	LABEL "Menu+" AUTOID AT (85 37) FONT 1
 	GRAFFITISTATEINDICATOR AT (147 116)
 	
-	LABEL "ZDic DA Font:" ID PrefsFontDALabel   AT (85 90) FONT 1
-	PUSHBUTTON  "A" ID PrefsFontSmallDAPushButton      AT (113 102 12 12) GROUP 2 FONT 0
-	PUSHBUTTON  "A" ID PrefsFontLargeDAPushButton    AT (126 102 12 12) FONT 2 GROUP 2
+	PUSHBUTTON  "A" ID PrefsFontSmallDAPushButton      AT (90 77 12 12) FONT 0 GROUP 2
+	PUSHBUTTON  "A" ID PrefsFontLargeDAPushButton    AT (103 77 12 12) FONT 2 GROUP 2
 	//PUSHBUTTON  "A" ID PrefsFontSmallTinyDAPushButton      AT (87 102 12 12) GROUP 2 FONT 0
 	//PUSHBUTTON  "A" ID PrefsFontLargeTinyDAPushButton    AT (100 102 12 12) FONT 2 GROUP 2
 	LABEL "ZDic Font:" ID PrefsFontLabel  AT (85 65) FONT 1
-	PUSHBUTTON  "A" ID PrefsFontSmallPushButton    AT (113 77 12 12) GROUP 1 FONT 0
-	PUSHBUTTON  "A" ID PrefsFontLargePushButton  AT (126 77 12 12) FONT 2 GROUP 1
+	PUSHBUTTON  "A" ID PrefsFontSmallPushButton    AT (119 77 12 12) FONT 0 GROUP 1
+	PUSHBUTTON  "A" ID PrefsFontLargePushButton  AT (132 77 12 12) FONT 2 GROUP 1
 	//PUSHBUTTON  "A" ID PrefsFontSmallTinyPushButton     AT (87 77 12 12) GROUP 1 FONT 0
 	//PUSHBUTTON  "A" ID PrefsFontLargeTinyPushButton   AT (100 77 12 12) FONT 2 GROUP 1
 	
+	POPUPTRIGGER "Black" ID triggerHeadColor  AT (84 91 41 AUTO) 
+	POPUPLIST ID triggerHeadColor   lstFontColor
+	LIST  "Black" "Blue" "Red" "Green" "Yellow" "Purple" "Orange" "Gray"   ID lstFontColor  AT (PREVLEFT 59 PREVWIDTH 90) VISIBLEITEMS 8 NONUSABLE
+	POPUPTRIGGER "Black" ID triggerBodyColor   AT (84 104 41 AUTO)
+	POPUPLIST ID triggerBodyColor  lstFontColor
+	CHECKBOX "B" ID chkHeadBold   AT (132 91 AUTO AUTO) CHECKED
+	CHECKBOX "B" ID chkBodyBold   AT (132 104 AUTO AUTO) 
 END
 
 FORM ID DetailsForm AT ( 2 2 156 156 )
@@ -510,7 +515,7 @@ BEGIN
 LIST  "Numerical" "Alphabetic" "User Defined" ID lstMenuType  AT (PREVLEFT PREVBOTTOM+1 PREVWIDTH 35) VISIBLEITEMS 3 NONUSABLE 
 POPUPLIST ID triggerMenuType  lstMenuType
 	LABEL "Menu Type:" AUTOID AT (4 125)
-	POPUPTRIGGER "DA size" ID triggerDAsize  AT (37 113 50 AUTO)
+	POPUPTRIGGER "DA size" ID triggerDAsize  AT (55 113 50 AUTO)
 LIST  "Small DA" "Large DA" "Fullscreen" ID lstDAsize   AT (PREVLEFT PREVBOTTOM+1 PREVWIDTH 35) VISIBLEITEMS 3 NONUSABLE 
 POPUPLIST ID triggerDAsize  listDAsize
 	LABEL "DA Size:" AUTOID AT (4 113)
