@@ -2212,7 +2212,7 @@ static Err PrvZDicDBInitIndexRecord(DmOpenRef dbP, const Char *dbName)
 	frmP = FrmInitForm (ProcessForm);
 	FrmSetActiveForm (frmP);
 	controlP = FrmGetObjectPtr (frmP, FrmGetObjectIndex (frmP, ProcessFormProcessButton));
-
+			
 	// build index list.
 	step = 101;
 	for (idx = 1; idx <= strNumber; idx++)
@@ -2563,7 +2563,6 @@ static Err PrvZDicVFSInitIndexFile(UInt16 volRefNum, const Char *fileName)
 			if (step != (idx * 100) / (strNumber))
 			{
 				step = (idx * 100) / (strNumber);
-				/*
 				StrPrintF (messageP, "%s : %d %%", fileName, step);
 				if (idx == 1)
 				{
@@ -2574,7 +2573,6 @@ static Err PrvZDicVFSInitIndexFile(UInt16 volRefNum, const Char *fileName)
 				{
 					CtlDrawControl (controlP);
 				}
-				*/
 			}
 			
 			// skip head string.
