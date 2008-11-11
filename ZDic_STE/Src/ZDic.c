@@ -95,17 +95,17 @@ static void DAHyperlinkCallback(UInt32 refNum)//da window hyperlink callback
 static void AppendStr(Char *data)//append data rendered with STE
 {
 	AppGlobalPtr global;
-	Char head[100]="", *body;
+	Char head[100]="";
 	UInt32 i=0,j=0,k=0;
-	UInt16 fmtLen, dataLen;
+	UInt16 fmtLen;
 		
 	Char *ipaS="//[]";//ipa script between/ / or []
 	Char steColorFont[8][18]={steBlackFont, steBlueFont, steRedFont, steGreenFont,\
 						   steYellowFont, stePurpleFont, steOrangeFont, steGrayFont};
 	
 	global = AppGetGlobal();
-	StrCat(head,steColorFont[global->prefs.fontColor >> 4 & 0x7]);
-	if(global->prefs.fontColor >> 7 )StrCat(head, steBoldFont);
+	StrCat(head,steColorFont[global->prefs.headColor & 0x7]);
+	if(global->prefs.headColor >> 3 )StrCat(head, steBoldFont);
 	while(data[j]!='\n')j++;
 	fmtLen=StrLen(head);
 	StrNCopy(&head[fmtLen], data, j);
@@ -144,30 +144,15 @@ static void AppendStr(Char *data)//append data rendered with STE
 			 global->phonetic[0] = chrNull;
 		}		
 	}	
-	
-	dataLen = StrLen(data+j+1);
-	body = ( Char * ) MemPtrNew( dataLen + 50);
-	if ( body == NULL )//render body text
-		STEAppendTextToEngine(global->smtLibRefNum, global->smtEngineRefNum, data+j+1, false);
-	else{
-		fmtLen = StrLen(steColorFont[global->prefs.fontColor & 0x7]);
-		StrNCopy(body, steColorFont[global->prefs.fontColor & 0x7], fmtLen);
-		if(global->prefs.fontColor & 0x8){
-			UInt16 boldLen = StrLen(steBoldFont);
-			StrNCopy(body + fmtLen, steBoldFont, boldLen);
-			fmtLen += boldLen;
-		}
-		StrNCopy(body + fmtLen, data+j+1, dataLen);
-		body[dataLen + fmtLen] = chrNull;
-		STEAppendTextToEngine(global->smtLibRefNum, global->smtEngineRefNum, body, false);
-		MemPtrFree(body);
-	}
+	STEAppendTextToEngine(global->smtLibRefNum, global->smtEngineRefNum, data+j+1, false);
 }
 
 static void RenderStr(Char *data)//render data with STE from the beginning
 {
 	AppGlobalPtr global = AppGetGlobal();
 	STEReinitializeEngine(global->smtLibRefNum, global->smtEngineRefNum);
+	WinSetTextColor(global->prefs.bodyColor);
+	WinSetBackColor(global->prefs.backColor);
 	AppendStr(data);
 	STERenderList(global->smtLibRefNum, global->smtEngineRefNum);
 }
@@ -3638,7 +3623,7 @@ static void PrefFormInit( FormType *frmP )
     AppGlobalType	* global;
     ZDicDBDictInfoType	*dictInfo;
     ListType	*lstP,*lstP2,*lstP3,*lstP4;
-    ControlType	*triP2,*triP3,*triP4,*triP5;
+    ControlType	*triP2,*triP3,*triP4;
     FieldType *fldP;
     Int16	itemNum;
     Err     err;
@@ -3654,7 +3639,6 @@ static void PrefFormInit( FormType *frmP )
     
     lstP4 = GetObjectPtr(lstFontColor);    
     triP4 = GetObjectPtr(triggerHeadColor);
-    triP5 = GetObjectPtr(triggerBodyColor);
     
     lstP = GetObjectPtr( PrefsDictList );
     
@@ -3728,10 +3712,8 @@ static void PrefFormInit( FormType *frmP )
     LstSetSelection(lstP2,global->prefs.dictMenu);
 	CtlSetLabel(triP2,LstGetSelectionText(lstP2,global->prefs.dictMenu));
 	
-	CtlSetLabel(triP4,LstGetSelectionText(lstP4, (global->prefs.fontColor >> 4) & 0x7));
-	CtlSetLabel(triP5,LstGetSelectionText(lstP4, global->prefs.fontColor & 0x7));
-	CtlSetValue ( GetObjectPtr ( chkHeadBold ), global->prefs.fontColor >> 7 );		
-	CtlSetValue ( GetObjectPtr ( chkBodyBold ), global->prefs.fontColor & 0x8 );
+	CtlSetLabel(triP4,LstGetSelectionText(lstP4, global->prefs.headColor & 0x7));
+	CtlSetValue ( GetObjectPtr ( chkHeadBold ), global->prefs.headColor >> 3 );		
     return ;
 }
 
@@ -3984,7 +3966,7 @@ static Boolean PrefFormHandleEvent( FormType *frmP, EventType *eventP, Boolean *
 {
     Boolean	handled = false;
     ListType	*lstP,*lstP2,*lstP3;
-    ControlType	*triP,*triP2,*triP3,*triP4;
+    ControlType	*triP,*triP2,*triP3;
     FieldType *fldP;
     AppGlobalType	*global;
     ZDicDBDictInfoType	*dictInfo;
@@ -4003,7 +3985,6 @@ static Boolean PrefFormHandleEvent( FormType *frmP, EventType *eventP, Boolean *
 	lstP2 = GetObjectPtr( PrefsPhoneticList );
 	
 	triP3 =  GetObjectPtr(triggerHeadColor);
-	triP4 =  GetObjectPtr(triggerBodyColor);
 	
 	lstP3 = GetObjectPtr(lstFontColor);
 	
@@ -4069,30 +4050,46 @@ static Boolean PrefFormHandleEvent( FormType *frmP, EventType *eventP, Boolean *
 					break;
 				
 				case triggerHeadColor:
-					LstSetSelection(lstP3,global->prefs.fontColor >> 4);
+					LstSetSelection(lstP3,global->prefs.headColor & 7);
 					LstPopupList(lstP3);					
 					CtlSetLabel(triP3,LstGetSelectionText(lstP3,LstGetSelection(lstP3)));
-					global->prefs.fontColor = LstGetSelection(lstP3) << 4 | (global->prefs.fontColor & 0x8f);
+					global->prefs.headColor = LstGetSelection(lstP3) | (global->prefs.headColor & 8);
 					handled = true;
-					break;
-									
-				case triggerBodyColor:
-					LstSetSelection(lstP3,global->prefs.fontColor & 0x0f);
-					LstPopupList(lstP3);					
-					CtlSetLabel(triP4,LstGetSelectionText(lstP3,LstGetSelection(lstP3)));
-					global->prefs.fontColor = LstGetSelection(lstP3) | (global->prefs.fontColor & 0xf8);
-					handled = true;
-					break;
+					break;						
 					
 				case chkHeadBold:
-					global->prefs.fontColor = global->prefs.fontColor & 0x7f | ( CtlGetValue ( GetObjectPtr ( chkHeadBold ) ) != 0 ? 0x80 : 0 );
+					global->prefs.headColor = global->prefs.headColor & 7 | ( CtlGetValue ( GetObjectPtr ( chkHeadBold ) ) != 0 ? 8 : 0 );
 					handled = true;
 					break;
 					
-				case chkBodyBold:
-					global->prefs.fontColor = global->prefs.fontColor & 0xf7 | ( CtlGetValue ( GetObjectPtr ( chkBodyBold ) ) != 0 ? 0x08 : 0 );
-					handled = true;
-					break;					
+				case BodyColorButton:
+				case BackColorButton:
+				case LinkColorButton:
+					{
+						IndexedColorType a, b, c;
+						RectangleType		rectangle;
+						rectangle.topLeft.x = 140;
+						rectangle.topLeft.y = 105;
+						rectangle.extent.x = 6;
+						rectangle.extent.y = 10;
+						
+						UIPickColor(eventP->data.ctlSelect.controlID == BodyColorButton ? &global->prefs.bodyColor : (eventP->data.ctlSelect.controlID == BackColorButton ? &global->prefs.backColor : &global->prefs.linkColor), NULL, UIPickColorStartPalette, CtlGetLabel(GetObjectPtr ( eventP->data.ctlSelect.controlID )), NULL);
+						
+						FrmDrawForm( frmP );
+						
+						a = WinSetTextColor(global->prefs.bodyColor);
+						b = WinSetForeColor(global->prefs.linkColor);							
+						c = WinSetBackColor(global->prefs.backColor);
+											
+						WinDrawChars("Aa", 2, 140, 90);
+						WinDrawRectangle(&rectangle, 0);
+						WinEraseRectangleFrame(rectangleFrame, &rectangle);
+						
+						WinSetTextColor(a);
+						WinSetForeColor(b);
+						WinSetBackColor(c);
+					}
+					break;
 				
 				case btnSetMenuShortcut:
 					chrP = FldGetTextPtr(fldP);
@@ -4172,7 +4169,23 @@ static Err PrefFormPopupPrefsDialog( void )
     FrmSetActiveForm( frmP );
     PrefFormInit( frmP );
     FrmDrawForm ( frmP );
-
+    {	
+    	RectangleType		rectangle;
+    	IndexedColorType a,b,c;								
+		rectangle.topLeft.x = 140;
+		rectangle.topLeft.y = 105;
+		rectangle.extent.x = 6;
+		rectangle.extent.y = 10;
+		a=WinSetTextColor(global->prefs.bodyColor);
+		b=WinSetForeColor(global->prefs.linkColor);		
+		c=WinSetBackColor(global->prefs.backColor);
+		WinDrawRectangle(&rectangle, 0);
+		WinEraseRectangleFrame(rectangleFrame, &rectangle);		
+		WinDrawChars("Aa", 2, 140, 90);
+		WinSetTextColor(a);
+		//WinSetForeColor(b);
+		WinSetBackColor(c);
+    }
     do
     {
         EvtGetEvent( &event, evtWaitForever );
@@ -4197,6 +4210,7 @@ static Err PrefFormPopupPrefsDialog( void )
     {
         FontID newFont,newFontDA;
         AppGlobalType	*global;
+        IndexedColorType oldLinkColor;
 
         global = AppGetGlobal();
         
@@ -4204,7 +4218,9 @@ static Err PrefFormPopupPrefsDialog( void )
 	    
 	    newFontDA = FrmGetObjectId ( frmP,FrmGetControlGroupSelection ( frmP, 2 )) == PrefsFontSmallDAPushButton ? stdFont : largeFont;
 	    
-        if ( newFont != global->prefs.font || newFontDA != global->prefs.fontDA )
+	  	oldLinkColor = WinSetForeColor(NULL);
+	    
+        if ( newFont != global->prefs.font || newFontDA != global->prefs.fontDA || oldLinkColor !=  global->prefs.linkColor)
         {
             global->prefs.font = newFont;
             global->prefs.fontDA = newFontDA;
@@ -4827,7 +4843,7 @@ void DAFormAdjustFormBounds ( AppGlobalType	*global, FormPtr frmP,
     flags =  (global->prefs.fontDA == largeFont?steLargeFont:0);
 	if(global->smtEngineRefNum)STEResetEngine(global->smtLibRefNum, global->smtEngineRefNum);
 	STEInitializeEngine(global->smtLibRefNum, &global->smtEngineRefNum, &displayBounds, DADescriptionScrollBar, flags,
-							kSTEGreen /* phone numbers */, kSTEBlue /* urls */, kSTEPurple /* email */);
+							kSTEGreen /* phone numbers */, global->prefs.linkColor /* urls */, kSTEPurple /* email */);
 	STESetCustomHyperlinkCallback(global->smtLibRefNum, global->smtEngineRefNum, (STECallbackType)DAHyperlinkCallback, false);
     return ;
 }
@@ -5845,7 +5861,7 @@ Err MainFormAdjustObject ( const RectanglePtr toBoundsP )
 	
 	if(global->smtEngineRefNum)STEResetEngine(global->smtLibRefNum, global->smtEngineRefNum);
 	STEInitializeEngine(global->smtLibRefNum, &global->smtEngineRefNum, &descFieldBound, MainDescScrollBar, flags,
-							kSTEGreen /* phone numbers */, kSTEBlue /* urls */, kSTEPurple /* email */);
+							kSTEGreen /* phone numbers */, global->prefs.linkColor /* urls */, kSTEPurple /* email */);			
 	STESetCustomHyperlinkCallback(global->smtLibRefNum, global->smtEngineRefNum, (STECallbackType)HyperlinkCallback, false);
 	if(FrmVisible(frmP))
 		MainFormSearch( true, true, global->prefs.enableHighlightWord, true, false, global->prefs.enableAutoSpeech );
@@ -6546,8 +6562,8 @@ static Boolean FormJumpSearch( UInt16 field, Boolean hyperlink )
         if(buf){
     		ToolsPutWordFieldToHistory( field );
     		ToolsSetFieldPtr( field, buf, StrLen( buf ), true );
-			field ==DAWordField?DAFormSearch( false, global->prefs.enableHighlightWord, false, global->prefs.enableAutoSpeech ):\
-			MainFormSearch( true, true, global->prefs.enableHighlightWord, true, false, global->prefs.enableAutoSpeech );
+			field ==DAWordField?DAFormSearch( true, global->prefs.enableHighlightWord, false, global->prefs.enableAutoSpeech ):\
+										MainFormSearch( true, true, global->prefs.enableHighlightWord, true, false, global->prefs.enableAutoSpeech );
             frmP = FrmGetActiveForm ();
             FrmSetFocus( frmP, FrmGetObjectIndex( frmP, field ) ); 
         }
