@@ -2671,6 +2671,10 @@ static Err AppStart( Boolean subLaunch,UInt8 dictMenu )
 		
         global->prefs.font = stdFont;
         global->prefs.fontDA = stdFont;
+        global->prefs.headColor = 13; //bold Purple
+        global->prefs.bodyColor = kSTEBlack;
+        global->prefs.backColor = 0; //white
+        global->prefs.linkColor = kSTEBlue;
         global->prefs.getClipBoardAtStart = false;
         global->prefs.enableIncSearch = true;
         global->prefs.enableSingleTap = true;
