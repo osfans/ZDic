@@ -148,7 +148,7 @@ static void AppendStr(Char *data)//append data rendered with STE
 }
 
 static void RenderStr(Char *data)//render data with STE from the beginning
-{
+{	
 	AppGlobalPtr global = AppGetGlobal();
 	STEReinitializeEngine(global->smtLibRefNum, global->smtEngineRefNum);
 	WinSetTextColor(global->prefs.bodyColor);
@@ -4066,7 +4066,7 @@ static Boolean PrefFormHandleEvent( FormType *frmP, EventType *eventP, Boolean *
 				case BackColorButton:
 				case LinkColorButton:
 					{
-						IndexedColorType a, b, c;
+						IndexedColorType b;
 						RectangleType		rectangle;
 						rectangle.topLeft.x = 140;
 						rectangle.topLeft.y = 105;
@@ -4077,17 +4077,15 @@ static Boolean PrefFormHandleEvent( FormType *frmP, EventType *eventP, Boolean *
 						
 						FrmDrawForm( frmP );
 						
-						a = WinSetTextColor(global->prefs.bodyColor);
+						WinSetTextColor(global->prefs.bodyColor);
 						b = WinSetForeColor(global->prefs.linkColor);							
-						c = WinSetBackColor(global->prefs.backColor);
+						WinSetBackColor(global->prefs.backColor);
 											
 						WinDrawChars("Aa", 2, 140, 90);
 						WinDrawRectangle(&rectangle, 0);
 						WinEraseRectangleFrame(rectangleFrame, &rectangle);
 						
-						WinSetTextColor(a);
 						WinSetForeColor(b);
-						WinSetBackColor(c);
 					}
 					break;
 				
@@ -4171,19 +4169,18 @@ static Err PrefFormPopupPrefsDialog( void )
     FrmDrawForm ( frmP );
     {	
     	RectangleType		rectangle;
-    	IndexedColorType a,b,c;								
+    	IndexedColorType a, c;								
 		rectangle.topLeft.x = 140;
 		rectangle.topLeft.y = 105;
 		rectangle.extent.x = 6;
 		rectangle.extent.y = 10;
-		a=WinSetTextColor(global->prefs.bodyColor);
-		b=WinSetForeColor(global->prefs.linkColor);		
-		c=WinSetBackColor(global->prefs.backColor);
+		a = WinSetTextColor(global->prefs.bodyColor);
+		WinSetForeColor(global->prefs.linkColor);		
+		c = WinSetBackColor(global->prefs.backColor);
 		WinDrawRectangle(&rectangle, 0);
 		WinEraseRectangleFrame(rectangleFrame, &rectangle);		
 		WinDrawChars("Aa", 2, 140, 90);
 		WinSetTextColor(a);
-		//WinSetForeColor(b);
 		WinSetBackColor(c);
     }
     do

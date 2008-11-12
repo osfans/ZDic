@@ -191,7 +191,20 @@ BEGIN
  "Select Item" = "选择项目"    
  "Set" = "设置"  
  
- "ZDic Font:" = "ZDic 字体："  
+ "ZDic Font:" = "ZDic 字体："
+ "Black" = "黑色"
+ "Blue" = "蓝色"
+ "Red" = "红色"
+ "Green" = "绿色"
+ "Yellow" = "黄色"
+ "Purple" = "紫色"
+ "Orange" = "橙色"
+ "Gray" = "灰色"
+ "TC" = "正文"
+ "BC" = "背景"
+ "Link Color" = "超链接颜色"
+ 
+  
  "Preferences" = "参数设置"    
  "Get word from Clipboard at start" = "启动时从剪切板中获取词语"  
  "Enable incremental search" = "启用增量搜索"  
@@ -478,23 +491,23 @@ POPUPLIST ID triggerPhonetic  PrefsPhoneticList
 	LABEL "Menu+" AUTOID AT (85 37) FONT 1
 	GRAFFITISTATEINDICATOR AT (147 116)
 	
-	PUSHBUTTON  "A" ID PrefsFontSmallDAPushButton      AT (90 77 12 12) FONT 0 GROUP 2
-	PUSHBUTTON  "A" ID PrefsFontLargeDAPushButton    AT (103 77 12 12) FONT 2 GROUP 2
+	PUSHBUTTON  "A" ID PrefsFontSmallDAPushButton      AT (90 63 12 12) FONT 0 GROUP 2
+	PUSHBUTTON  "A" ID PrefsFontLargeDAPushButton    AT (103 63 12 12) FONT 2 GROUP 2
 	//PUSHBUTTON  "A" ID PrefsFontSmallTinyDAPushButton      AT (87 102 12 12) GROUP 2 FONT 0
 	//PUSHBUTTON  "A" ID PrefsFontLargeTinyDAPushButton    AT (100 102 12 12) FONT 2 GROUP 2
-	LABEL "ZDic Font:" ID PrefsFontLabel  AT (85 65) FONT 1
-	PUSHBUTTON  "A" ID PrefsFontSmallPushButton    AT (119 77 12 12) FONT 0 GROUP 1
-	PUSHBUTTON  "A" ID PrefsFontLargePushButton  AT (132 77 12 12) FONT 2 GROUP 1
+	LABEL "ZDic Font:" ID PrefsFontLabel  AT (85 51) FONT 1
+	PUSHBUTTON  "A" ID PrefsFontSmallPushButton    AT (119 63 12 12) FONT 0 GROUP 1
+	PUSHBUTTON  "A" ID PrefsFontLargePushButton  AT (132 63 12 12) FONT 2 GROUP 1
 	//PUSHBUTTON  "A" ID PrefsFontSmallTinyPushButton     AT (87 77 12 12) GROUP 1 FONT 0
 	//PUSHBUTTON  "A" ID PrefsFontLargeTinyPushButton   AT (100 77 12 12) FONT 2 GROUP 1
 	
-	POPUPTRIGGER "Black" ID triggerHeadColor  AT (84 91 41 AUTO) 
+	POPUPTRIGGER "Black" ID triggerHeadColor  AT (84 76 41 AUTO) 
 	POPUPLIST ID triggerHeadColor   lstFontColor
-	LIST  "Black" "Blue" "Red" "Green" "Yellow" "Purple" "Orange" "Gray"   ID lstFontColor  AT (PREVLEFT 59 PREVWIDTH 90) VISIBLEITEMS 8 NONUSABLE
-	POPUPTRIGGER "Black" ID triggerBodyColor   AT (84 104 41 AUTO)
-	POPUPLIST ID triggerBodyColor  lstFontColor
-	CHECKBOX "B" ID chkHeadBold   AT (132 91 AUTO AUTO) CHECKED
-	CHECKBOX "B" ID chkBodyBold   AT (132 104 AUTO AUTO) 
+	LIST  "Black" "Blue" "Red" "Green" "Yellow" "Purple" "Orange" "Gray"   ID lstFontColor  AT (PREVLEFT 36 PREVWIDTH 90) VISIBLEITEMS 8 NONUSABLE
+	CHECKBOX "B" ID chkHeadBold   AT (132 76 AUTO AUTO) CHECKED
+	BUTTON "TC" ID BodyColorButton  AT (88 90 24 12) FONT 0
+	BUTTON "Link Color" ID LinkColorButton  AT (88 103 47 12)	
+	BUTTON "BC" ID BackColorButton  AT (113 90 24 12)
 END
 
 FORM ID DetailsForm AT ( 2 2 156 156 )
