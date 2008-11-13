@@ -489,11 +489,11 @@ Err ExportToSugarMemo(Char *str)
     MemHandle recordH, recHeadImageH;
     SugarMemoRecHeadType *recordP, *recHeadImageP;
     SugarMemoRecHeadType recHead;
-    Int16	size;
+    Int16	size, sizemore=0;
     //FieldType	*fieldP;
     DmOpenRef	dbP;
     UInt16 index, attr;
-    UInt16 chrNullOffset[ 4 ], i, j, offset;
+    UInt16 chrNullOffset[ 3 ], i, j, offset;
     WChar ch;
     Char tail = chrNull;
     Err	err;
@@ -527,7 +527,7 @@ Err ExportToSugarMemo(Char *str)
         // but we only use three fields, the fourth field
         // always be empty.
         // j < 3 means we only used three filed.
-        // field #1: keyword
+        // field #1: keyword <-chrNullOffset[0]
         // field #2: phonetic
         // field #3: explain
         // field #4: note.
@@ -536,19 +536,41 @@ Err ExportToSugarMemo(Char *str)
         {
             offset = TxtGetNextChar( str, i, &ch );
             if ( ch == chrNull || ch == chrLineFeed )
-                chrNullOffset[ j++ ] = i;
-
+            {
+            	if( j == 0 ){
+            		chrNullOffset[ 0 ] = i;
+            		str[i] = chrNull;     		
+            		if (global->phonetic[0])
+            		{	
+            			chrNullOffset[ 1 ] = StrLen(global->phonetic);
+            			i = chrNullOffset[ 1 ] ;      			
+            		}
+            		else
+            		{
+            			chrNullOffset[ 1 ] = i;
+            			sizemore++;
+            		}            		
+            		j = 2;
+            	}
+            	else
+            	{
+            		if (StrNCompare( str + i, "\n\n\n", 3) == 0)// field #3\n\n\nfield #4
+            		{	
+            			str[i] = chrNull; 
+            			chrNullOffset[ j++ ] = i;
+            			sizemore -= 3;
+            		}
+            	}
+            }
             i += offset;
         }
 
-        if ( j == 3 )
-            chrNullOffset[ j++ ] = size;
-
-        while ( j < 4 )
+        if ( j < 3 )
         {
-            chrNullOffset[ j ] = chrNullOffset[ j - 1 ] + 1;
-            j++;
+            chrNullOffset[ j++ ] = size;
+            sizemore++;
         }
+        sizemore+=2;
 
         // Get SugarMemo record Head.
         recHeadImageH = DmGetResource( 'data', SugarMemoDefaultRecordHead );
@@ -560,7 +582,7 @@ Err ExportToSugarMemo(Char *str)
 
         // Add a new record at the end of the database.
         index = DmNumRecords ( dbP );
-        recordH = DmNewRecord ( dbP, &index, sizeof ( SugarMemoRecHeadType ) + chrNullOffset[ 3 ] + 1 );
+        recordH = DmNewRecord ( dbP, &index, sizeof ( SugarMemoRecHeadType ) + size + sizemore );
 
         // If the allocate failed, display a warning.
         if ( ! recordH )
@@ -572,16 +594,31 @@ Err ExportToSugarMemo(Char *str)
 
         // Pack the the data into the new record.
         recordP = MemHandleLock ( recordH );
-        DmWrite( recordP, 0, &recHead, sizeof( SugarMemoRecHeadType ) );
-        DmWrite( recordP, sizeof( SugarMemoRecHeadType ), str, chrNullOffset[ 3 ] + 1 );    // record head,(remember data)
-        DmWrite( recordP, sizeof( SugarMemoRecHeadType ), str, chrNullOffset[ 3 ] + 1 );    // record text.
-        DmWrite( recordP, sizeof( SugarMemoRecHeadType ) + chrNullOffset[ 0 ], &tail, sizeof( tail ) );  // end of field #1.
-        DmWrite( recordP, sizeof( SugarMemoRecHeadType ) + chrNullOffset[ 1 ], &tail, sizeof( tail ) );  // end of field #2.
-        DmWrite( recordP, sizeof( SugarMemoRecHeadType ) + chrNullOffset[ 2 ], &tail, sizeof( tail ) );  // end of field #3.
-        DmWrite( recordP, sizeof( SugarMemoRecHeadType ) + chrNullOffset[ 3 ], &tail, sizeof( tail ) );  // end of field #4.
         
+        offset = sizeof( SugarMemoRecHeadType );
+        DmWrite( recordP, 0, &recHead, offset ); // record head,(remember data)    
+        
+    	DmWrite( recordP, offset, str, chrNullOffset[ 0 ] + 1);    // record field #1\0
+    	offset += chrNullOffset[ 0 ] + 1;
+    	
+        if(global->phonetic[0])
+        {
+        	DmWrite( recordP, offset, &str[chrNullOffset[ 0 ] + 1], chrNullOffset[ 1 ] - chrNullOffset[ 0 ] - 1);    // record field #2
+        	offset += chrNullOffset[ 1 ] - chrNullOffset[ 0 ] - 1;
+        }
+    	DmWrite( recordP, offset, &tail, sizeof( tail ) );  // end of field #2
+    	offset += sizeof( tail );       
+        
+    	DmWrite( recordP, offset, &str[chrNullOffset[ 1 ] + 1], chrNullOffset[ 2 ] - chrNullOffset[ 1 ] );    // record field #3\0
+    	offset += chrNullOffset[ 2 ] - chrNullOffset[ 1 ];
+    	
+        if(chrNullOffset[ 2 ] == size)// record field #4\0
+        	DmWrite( recordP, offset, &tail, sizeof( tail ) );
+        else
+        	DmWrite( recordP, offset, &str[chrNullOffset[ 2 ] + 3], size - chrNullOffset[ 2 ] - 2 );
+        	
         // Now translate GMX phonetic to SugarMemo phonetic.
-        if ( chrNullOffset[ 1 ] - chrNullOffset[ 0 ] > 1 )
+        if ( global->phonetic[0] )
         {
             MemHandle transH;
             Char *trans;
@@ -624,7 +661,6 @@ Err ExportToSugarMemo(Char *str)
             MemHandleUnlock( transH );
             DmReleaseResource( transH );
         }
-        
         
         MemPtrUnlock ( recordP );
 
