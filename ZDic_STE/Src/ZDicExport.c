@@ -67,7 +67,7 @@ static void ExportApply ( FormType *frmP, UInt16 category )
 
     index = FrmGetControlGroupSelection ( frmP, 1 );
     objID = FrmGetObjectId ( frmP, index );
-    global->prefs.exportAppCreatorID = objID == ExportOptionsMemoPad ? sysFileCMemo : appSugarMemoCreator;
+    global->prefs.exportAppCreatorID = objID == ExportOptionsMemoPad ? sysFileCMemo : (objID == ExportOptionsSugarMemo ?appSugarMemoCreator : appSuperMemoCreator);
 
     return ;
 }
@@ -114,7 +114,7 @@ static void ExportInit ( FormType * frmP, DmOpenRef dbP )
     // Set export application group selection.
     FrmSetControlGroupSelection ( frmP, 1,
                                   global->prefs.exportAppCreatorID == sysFileCMemo ?
-                                  ExportOptionsMemoPad : ExportOptionsSugarMemo );
+                                  ExportOptionsMemoPad : (global->prefs.exportAppCreatorID == appSugarMemoCreator? ExportOptionsSugarMemo : ExportOptionsSuperMemo) );
 
     if ( global->prefs.exportAppCreatorID == sysFileCMemo )
     {
@@ -177,6 +177,7 @@ static Boolean ExportHandleEvent ( FormType * frmP, EventType * eventP,
             break;
 
         case ExportOptionsSugarMemo:
+        case ExportOptionsSuperMemo:
             FrmHideObject ( frmP, FrmGetObjectIndex (frmP, ExportOptionsPrivateCheckBox) );
             FrmHideObject ( frmP, FrmGetObjectIndex (frmP, ExportOptionsPrivateLabel) );
             FrmHideObject ( frmP, FrmGetObjectIndex (frmP, ExportOptionsCategoryPopupTriger) );
@@ -391,7 +392,7 @@ Err ExportToMemo(Char	* str)
  *		ZhongYuanHuan	15/Jan/05	Initial Revision
 *
  ***********************************************************************/
-static Err SugarMemoGetDatabase ( DmOpenRef *dbPP, UInt16 mode )
+static Err GetDatabase ( DmOpenRef *dbPP, UInt16 mode, DmResID dbNameID, DmResID dbImageID )
 {
     MemHandle dbNameH;
     Char *dbNameP;
@@ -413,14 +414,14 @@ static Err SugarMemoGetDatabase ( DmOpenRef *dbPP, UInt16 mode )
     err = errNone;
 
     // Get database dbID.
-    dbNameH = DmGetResource( strRsc, SugarMemoDBName );
+    dbNameH = DmGetResource( strRsc, dbNameID );
     dbNameP = MemHandleLock( dbNameH );
 
     dbID = DmFindDatabase ( 0, dbNameP );
     if ( dbID == 0 )
     {
         // Create default database by image.
-        dbImageH = DmGetResource( 'data', SugarMemoDefaultDBImage );
+        dbImageH = DmGetResource( 'data', dbImageID );
         dbImageP = MemHandleLock( dbImageH );
         err = DmCreateDatabaseFromImage ( dbImageP );
         if ( err != errNone )
@@ -462,7 +463,7 @@ exit:
 
 /***********************************************************************
  *
- * FUNCTION:    ExportToSugarMemo
+ * FUNCTION:    ExportToSu(ga|pe)rMemo
  *
  * DESCRIPTION: This routine export text to SugarMemo with field id.
  *
@@ -473,26 +474,17 @@ exit:
  * REVISION HISTORY:
  *		Name			Date		Description
  *		----			----		-----------
- *		ZhongYuanHuan	07/Set/04	Initial Revision
+ *		ZhongYuanHuan	07/Sep/04	Initial Revision
+ *		osfans			08/Nov/15	SuperMemo Revision
  *
  ***********************************************************************/
-typedef struct
+Err ExportToSMemo(Char *str)
 {
-    UInt8 recHead[ 25 ];
-    UInt16 keywordLen;
-}
-SugarMemoRecHeadType;
-
-
-Err ExportToSugarMemo(Char *str)
-{
-    MemHandle recordH, recHeadImageH;
-    SugarMemoRecHeadType *recordP, *recHeadImageP;
-    SugarMemoRecHeadType recHead;
+    MemHandle recordH, recHeadImageH; 
+    MemPtr recordP;
     Int16	size, sizemore=0;
-    //FieldType	*fieldP;
     DmOpenRef	dbP;
-    UInt16 index, attr;
+    UInt16 index, attr, recHeadSize;
     UInt16 chrNullOffset[ 3 ], i, j, offset;
     WChar ch;
     Char tail = chrNull;
@@ -508,7 +500,10 @@ Err ExportToSugarMemo(Char *str)
     do
     {
         // Get SugarMemo database, if it is not exist then create it.
-        err = SugarMemoGetDatabase ( &dbP, dmModeReadWrite );
+        if(global->prefs.exportAppCreatorID == appSugarMemoCreator)
+        	err = GetDatabase ( &dbP, dmModeReadWrite, SugarMemoDBName, SugarMemoDefaultDBImage );
+        else
+        	err = GetDatabase ( &dbP, dmModeReadWrite, SuperMemoDBName, SuperMemoDefaultDBImage );
         if ( err != errNone || dbP == NULL )
             break;
 
@@ -573,30 +568,82 @@ Err ExportToSugarMemo(Char *str)
         sizemore+=2;
 
         // Get SugarMemo record Head.
-        recHeadImageH = DmGetResource( 'data', SugarMemoDefaultRecordHead );
-        recHeadImageP = ( SugarMemoRecHeadType * ) MemHandleLock( recHeadImageH );
-        recHead = *recHeadImageP;
-        recHead.keywordLen = chrNullOffset[ 1 ] + 1;
-        MemHandleUnlock( recHeadImageH );
-        DmReleaseResource( recHeadImageH );
-
-        // Add a new record at the end of the database.
-        index = DmNumRecords ( dbP );
-        recordH = DmNewRecord ( dbP, &index, sizeof ( SugarMemoRecHeadType ) + size + sizemore );
-
-        // If the allocate failed, display a warning.
-        if ( ! recordH )
+        if(global->prefs.exportAppCreatorID == appSugarMemoCreator)
         {
-            FrmAlert ( DeviceFullAlert );
-            err = ~errNone;
-            break;
-        }
+			typedef struct
+			{
+			    UInt8 recHead[ 25 ];
+			    UInt16 keywordLen;
+			}
+			SugarMemoRecHeadType;
+			SugarMemoRecHeadType *recHeadImageP, recHead;
+    		recHeadSize = sizeof( SugarMemoRecHeadType );	        
+	        recHeadImageH = DmGetResource( 'data', SugarMemoDefaultRecordHead );
+	        recHeadImageP = ( SugarMemoRecHeadType * ) MemHandleLock( recHeadImageH );
+	        recHead = *recHeadImageP;
+	        recHead.keywordLen = chrNullOffset[ 1 ] + 1;
+	        	    
+	        MemHandleUnlock( recHeadImageH );
+	        DmReleaseResource( recHeadImageH );
 
-        // Pack the the data into the new record.
-        recordP = MemHandleLock ( recordH );
-        
-        offset = sizeof( SugarMemoRecHeadType );
-        DmWrite( recordP, 0, &recHead, offset ); // record head,(remember data)    
+	        // Add a new record at the end of the database.
+	        index = DmNumRecords ( dbP );
+	        recordH = DmNewRecord ( dbP, &index, recHeadSize + size + sizemore );
+
+	        // If the allocate failed, display a warning.
+	        if ( ! recordH )
+	        {
+	            FrmAlert ( DeviceFullAlert );
+	            err = ~errNone;
+	            break;
+	        }
+
+	        // Pack the the data into the new record.
+	        recordP = MemHandleLock ( recordH );        
+	        
+	        DmWrite( recordP, 0, &recHead, recHeadSize ); // record head,(remember data)
+	        offset = recHeadSize;   
+        }
+        else
+        {   		
+    		UInt8 *recHead;
+    		DateType today;
+    		UInt16 indexSize;	        
+    		
+	        index = DmNumRecords ( dbP );	        
+	        //append new record index        
+	        indexSize = 130 + index * 2;
+	        recordH = DmResizeRecord (dbP, 15,  indexSize); 
+			recordP = MemHandleLock ( recordH );			
+			DmWrite( recordP, indexSize-2, &index, 2);			
+			MemPtrUnlock ( recordP );
+			DmReleaseRecord ( dbP, 15, true );
+			
+    		sizemore += 2;
+    		recHeadSize = 20;
+	        recHeadImageH = DmGetResource( 'data', SuperMemoDefaultRecordHead );
+	        recHead = MemHandleLock( recHeadImageH );
+	        MemHandleUnlock( recHeadImageH );
+	        DmReleaseResource( recHeadImageH );	        
+			 
+			// Add a new record at the end of the database.
+	        recordH = DmNewRecord ( dbP, &index, recHeadSize + size + sizemore );
+
+	        // If the allocate failed, display a warning.
+	        if ( ! recordH )
+	        {
+	            FrmAlert ( DeviceFullAlert );
+	            err = ~errNone;
+	            break;
+	        }
+
+	        // Pack the the data into the new record.
+	        recordP = MemHandleLock ( recordH );	        
+	        DmWrite( recordP, 0, recHead, recHeadSize ); // record head,(remember data)
+	        DateSecondsToDate (TimGetSeconds(), &today);
+	        DmWrite( recordP, 6, &DateToInt(today), 2 );//record create date
+	        offset = recHeadSize;	        
+	    }	            
         
     	DmWrite( recordP, offset, str, chrNullOffset[ 0 ] + 1);    // record field #1\0
     	offset += chrNullOffset[ 0 ] + 1;
@@ -613,17 +660,29 @@ Err ExportToSugarMemo(Char *str)
     	offset += chrNullOffset[ 2 ] - chrNullOffset[ 1 ];
     	
         if(chrNullOffset[ 2 ] == size)// record field #4\0
+        {
         	DmWrite( recordP, offset, &tail, sizeof( tail ) );
+        	offset+=sizeof( tail);
+        }
         else
+        {
         	DmWrite( recordP, offset, &str[chrNullOffset[ 2 ] + 3], size - chrNullOffset[ 2 ] - 2 );
+        	offset+=size - chrNullOffset[ 2 ] - 2 ;
+        }
         	
+        if(global->prefs.exportAppCreatorID == appSuperMemoCreator)
+        {
+        	DmWrite( recordP,  offset, &tail, sizeof( tail) ); //field #5
+        	offset+=sizeof( tail);
+	    	DmWrite( recordP,  offset, &tail, sizeof( tail) ); //field #6	
+        }	
         // Now translate GMX phonetic to SugarMemo phonetic.
-        if ( global->phonetic[0] )
+        else if ( global->phonetic[0] )
         {
             MemHandle transH;
             Char *trans;
             
-            str = (Char*)recordP + sizeof( SugarMemoRecHeadType ) + chrNullOffset[ 0 ] + 1;
+            str = (Char *)recordP + recHeadSize + chrNullOffset[ 0 ] + 1;
             transH = DmGetResource( strRsc, sugarMemo2GMXString );
             trans = ( Char * ) MemHandleLock( transH );
 
@@ -646,13 +705,13 @@ Err ExportToSugarMemo(Char *str)
                 // Ok, we find the char in translate map, so translate to SugarMemo from GMX.
                 if ( ( WChar ) * ( trans + j ) != chrNull && ( WChar ) * ( trans + j + 1 ) == ch )
                 {
-                    DmWrite( recordP, sizeof( SugarMemoRecHeadType ) + chrNullOffset[ 0 ] + i + 1, trans + j, sizeof(Char) );
+                    DmWrite( recordP, recHeadSize + chrNullOffset[ 0 ] + i + 1, trans + j, sizeof(Char) );
                 }
                 // The phonetic of sugarmemo must lager than space character.
                 else if ( ch < chrSpace )
                 {
                     Char c = chrSpace;
-                    DmWrite( recordP, sizeof( SugarMemoRecHeadType ) + chrNullOffset[ 0 ] + i + 1, &c, sizeof(Char) );
+                    DmWrite( recordP, recHeadSize + chrNullOffset[ 0 ] + i + 1, &c, sizeof(Char) );
                 }
                 
                 i += offset;
@@ -671,7 +730,7 @@ Err ExportToSugarMemo(Char *str)
 
         DmSetRecordInfo ( dbP, index, &attr, NULL );
         DmReleaseRecord ( dbP, index, true );
-
+        
     }
     while ( false );
 
@@ -681,4 +740,3 @@ Err ExportToSugarMemo(Char *str)
 
     return err;
 }
-

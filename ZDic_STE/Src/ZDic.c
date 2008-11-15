@@ -2737,7 +2737,7 @@ static Err AppStart( Boolean subLaunch,UInt8 dictMenu )
 		err = ZDicToolsOpenZLib(&global->zlibRefNum);
 		if (err != errNone || global->zlibRefNum == sysInvalidRefNum) 
 		{
-			FrmAlert(ZLibNotFoundAlert);
+			FrmCustomAlert(LibNotFoundAlert, "ZLib", NULL, NULL);
 			goto exit;
 		}
 		
@@ -2745,7 +2745,7 @@ static Err AppStart( Boolean subLaunch,UInt8 dictMenu )
 		err = ZDicLib_OpenLibrary(&global->zdicLibRefNum, &global->zdicLibClientContext);
 		if (err != errNone || global->zdicLibRefNum == sysInvalidRefNum) 
 		{
-			FrmAlert(ZDicLibNotFoundAlert);
+			FrmCustomAlert(LibNotFoundAlert, "ZDicLib", NULL, NULL);
 			goto exit_lib;
 		}
 		
@@ -2767,7 +2767,7 @@ static Err AppStart( Boolean subLaunch,UInt8 dictMenu )
 		err = ZDicToolsOpenZLib(&global->zlibRefNum);
 		if (err != errNone || global->zlibRefNum == sysInvalidRefNum) 
 		{
-			FrmAlert(ZLibNotFoundAlert);
+			FrmCustomAlert(LibNotFoundAlert, "ZLib", NULL, NULL);
 			goto exit;
 		}
 		
@@ -2775,7 +2775,7 @@ static Err AppStart( Boolean subLaunch,UInt8 dictMenu )
 		err = ZDicLib_OpenLibrary(&global->zdicLibRefNum, &global->zdicLibClientContext);
 		if (err != errNone || global->zdicLibRefNum == sysInvalidRefNum) 
 		{
-			FrmAlert(ZDicLibNotFoundAlert);
+			FrmCustomAlert(LibNotFoundAlert, "ZDicLib", NULL, NULL);
 			goto exit_lib;
 		}
     }
@@ -5044,6 +5044,7 @@ static Boolean DAFormDoCommand( UInt16 command )
         }
     case OptionsExportMemo:
     case OptionsExportSugarMemo:
+    case OptionsExportSuperMemo:
         {
             Char *buf;
             buf = STEGetSelectedText(global->smtLibRefNum, global->smtEngineRefNum);
@@ -5051,9 +5052,9 @@ static Boolean DAFormDoCommand( UInt16 command )
             	STESetCurrentTextSelection(global->smtLibRefNum, global->smtEngineRefNum, 1, 0, kSelectUntilEnd);
             	buf = STEGetSelectedText(global->smtLibRefNum, global->smtEngineRefNum);
             	STEClearCurrentSelection(global->smtLibRefNum, global->smtEngineRefNum);
-            	if (global->phonetic[0])StrNCopy( &buf[0], global->phonetic, StrLen(global->phonetic));
+            	if (global->phonetic[0]) StrNCopy( &buf[0], global->phonetic, StrLen(global->phonetic));
             }
-            command==OptionsExportMemo ? ExportToMemo(buf) : ExportToSugarMemo(buf);
+            command==OptionsExportMemo? ExportToMemo(buf):ExportToSMemo(buf);
             MemPtrFree(buf);
             handled = true;
             break;
@@ -6981,16 +6982,17 @@ static Boolean MainFormDoCommand( UInt16 command )
         }
     case OptionsExportMemo:
     case OptionsExportSugarMemo:
+    case OptionsExportSuperMemo:
         {
-        	Char* buf;
-            buf=STEGetSelectedText(global->smtLibRefNum, global->smtEngineRefNum);
+        	Char *buf;
+            buf = STEGetSelectedText(global->smtLibRefNum, global->smtEngineRefNum);
             if(buf==NULL){
             	STESetCurrentTextSelection(global->smtLibRefNum, global->smtEngineRefNum, 1, 0, kSelectUntilEnd);
             	buf = STEGetSelectedText(global->smtLibRefNum, global->smtEngineRefNum);
             	STEClearCurrentSelection(global->smtLibRefNum, global->smtEngineRefNum);
             	if (global->phonetic[0]) StrNCopy( &buf[0], global->phonetic, StrLen(global->phonetic));
             }
-            command==OptionsExportMemo? ExportToMemo(buf):ExportToSugarMemo(buf);
+            command==OptionsExportMemo? ExportToMemo(buf):ExportToSMemo(buf);
             MemPtrFree(buf);
             handled = true;
             break;
@@ -7183,7 +7185,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 	            }
 				case MainExportToMemo:
 	            {
-	                ToolsSendMenuCmd( global->prefs.exportAppCreatorID == sysFileCMemo ? chrCapital_M : chrCapital_Z );
+	                ToolsSendMenuCmd( global->prefs.exportAppCreatorID == sysFileCMemo ? chrCapital_M : (global->prefs.exportAppCreatorID == appSugarMemoCreator? chrCapital_Z :  chrCapital_Y));
 	                handled = true;
 	                break;
 	            }

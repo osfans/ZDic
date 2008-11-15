@@ -154,6 +154,8 @@ typedef struct ZDicPreferenceType
 #define appKDicCreator			'Kdic'
 #define appSugarMemoCreator     'SGMM'
 #define appSugarMemoDBType      'Voc0'
+#define appSuperMemoCreator     'SGem'
+#define appSuperMemoDBType      'SM01'
 #define appName					"ZDic"
 #define appDBType				'Dict'
 #define appIdxType				'ZIdx'

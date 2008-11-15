@@ -32,6 +32,7 @@ BEGIN
 "Display/Hide List" = "¤Á´«¦CªíÅã¥Ü"
 "Export to Memo" = "¾É¥X¦Ü°O¨Æ¥»"
 "Export to SugarMemo" = "¾É¥X¦Ü SugarMemo"
+"Export to SuperMemo" = "¾É¥X¦Ü SuperMemo"
 "About ZDic" = "Ãö©ó ZDic"
 "System Incompatible" = "¨t²Î¤£¬Û®e"
 "System Version 3.0 or greater is required to run this application." = "¥»µ{¦¡»Ý¹B¦æ©ó 3.0¤Î¥H¤Wª©¥»ªº¨t²Î"
@@ -157,26 +158,26 @@ BEGIN
  "Change Case" = "¸ü¸Ä´óÐ¡Ð´"  
  "Display/Hide List" = "ÇÐ»»ÁÐ±íÏÔÊ¾"  
  "Export to Memo" = "µ¼³öÖÁ¼ÇÊÂ±¾"    
- "Export to SugarMemo" = "µ¼³öÖÁ SugarMemo"  
+ "Export to SugarMemo" = "µ¼³öÖÁ SugarMemo"
+ "Export to SuperMemo" = "µ¼³öÖÁ SuperMemo"  
  "About ZDic" = "¹ØÓÚ ZDic"  
  "System Incompatible" = "ÏµÍ³²»¼æÈÝ"  
  "System Version 3.0 or greater is required to run this application." = "±¾³ÌÐòÐèÔËÐÐÓÚ 3.0¼°ÒÔÉÏ°æ±¾µÄÏµÍ³"  
  "OK" = "È·¶¨"  
  "Dictionary Not Found" = "Î´·¢ÏÖ´Êµä"  
- "Dictionary not installed." = "´ÊµäÎ´°²×°"  
+ "At least one dictionary should be installed." = "ÄãÖÁÉÙÐè°²×°Ò»²¿´Êµä¡£"  
  "Alert" = "¾¯¸æ"  
- "Not Enough Memory!" = "ÄÚ´æ²»×ã£¡"  
- "ZDic font share library not found!" = "ZDic ×ÖÌå¹²Ïí¿âÎ´·¢ÏÖ£¡"  
+ "Not Enough Memory!" = "ÄÚ´æ²»×ã£¡"
+ "Library Not Found" = "Î´·¢ÏÖ¿â"
+ "^1 not installed." = "Î´°²×° ^1 ¿â¡£" 
+ //"ZDic font share library not found!" = "ZDic ×ÖÌå¹²Ïí¿âÎ´·¢ÏÖ£¡"  
  "ZDic-must long than 16 bytes" = "ZDic ±ØÐë³¤ÓÚ 16 ×Ö½Ú"  
  "Go" = "²é"  
- "Clr" = "Çå"   
- 
+ "Clr" = "Çå" 
   
- "W:" = "´Ê"   
+ "W:" = "´Ê"  
  
- 
- "Thank you for using ZDic!" = "¸ÐÐ»ÄãÊ¹ÓÃ ZDic£¡"  
- 
+ "Thank you for using ZDic!" = "¸ÐÐ»ÄãÊ¹ÓÃ ZDic£¡" 
  
  "Dict Options" = "´ÊµäÑ¡Ïî"  
  "Done" = "Íê³É"  
@@ -311,8 +312,9 @@ BEGIN
 		MENUITEM "Clear History" ID OptionsClearHistory "H"
 		MENUITEM "Change Case" ID OptionsChangeCase "A"
 		MENUITEM "Display/Hide List" ID OptionsList "L"
-		MENUITEM "Export to Memo" ID OptionsExportMemo "M"	
-		MENUITEM "Export to SugarMemo" ID OptionsExportSugarMemo "Z"	
+		MENUITEM "Export to Memo" ID OptionsExportMemo "M"
+		MENUITEM "Export to SugarMemo" ID OptionsExportSugarMemo "Z"
+		MENUITEM "Export to SuperMemo" ID OptionsExportSuperMemo "Y"					
 		MENUITEM "About ZDic" ID OptionsAboutZDic
 	END
 
@@ -346,24 +348,15 @@ ALERT ID DictNotFoundAlert
 INFORMATION
 BEGIN
      TITLE "Dictionary Not Found"
-     MESSAGE "Dictionary not installed."
+     MESSAGE "At least one dictionary should be installed."
      BUTTONS "OK" 
 END
 
-ALERT ID ZLibNotFoundAlert 
+ALERT ID LibNotFoundAlert 
 INFORMATION
 BEGIN
-     TITLE "ZLib Library Not Found"
-     MESSAGE "ZLib Library not installed."
-     BUTTONS "OK" 
-END
-
-
-ALERT ID ZDicLibNotFoundAlert 
-INFORMATION
-BEGIN
-     TITLE "ZDic Library Not Found"
-     MESSAGE "ZDic Library not installed."
+     TITLE "Library Not Found"
+     MESSAGE "^1 not installed."
      BUTTONS "OK" 
 END
 
@@ -451,7 +444,7 @@ FORM ID AboutForm AT (2 2 156 156)
     DEFAULTBTNID AboutOKButton  SAVEBEHIND MODAL
 BEGIN
 	TITLE "About ZDic"
-	LABEL "ZDic 2.44" AUTOID AT (CENTER 21) FONT 7
+	LABEL "ZDic 2.45" AUTOID AT (CENTER 21) FONT 7
 	LABEL "Copyright © 2003-2004 neisoo" AUTOID AT (CENTER 43)
 	LABEL "Thank you for using ZDic!" AUTOID AT (CENTER 62) FONT 2
 	LABEL "JEMYZHANG(v2.34)" AUTOID AT (35 81)
@@ -545,9 +538,10 @@ BEGIN
 	POPUPTRIGGER "................" ID ExportOptionsCategoryPopupTriger  AT (57 39 49 12) NONUSABLE
 	LIST "One" "Two" "Three" ID ExportOptionsCategoryList  AT (57 39 60 2) VISIBLEITEMS 0 NONUSABLE
 	LABEL "Private:" ID ExportOptionsPrivateLabel  AT (12 54) FONT 1 NONUSABLE
-	CHECKBOX "" ID ExportOptionsPrivateCheckBox  AT (58 52 19 14) NONUSABLE
-	PUSHBUTTON  "Memo pad" ID ExportOptionsMemoPad  AT (5 19 60 AUTO) GROUP 1
-	PUSHBUTTON  "SugarMemo" ID ExportOptionsSugarMemo  AT (66 19 60 AUTO) GROUP 1
+	CHECKBOX "" ID ExportOptionsPrivateCheckBox  AT (63 52 19 14) NONUSABLE
+	PUSHBUTTON  "Memo pad" ID ExportOptionsMemoPad  AT (2 19 50 AUTO) GROUP 1
+	PUSHBUTTON  "SugarMm" ID ExportOptionsSugarMemo  AT (53 19 50 AUTO) GROUP 1
+	PUSHBUTTON  "SuperMm" ID ExportOptionsSuperMemo  AT (104 19 50 AUTO) GROUP 1
 END
 
 ICONFAMILYEX COMPRESS
@@ -653,7 +647,11 @@ LAUNCHERCATEGORY ID 1000  "Main"
 
 DATA "data" ID SugarMemoDefaultDBImage  "ZDicPad.pdb"
 DATA "data" ID SugarMemoDefaultRecordHead  "SugarMemoDefaultRecordHead.bin"
-STRING ID SugarMemoDBName "ZDic Pad"        
+STRING ID SugarMemoDBName "ZDic Pad"
+
+DATA "data" ID SuperMemoDefaultDBImage   "sm_zdic.pdb"
+DATA "data" ID SuperMemoDefaultRecordHead  "SuperMemoDefaultRecordHead.bin"
+STRING ID SuperMemoDBName "sm_zdic"  
 
 
 BITMAPFAMILYEX ID WordListBitmapFamily  COMPRESS
@@ -2136,3 +2134,5 @@ BITMAPFAMILYEX ID 9257 COMPRESS
 BEGIN
 	BITMAP "257.bmp" BPP 16 DENSITY 144
 END
+
+
