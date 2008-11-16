@@ -2784,7 +2784,7 @@ static Err AppStart( Boolean subLaunch,UInt8 dictMenu )
 	err = ZDicToolsOpenSMTLib(&global->smtLibRefNum);
 	if (err != errNone || global->smtLibRefNum == sysInvalidRefNum) 
 	{
-		FrmAlert(CantLoadSTEAlert);
+		FrmCustomAlert(LibNotFoundAlert, "SmartTextEngine", NULL, NULL);
 		goto exit;
 	}
 	
@@ -4977,23 +4977,16 @@ static Boolean DAFormDoCommand( UInt16 command )
     {
     case OptionsAboutZDic:
         {           
-            FormType * frmP;
-            MemPtr p;
-			MemHandle h;
-			
-			h = DmGetResource(verRsc, appVersionAlternateID);
-			p = MemHandleLock(h);
+            //FormType * frmP;
 
             // Clear the menu status from the display
-            MenuEraseStatus( 0 );
+            MenuEraseStatus( 0 );            
 
             // Display the About Box.
-            frmP = FrmInitForm ( AboutForm );
-            CtlSetLabel(FrmGetObjectPtr(frmP, FrmGetObjectIndex(frmP, VersionLabel)),p);
-			MemPtrUnlock( p );
-        	DmReleaseResource( h );
-            FrmDoDialog ( frmP );
-            FrmDeleteForm ( frmP );
+            //frmP = FrmInitForm ( AboutForm );
+            //FrmDoDialog ( frmP );
+            //FrmDeleteForm ( frmP );
+            HsAboutHandspringAppWithYearCredId(YearID, CreditsID);
 
             handled = true;
             break;
@@ -6862,23 +6855,9 @@ static Boolean MainFormDoCommand( UInt16 command )
     {
     case OptionsAboutZDic:
         {
-            FormType * frmP;
-            MemPtr p;
-			MemHandle h;
-			
-			h = DmGetResource(verRsc, appVersionAlternateID);
-			p = MemHandleLock(h);
-
             // Clear the menu status from the display
             MenuEraseStatus( 0 );
-
-            // Display the About Box.
-            frmP = FrmInitForm ( AboutForm );
-            CtlSetLabel(FrmGetObjectPtr(frmP, FrmGetObjectIndex(frmP, VersionLabel)),p);
-			MemPtrUnlock( p );
-        	DmReleaseResource( h );
-            FrmDoDialog ( frmP );
-            FrmDeleteForm ( frmP );
+            HsAboutHandspringAppWithYearCredId(YearID, CreditsID);
 
             handled = true;
             break;
