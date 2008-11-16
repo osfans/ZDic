@@ -5274,8 +5274,7 @@ static Boolean DAFormHandleEvent( EventType * eventP )
 
     case frmCloseEvent:
         //ToolsSetFieldHandle( DADescriptionField, NULL, false );
-        STEResetEngine(global->smtLibRefNum, global->smtEngineRefNum);
-        
+        STEResetEngine(global->smtLibRefNum, global->smtEngineRefNum);        
         ToolsSetFieldHandle( DAWordField, NULL, false );
         ZDicDIAFormClose ( global );
         break;
@@ -5597,7 +5596,8 @@ static Boolean DAFormHandleEvent( EventType * eventP )
 
             break;
         }
-    case fldEnterEvent:
+        
+    case penUpEvent://fldEnterEvent:
     	handled = FormJumpSearch(DAWordField, false);
     	break;
 
@@ -7055,9 +7055,9 @@ static Boolean MainFormHandleEvent( EventType * eventP )
         // FrmDrawForm will save current screen.
         global->smtEngineRefNum = 0;
         frmP = FrmGetActiveForm();
-        ZDicDIAFormLoadInitial ( global, frmP );
-        MainFormInit( frmP );
         
+        ZDicDIAFormLoadInitial ( global, frmP );
+        MainFormInit( frmP );        
         ZDicDIADisplayChange ( global );
         FrmDrawForm ( frmP );
 		
