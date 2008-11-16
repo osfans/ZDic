@@ -4977,17 +4977,16 @@ static Boolean DAFormDoCommand( UInt16 command )
     {
     case OptionsAboutZDic:
         {           
-            //FormType * frmP;
+            FormType * frmP;
 
             // Clear the menu status from the display
             MenuEraseStatus( 0 );            
 
             // Display the About Box.
-            //frmP = FrmInitForm ( AboutForm );
-            //FrmDoDialog ( frmP );
-            //FrmDeleteForm ( frmP );
-            HsAboutHandspringAppWithYearCredId(YearID, CreditsID);
-
+            frmP = FrmInitForm ( AboutForm );
+            FrmDoDialog ( frmP );
+            FrmDeleteForm ( frmP );
+            
             handled = true;
             break;
         }
@@ -6855,10 +6854,16 @@ static Boolean MainFormDoCommand( UInt16 command )
     {
     case OptionsAboutZDic:
         {
-            // Clear the menu status from the display
-            MenuEraseStatus( 0 );
-            HsAboutHandspringAppWithYearCredId(YearID, CreditsID);
+            FormType * frmP;      
 
+            // Clear the menu status from the display
+            MenuEraseStatus( 0 );            
+
+            // Display the About Box.
+            frmP = FrmInitForm ( AboutForm );            
+            FrmDoDialog ( frmP );
+            FrmDeleteForm ( frmP );
+            
             handled = true;
             break;
         }
