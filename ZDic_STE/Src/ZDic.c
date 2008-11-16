@@ -4930,14 +4930,15 @@ static Boolean DAFormMoveForm( EventType * eventP )
 
     // adjust the bround and set new form bround
     DAFormAdjustFormBounds ( global, frmP, r, displayBounds );
-
     WinSetDrawMode ( oldMode );
 
     // Show DA form.
     WinSetDrawWindow ( oldDrawWinH );
     WinSetActiveWindow ( oldActiveWinH );
     FrmDrawForm( frmP );
-	//DAFormSearch( false, global->prefs.enableHighlightWord, false, global->prefs.enableAutoSpeech );
+    //for tx tt since they don't trigger winDisplayChangedEvent
+	if( !global->prefs.isTreo)
+		DAFormSearch( false, global->prefs.enableHighlightWord, false, global->prefs.enableAutoSpeech );
     return true;
 }
 
