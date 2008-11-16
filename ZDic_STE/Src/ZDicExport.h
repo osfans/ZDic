@@ -16,6 +16,6 @@
 
 extern Err ExportPopupDialog(void);
 extern Err ExportToMemo(Char *str);
-extern Err ExportToSMemo(Char *str); //Sugar or Super Memo
+extern Err ExportToSMemo(Char *str, UInt16 command); //command = OptionsExportSugarMemo or OptionsExportSuperMemo
 	
 #endif // _ZDIC_EXPORT_H

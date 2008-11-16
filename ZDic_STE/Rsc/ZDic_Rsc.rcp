@@ -7,7 +7,7 @@
 GENERATEHEADER "ZDic_Rsc.h"
 RESETAUTOID 1000
 
-TRANSLATION "zhTW"
+TRANSLATION "tc"
 //by alancc00 @ hi-pda
 BEGIN
 "Dictionary" = "√„®Â"
@@ -135,7 +135,7 @@ BEGIN
 "Main" = "•D≠n"
 END
 
-TRANSLATION "zhCN"
+TRANSLATION "sc"
 BEGIN
  "Dictionary" = "¥ µ‰"  
  "All Dictionaries" = "À˘”–¥ µ‰"
@@ -444,12 +444,13 @@ FORM ID AboutForm AT (2 2 156 156)
     DEFAULTBTNID AboutOKButton  SAVEBEHIND MODAL
 BEGIN
 	TITLE "About ZDic"
-	LABEL "ZDic 2.45" AUTOID AT (CENTER 21) FONT 7
+	LABEL "ZDic" AUTOID  AT (45 21) FONT 7
+	LABEL "X.xxx" ID VersionLabel AT (76 21) FONT 7
 	LABEL "Copyright © 2003-2004 neisoo" AUTOID AT (CENTER 43)
 	LABEL "Thank you for using ZDic!" AUTOID AT (CENTER 62) FONT 2
 	LABEL "JEMYZHANG(v2.34)" AUTOID AT (35 81)
-	LABEL "BobGreen (after v2.34)" AUTOID AT (CENTER 94)	
-	LABEL "osfans (v2.42-2.43)" AUTOID AT (CENTER 107)
+	LABEL "BobGreen (v2.34-2.41)" AUTOID AT (CENTER 94)	
+	LABEL "osfans (v2.42-2.45)" AUTOID AT (CENTER 107)
 	LABEL "Yang Zhiqiang (v2.44)" AUTOID AT (35 120)
 	BUTTON "OK" ID AboutOKButton AT (58 137 40 12)	
 END
@@ -650,7 +651,6 @@ DATA "data" ID SugarMemoDefaultRecordHead  "SugarMemoDefaultRecordHead.bin"
 STRING ID SugarMemoDBName "ZDic Pad"
 
 DATA "data" ID SuperMemoDefaultDBImage   "sm_zdic.pdb"
-DATA "data" ID SuperMemoDefaultRecordHead  "SuperMemoDefaultRecordHead.bin"
 STRING ID SuperMemoDBName "sm_zdic"  
 
 

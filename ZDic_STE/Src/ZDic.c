@@ -4976,14 +4976,22 @@ static Boolean DAFormDoCommand( UInt16 command )
     switch ( command )
     {
     case OptionsAboutZDic:
-        {
+        {           
             FormType * frmP;
+            MemPtr p;
+			MemHandle h;
+			
+			h = DmGetResource(verRsc, appVersionAlternateID);
+			p = MemHandleLock(h);
 
             // Clear the menu status from the display
             MenuEraseStatus( 0 );
 
             // Display the About Box.
             frmP = FrmInitForm ( AboutForm );
+            CtlSetLabel(FrmGetObjectPtr(frmP, FrmGetObjectIndex(frmP, VersionLabel)),p);
+			MemPtrUnlock( p );
+        	DmReleaseResource( h );
             FrmDoDialog ( frmP );
             FrmDeleteForm ( frmP );
 
@@ -5054,8 +5062,8 @@ static Boolean DAFormDoCommand( UInt16 command )
             	STEClearCurrentSelection(global->smtLibRefNum, global->smtEngineRefNum);
             	if (global->phonetic[0]) StrNCopy( &buf[0], global->phonetic, StrLen(global->phonetic));
             }
-            command==OptionsExportMemo? ExportToMemo(buf):ExportToSMemo(buf);
-            MemPtrFree(buf);
+            command==OptionsExportMemo?ExportToMemo(buf):ExportToSMemo(buf, command);
+            if(buf)MemPtrFree(buf);
             handled = true;
             break;
         }
@@ -5451,7 +5459,7 @@ static Boolean DAFormHandleEvent( EventType * eventP )
 	                		}
 	                		case 6:
 	                		{
-	                			ToolsSendMenuCmd( global->prefs.exportAppCreatorID == sysFileCMemo ? chrCapital_M : chrCapital_Z );
+	                			ToolsSendMenuCmd( global->prefs.exportAppCreatorID == sysFileCMemo ? chrCapital_M : (global->prefs.exportAppCreatorID == appSugarMemoCreator? chrCapital_Z :  chrCapital_Y));
 	                			handled = true;
 	                			break;
 	                		}
@@ -5505,7 +5513,7 @@ static Boolean DAFormHandleEvent( EventType * eventP )
 	                		}
 	                		case 6:
 	                		{
-	                			ToolsSendMenuCmd( global->prefs.exportAppCreatorID == sysFileCMemo ? chrCapital_M : chrCapital_Z );
+	                			ToolsSendMenuCmd( global->prefs.exportAppCreatorID == sysFileCMemo ? chrCapital_M : (global->prefs.exportAppCreatorID == appSugarMemoCreator? chrCapital_Z :  chrCapital_Y));
 	                			handled = true;
 	                			break;
 	                		}
@@ -5540,7 +5548,7 @@ static Boolean DAFormHandleEvent( EventType * eventP )
                 else if( eventP->data.keyDown.chr == (WChar)global->prefs.keyExportChr &&
                 		 eventP->data.keyDown.keyCode == (WChar)global->prefs.keyExportKeycode )
                 {
-                	ToolsSendMenuCmd( global->prefs.exportAppCreatorID == sysFileCMemo ? chrCapital_M : chrCapital_Z );
+                	ToolsSendMenuCmd( global->prefs.exportAppCreatorID == sysFileCMemo ? chrCapital_M : (global->prefs.exportAppCreatorID == appSugarMemoCreator? chrCapital_Z :  chrCapital_Y));
 	                handled = true;
                 }
                 else if( eventP->data.keyDown.chr == (WChar)global->prefs.keyOneKeyChgDicChr &&
@@ -5648,7 +5656,7 @@ static Boolean DAFormHandleEvent( EventType * eventP )
 
             else if ( eventP->data.ctlSelect.controlID == DAExportToMemo )
             {
-                ToolsSendMenuCmd( global->prefs.exportAppCreatorID == sysFileCMemo ? chrCapital_M : chrCapital_Z );
+                ToolsSendMenuCmd( global->prefs.exportAppCreatorID == sysFileCMemo ? chrCapital_M : (global->prefs.exportAppCreatorID == appSugarMemoCreator? chrCapital_Z :  chrCapital_Y));
                 handled = true;
             }
 
@@ -6855,12 +6863,20 @@ static Boolean MainFormDoCommand( UInt16 command )
     case OptionsAboutZDic:
         {
             FormType * frmP;
+            MemPtr p;
+			MemHandle h;
+			
+			h = DmGetResource(verRsc, appVersionAlternateID);
+			p = MemHandleLock(h);
 
             // Clear the menu status from the display
             MenuEraseStatus( 0 );
 
             // Display the About Box.
             frmP = FrmInitForm ( AboutForm );
+            CtlSetLabel(FrmGetObjectPtr(frmP, FrmGetObjectIndex(frmP, VersionLabel)),p);
+			MemPtrUnlock( p );
+        	DmReleaseResource( h );
             FrmDoDialog ( frmP );
             FrmDeleteForm ( frmP );
 
@@ -6992,8 +7008,8 @@ static Boolean MainFormDoCommand( UInt16 command )
             	STEClearCurrentSelection(global->smtLibRefNum, global->smtEngineRefNum);
             	if (global->phonetic[0]) StrNCopy( &buf[0], global->phonetic, StrLen(global->phonetic));
             }
-            command==OptionsExportMemo? ExportToMemo(buf):ExportToSMemo(buf);
-            MemPtrFree(buf);
+            command==OptionsExportMemo?ExportToMemo(buf):ExportToSMemo(buf, command);
+            if(buf)MemPtrFree(buf);
             handled = true;
             break;
         }
@@ -7436,7 +7452,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 	                		}
 	                		case 6:
 	                		{
-	                			ToolsSendMenuCmd( global->prefs.exportAppCreatorID == sysFileCMemo ? chrCapital_M : chrCapital_Z );
+	                			ToolsSendMenuCmd( global->prefs.exportAppCreatorID == sysFileCMemo ? chrCapital_M : (global->prefs.exportAppCreatorID == appSugarMemoCreator? chrCapital_Z :  chrCapital_Y));
 	                			break;
 	                		}
 	                		case 7:
@@ -7503,7 +7519,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 	                		}
 	                		case 6:
 	                		{
-	                			ToolsSendMenuCmd( global->prefs.exportAppCreatorID == sysFileCMemo ? chrCapital_M : chrCapital_Z );
+	                			ToolsSendMenuCmd( global->prefs.exportAppCreatorID == sysFileCMemo ? chrCapital_M : (global->prefs.exportAppCreatorID == appSugarMemoCreator? chrCapital_Z :  chrCapital_Y));
 	                			break;
 	                		}
 	                		case 7:
@@ -7536,7 +7552,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
                 else if( eventP->data.keyDown.chr == (WChar)global->prefs.keyExportChr &&
                 		 eventP->data.keyDown.keyCode == (WChar)global->prefs.keyExportKeycode)
                 {
-                	ToolsSendMenuCmd( global->prefs.exportAppCreatorID == sysFileCMemo ? chrCapital_M : chrCapital_Z );
+                	ToolsSendMenuCmd( global->prefs.exportAppCreatorID == sysFileCMemo ? chrCapital_M : (global->prefs.exportAppCreatorID == appSugarMemoCreator? chrCapital_Z :  chrCapital_Y));
 	                handled = true;
                 }
                 else if( eventP->data.keyDown.chr == (WChar)global->prefs.keyWordListChr &&

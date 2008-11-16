@@ -392,7 +392,7 @@ Err ExportToMemo(Char	* str)
  *		ZhongYuanHuan	15/Jan/05	Initial Revision
 *
  ***********************************************************************/
-static Err GetDatabase ( DmOpenRef *dbPP, UInt16 mode, DmResID dbNameID, DmResID dbImageID )
+static Err GetDatabase ( DmOpenRef *dbPP, UInt16 mode,  UInt16 command)
 {
     MemHandle dbNameH;
     Char *dbNameP;
@@ -402,6 +402,9 @@ static Err GetDatabase ( DmOpenRef *dbPP, UInt16 mode, DmResID dbNameID, DmResID
 
     DmOpenRef dbP;
     LocalID dbID;
+    
+    DmResID dbNameID, dbImageID;
+    Boolean newDB = false;
 
     Err err;
 
@@ -413,6 +416,16 @@ static Err GetDatabase ( DmOpenRef *dbPP, UInt16 mode, DmResID dbNameID, DmResID
     *dbPP = NULL;
     err = errNone;
 
+    if( command == OptionsExportSugarMemo )
+    {
+    	dbNameID = SugarMemoDBName;
+    	dbImageID = SugarMemoDefaultDBImage;
+    }
+    else
+    {
+    	dbNameID = SuperMemoDBName;
+    	dbImageID = SuperMemoDefaultDBImage;
+    }
     // Get database dbID.
     dbNameH = DmGetResource( strRsc, dbNameID );
     dbNameP = MemHandleLock( dbNameH );
@@ -433,6 +446,7 @@ static Err GetDatabase ( DmOpenRef *dbPP, UInt16 mode, DmResID dbNameID, DmResID
             err = DmGetLastErr();
             goto exit;
         }
+        newDB = true;
     }
 
     // Open database by dbID
@@ -444,6 +458,20 @@ static Err GetDatabase ( DmOpenRef *dbPP, UInt16 mode, DmResID dbNameID, DmResID
     }
 
     *dbPP = dbP;
+    
+    if ( newDB && command == OptionsExportSuperMemo )// Update supermemo create date
+    {
+		DateType today;
+		MemHandle recordH; 
+    	MemPtr recordP;        
+		
+        recordH = DmGetRecord (dbP, 0); 
+		recordP = MemHandleLock ( recordH );
+		DateSecondsToDate (TimGetSeconds(), &today);
+	    DmWrite( recordP, 8, &DateToInt(today), 2 );		
+		MemPtrUnlock ( recordP );
+		DmReleaseRecord ( dbP, 0, true );
+	}
 
 exit:
     if ( dbNameH != 0 )
@@ -465,7 +493,7 @@ exit:
  *
  * FUNCTION:    ExportToSu(ga|pe)rMemo
  *
- * DESCRIPTION: This routine export text to SugarMemo with field id.
+ * DESCRIPTION: This routine export text to Su(ga|pe)rMemo with field id.
  *
  * PARAMETERS:  -> fieldID Field resource id.
  *
@@ -478,9 +506,9 @@ exit:
  *		osfans			08/Nov/15	SuperMemo Revision
  *
  ***********************************************************************/
-Err ExportToSMemo(Char *str)
+Err ExportToSMemo(Char *str, UInt16 command)
 {
-    MemHandle recordH, recHeadImageH; 
+    MemHandle recordH; 
     MemPtr recordP;
     Int16	size, sizemore=0;
     DmOpenRef	dbP;
@@ -500,10 +528,7 @@ Err ExportToSMemo(Char *str)
     do
     {
         // Get SugarMemo database, if it is not exist then create it.
-        if(global->prefs.exportAppCreatorID == appSugarMemoCreator)
-        	err = GetDatabase ( &dbP, dmModeReadWrite, SugarMemoDBName, SugarMemoDefaultDBImage );
-        else
-        	err = GetDatabase ( &dbP, dmModeReadWrite, SuperMemoDBName, SuperMemoDefaultDBImage );
+        err = GetDatabase ( &dbP, dmModeReadWrite, command );
         if ( err != errNone || dbP == NULL )
             break;
 
@@ -553,7 +578,7 @@ Err ExportToSMemo(Char *str)
             		{	
             			str[i] = chrNull; 
             			chrNullOffset[ j++ ] = i;
-            			sizemore -= 3;
+            			sizemore -= 2;
             		}
             	}
             }
@@ -565,10 +590,10 @@ Err ExportToSMemo(Char *str)
             chrNullOffset[ j++ ] = size;
             sizemore++;
         }
-        sizemore+=2;
+        sizemore++;
 
         // Get SugarMemo record Head.
-        if(global->prefs.exportAppCreatorID == appSugarMemoCreator)
+        if( command == OptionsExportSugarMemo )
         {
 			typedef struct
 			{
@@ -577,6 +602,8 @@ Err ExportToSMemo(Char *str)
 			}
 			SugarMemoRecHeadType;
 			SugarMemoRecHeadType *recHeadImageP, recHead;
+			MemHandle recHeadImageH;
+			
     		recHeadSize = sizeof( SugarMemoRecHeadType );	        
 	        recHeadImageH = DmGetResource( 'data', SugarMemoDefaultRecordHead );
 	        recHeadImageP = ( SugarMemoRecHeadType * ) MemHandleLock( recHeadImageH );
@@ -606,8 +633,8 @@ Err ExportToSMemo(Char *str)
         }
         else
         {   		
-    		UInt8 *recHead;
-    		DateType today;
+    		UInt16 recHead[10]={0x2, 0xffff};
+    		//DateType today;
     		UInt16 indexSize;	        
     		
 	        index = DmNumRecords ( dbP );	        
@@ -620,11 +647,8 @@ Err ExportToSMemo(Char *str)
 			DmReleaseRecord ( dbP, 15, true );
 			
     		sizemore += 2;
-    		recHeadSize = 20;
-	        recHeadImageH = DmGetResource( 'data', SuperMemoDefaultRecordHead );
-	        recHead = MemHandleLock( recHeadImageH );
-	        MemHandleUnlock( recHeadImageH );
-	        DmReleaseResource( recHeadImageH );	        
+    		DateSecondsToDate (TimGetSeconds(), (DateType *)(&recHead[3]));
+    		recHeadSize = sizeof(recHead);       
 			 
 			// Add a new record at the end of the database.
 	        recordH = DmNewRecord ( dbP, &index, recHeadSize + size + sizemore );
@@ -640,8 +664,6 @@ Err ExportToSMemo(Char *str)
 	        // Pack the the data into the new record.
 	        recordP = MemHandleLock ( recordH );	        
 	        DmWrite( recordP, 0, recHead, recHeadSize ); // record head,(remember data)
-	        DateSecondsToDate (TimGetSeconds(), &today);
-	        DmWrite( recordP, 6, &DateToInt(today), 2 );//record create date
 	        offset = recHeadSize;	        
 	    }	            
         
@@ -670,14 +692,13 @@ Err ExportToSMemo(Char *str)
         	offset+=size - chrNullOffset[ 2 ] - 2 ;
         }
         	
-        if(global->prefs.exportAppCreatorID == appSuperMemoCreator)
+        if( command == OptionsExportSuperMemo )
         {
         	DmWrite( recordP,  offset, &tail, sizeof( tail) ); //field #5
         	offset+=sizeof( tail);
 	    	DmWrite( recordP,  offset, &tail, sizeof( tail) ); //field #6	
-        }	
-        // Now translate GMX phonetic to SugarMemo phonetic.
-        else if ( global->phonetic[0] )
+        }        
+        else if ( global->phonetic[0] )// Now translate GMX phonetic to SugarMemo phonetic.
         {
             MemHandle transH;
             Char *trans;
