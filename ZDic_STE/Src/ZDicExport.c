@@ -634,15 +634,18 @@ Err ExportToSMemo(Char *str, UInt16 command)
         else
         {   		
     		UInt16 recHead[10]={0x2, 0xffff};
-    		//DateType today;
     		UInt16 indexSize;	        
     		
 	        index = DmNumRecords ( dbP );	        
-	        //append new record index        
-	        indexSize = 130 + index * 2;
-	        recordH = DmResizeRecord (dbP, 15,  indexSize); 
-			recordP = MemHandleLock ( recordH );			
-			DmWrite( recordP, indexSize-2, &index, 2);			
+	               
+	        recordH = DmQueryRecord (dbP, 15);
+	        indexSize = MemHandleSize ( recordH );
+	        DmReleaseRecord ( dbP, 15, true );
+	        
+	        //append new record index 
+	        recordH = DmResizeRecord (dbP, 15, indexSize+2);
+	        recordP = MemHandleLock (recordH);						
+			DmWrite( recordP, indexSize, &index, 2);
 			MemPtrUnlock ( recordP );
 			DmReleaseRecord ( dbP, 15, true );
 			
@@ -745,11 +748,11 @@ Err ExportToSMemo(Char *str, UInt16 command)
         MemPtrUnlock ( recordP );
 
         // Get the attrib of new record and set it to unfiled and no secret.
-        DmRecordInfo ( dbP, index, &attr, NULL, NULL );
-        attr &= ~dmRecAttrCategoryMask;
-        attr &= ~dmRecAttrSecret;
+        //DmRecordInfo ( dbP, index, &attr, NULL, NULL );
+        //attr &= ~dmRecAttrCategoryMask;
+        //attr &= ~dmRecAttrSecret;
 
-        DmSetRecordInfo ( dbP, index, &attr, NULL );
+        //DmSetRecordInfo ( dbP, index, &attr, NULL );
         DmReleaseRecord ( dbP, index, true );
         
     }
