@@ -47,7 +47,7 @@ class ZDic:
             s = s.replace(name, char)
         s = re.compile('(</?(p|font|br|tr|td|table|div|span|ref|small).*?>)|(\[\[[a-z]{2,3}(-[a-z]*?)?:[^\]]*?\]\])|(<!--.*?-->)',\
                         re.I|re.DOTALL).sub('',s)
-        s = s.replace('\n', r'\n')
+        s = re.sub('\n{3,}','\n\n',s).replace('\n',r'\n')
         return s
 
     def ste(self,s):       
@@ -109,8 +109,11 @@ class ZDic:
                     try:
                         a = s.index('<title>')
                         b = s.index('</title>',a)
+                        #ta = s.index('<timestamp>',b)
+                        #tb = s.index('</timestamp>',ta)#获取时间                        
                         c = s.index('<text xml:space="preserve">',b)
                         d = s.index('</text>',c)
+                        #timestamp = s[ta+11:tb].replace('T',' ').replace('Z', '')
                         word, mean = self.trim(s[a+7:b]), self.trim(s[c+27:d])
                         if ((word in self.lines) and (mean[:9].lower()=='#redirect')) \
                            or ((':' in word) and word[:word.index(':')] in removed_title):#跳过简繁转换后的重复词条或跳过某些类别词条
@@ -149,7 +152,7 @@ class ZDic:
         first=''
         f=open('tmp.pdb','wb')
         if '' not in self.lines:
-            self.lines['']=self.ste('<b>Welcome to //STEPURPLEFONT//%s//STECURRENTFONT//!</b>\n<b>Words count:</b> //STEBLUEFONT//%d//STECURRENTFONT//\n<b>Made time:</b> //STEREDFONT//%s'%(self.pdbName,len(self.lines),time.strftime("%Y.%m.%d")))
+            self.lines['']=self.ste('<b>Welcome to //STEPURPLEFONT//%s//STECURRENTFONT//!</b>\\n<b>Words count:</b> //STEBLUEFONT//%d//STECURRENTFONT//\\n<b>Made time:</b> //STEREDFONT//%s'%(self.pdbName,len(self.lines),time.strftime("%Y.%m.%d")))
         for word in sorted(self.lines.keys()):
             line = "%s\t%s\n"%(word,self.lines[word])
             if first=='':
@@ -198,7 +201,7 @@ class ZDic:
         f=open('tmp.pdb','wb')
         dbf = bsddb.btopen('tmp.db','w')
         if '' not in dbf:
-            dbf['']=self.ste('<b>Welcome to //STEPURPLEFONT//%s//STECURRENTFONT//!</b>\n<b>Words count:</b> //STEBLUEFONT//%d//STECURRENTFONT//\n<b>Made time:</b> //STEREDFONT//%s'%(self.pdbName,len(dbf),time.strftime("%Y.%m.%d")))
+            dbf['']=self.ste('<b>Welcome to //STEPURPLEFONT//%s//STECURRENTFONT//!</b>\\n<b>Words count:</b> //STEBLUEFONT//%d//STECURRENTFONT//\\n<b>Made time:</b> //STEREDFONT//%s'%(self.pdbName,len(dbf),time.strftime("%Y.%m.%d")))
         word,mean = dbf.first()
         while 1:
             line = "%s\t%s\n"%(word,mean)
