@@ -21,8 +21,8 @@ for name, codepoint in htmlentitydefs.name2codepoint.items():
     except:
         pass
 
-replace_ste =[('<hr>','//STEHORIZONTALLINE//\n'),
-              ('<center>','//STECENTERALIGN//'),('</center>','\n'),
+replace_ste =[('<hr>','//STEHORIZONTALLINE//\\n'),
+              ('<center>','//STECENTERALIGN//'),('</center>','\\n'),
               ('<u>',"//STEHYPERLINK="),('</u>',"\1//"),
               ('<i>',"//STEBOLDFONT//"),('</i>',"//STESTDFONT//"),
               ('<b>',"//STEBOLDFONT//"),('</b>',"//STESTDFONT//"),
@@ -47,18 +47,17 @@ class ZDic:
             s = s.replace(name, char)
         s = re.compile('(</?(p|font|br|tr|td|table|div|span|ref|small).*?>)|(\[\[[a-z]{2,3}(-[a-z]*?)?:[^\]]*?\]\])|(<!--.*?-->)',\
                         re.I|re.DOTALL).sub('',s)
+        s = s.replace('\n', r'\n')
         return s
 
     def ste(self,s):       
         for i, j in replace_ste:
             s = s.replace(i, j)     
-        s = re.sub('\[\[([^\[/]*?)\]\]',"//STEHYPERLINK=\g<1>\1//", s)        
-        s = re.sub('\n{3,}','\n\n',s).replace('\n',r'\n')
+        s = re.sub('\[\[([^\[/]*?)\]\]',"//STEHYPERLINK=\g<1>\1//", s)
         return s
 
     def unste(self,s):    
-        return s.replace("//STEBOLDFONT//", '<b>').replace("//STESTDFONT//", '</b>')\
-                .replace("//STEHYPERLINK=", '<u>').replace("\1//", '</u>')
+        return s.replace("//STEHYPERLINK=", '[[').replace("\1//", ']]')
     
     def fromPDB(self, path):
         "pdb=>byteList"
@@ -117,7 +116,7 @@ class ZDic:
                            or ((':' in word) and word[:word.index(':')] in removed_title):#跳过简繁转换后的重复词条或跳过某些类别词条
                             pass
                         elif word in self.lines:
-                            self.lines[word]+='\\n\\n\\n' + self.ste(mean) #重复词条，合并成一条
+                            self.lines[word]+=r'\n\n\n' + self.ste(mean) #重复词条，合并成一条
                         else:
                             self.lines[word]=self.ste(mean)
                         s=s[d:]
@@ -137,7 +136,7 @@ class ZDic:
                     if '\t' in i:
                         word, mean = i.split('\t', 1)
                         if word in self.lines:
-                            self.lines[word]+='\\n\\n\\n' + self.ste(mean) #重复词条，合并成一条
+                            self.lines[word]+=r'\n\n\n' + self.ste(mean) #重复词条，合并成一条
                         else:
                             self.lines[word] = self.ste(mean)
         if bsddb_opt:
@@ -301,7 +300,7 @@ class ZDic:
         f.close()
 
     def p2t(self, path, patho):
-        "pdb=>byteList"
+        "pdb=>txt"
         f = open(path, 'rb')
         
         f.seek(PDBHeaderStructLength - 4)
@@ -328,6 +327,14 @@ class ZDic:
             t.close()
             f.close()
 
+    def toTXT(self, patho):
+        "直接将lines保存至txt文件中，便于编辑修改"
+        f = open( patho, 'w')
+        for word, mean in self.lines.iteritems():
+            print >>f, "%s\t%s" % (word, self.unste(mean))
+        f.close()
+        
+
 def log(msg):
     """打印日志"""
     print '[%s]%s'%(time.strftime('%X'), msg)
@@ -343,7 +350,12 @@ if __name__ == '__main__':
             app.pdbName = os.path.splitext(os.path.basename(patho))[0]
             if ('-t', '') in opts: #-t参数：转换为文本文件
                 log('Processing...')
-                app.p2t(pathi, patho)
+                if pathi.endswith('pdb'):
+                    app.p2t(pathi, patho)
+                else:
+                    app.fromPath(pathi)
+                    log('Saving...')
+                    app.toTXT(patho)
             else:
                 bsddb_opt = ('-b', '') in opts #-b参数：使用bsddb，较小内存，较大文件
                 app.fromPath(pathi)
