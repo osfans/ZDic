@@ -1,66 +1,66 @@
 #!/usr/bin/env python
 # -*- coding: cp936 -*-
+"""
+ZDic转换工具
+可将ZDic标准文本格式、维基XML格式转换为PDB词典格式
+也可将PDB格式转换为文本格式
+本脚本使用GBK格式编码
+"""
 
 import os, sys, getopt, bz2, time, datetime, re, htmlentitydefs, bsddb
 from struct import *
+from xml.dom.minidom import parseString
 
-PDBHeaderStructString='>32shhLLLlll4s4sllH'
-PDBHeaderStructLength=calcsize(PDBHeaderStructString)
-padding='\0\0'
+PDBHeaderStructString = '>32shhLLLlll4s4sllH'           #PDB文件头
+PDBHeaderStructLength = calcsize(PDBHeaderStructString) #PDB文件头长度
+padding = '\0\0'                                        #PDB文件头补白
 
-enc = sys.getfilesystemencoding()
-enc = 'gbk' if enc == 'UTF-8' else enc #默认编码
+enc = sys.getfilesystemencoding()                       #系统默认编码
+enc = 'gbk' if enc == 'UTF-8' else enc                  #如果是UTF-8，则改为GBK，否则不变
 
-bsddb_opt = False
+bsddb_opt = False                                       #默认不采用bsddb保存
 
-replace_dic = {} #要转换的HTML命名
+replace_dic = {}                                        #保存需要转换的HTML命名字符，如&nbsp; &lt;等
 for name, codepoint in htmlentitydefs.name2codepoint.items():
     try:
-        char = unichr(codepoint).encode(enc)
-        replace_dic["&%s;" % name.lower()]=char
+        char = unichr(codepoint).encode(enc)            #enc编码可显示该HTML对象时，才进行替换
+        replace_dic['&%s;' % name.lower()] = char
     except:
         pass
 
-replace_ste =[('<hr>','//STEHORIZONTALLINE//\\n'),
-              ('<center>','//STECENTERALIGN//'),('</center>','\\n'),
-              ('<u>',"//STEHYPERLINK="),('</u>',"\1//"),
-              ('<i>',"//STEBOLDFONT//"),('</i>',"//STESTDFONT//"),
-              ('<b>',"//STEBOLDFONT//"),('</b>',"//STESTDFONT//"),
-              ('<big>',"//STEBOLDFONT//"),('</big>',"//STESTDFONT//")]#可替换成STE的标记
+replace_ste = [('<hr>', '//STEHORIZONTALLINE//\\n'),
+               ('<center>', '//STECENTERALIGN//'), ('</center>','\\n'),
+               ('<u>', '//STEHYPERLINK='), ('</u>', '\1//'),
+               ('<i>', '//STEBOLDFONT//'), ('</i>', '//STESTDFONT//'),
+               ('<b>', '//STEBOLDFONT//'), ('</b>', '//STESTDFONT//'),
+               ('<big>', '//STEBOLDFONT//'), ('</big>', '//STESTDFONT//')
+              ] #可替换成STE的HTML标记
     
-removed_title=['Help', 'Template', 'Image', 'Portal', 'Wikipedia', 'MediaWiki', 'WP'] #要删除的词条
+removed_title = ['Help', 'Template', 'Image', 'Portal', 'Wikipedia', 'MediaWiki', 'WP'] #要删除的WIKI词条
   
 class ZDic:
-    def __init__(self,compressFlag=2,recordSize=0x4000):
-        self.index=''
-        self.byteLen=[]
-        self.lenSec=''
-        self.creatorID='Kdic'
-        self.pdbType='Dict'
-        self.maxWordLen=32
-        self.recordSize=recordSize        
-        self.compressFlag=compressFlag
-
-    def trim(self,s):
-        s = s.decode('utf-8').encode(enc,'replace').replace('&amp;', '&')
-        for name, char in replace_dic.iteritems():
-            s = s.replace(name, char)
-        s = re.compile('(</?(p|font|br|tr|td|table|div|span|ref|small).*?>)|(\[\[[a-z]{2,3}(-[a-z]*?)?:[^\]]*?\]\])|(<!--.*?-->)',\
-                        re.I|re.DOTALL).sub('',s)
-        s = re.sub('\n{3,}','\n\n',s).replace('\n',r'\n')
-        return s
+    def __init__(self, compressFlag = 2, recordSize = 0x4000):
+        "初始化ZDic类，默认为Zlib压缩方式，16K页面大小"
+        self.index = ''
+        self.byteLen = []
+        self.lenSec = ''
+        self.creatorID = 'Kdic'
+        self.pdbType = 'Dict'
+        self.maxWordLen = 32
+        self.recordSize = recordSize        
+        self.compressFlag = compressFlag
 
     def ste(self,s):       
-        for i, j in replace_ste:
+        for i, j in replace_ste: #替换HTML标记
             s = s.replace(i, j)     
-        s = re.sub('\[\[([^\[/]*?)\]\]',"//STEHYPERLINK=\g<1>\1//", s)
+        s = re.sub('\[\[([^\[/]*?)\]\]', '//STEHYPERLINK=\g<1>\1//', s) #把[[]]变成STE超链接
         return s
 
     def unste(self,s):    
-        return s.replace("//STEHYPERLINK=", '[[').replace("\1//", ']]')
+        return s.replace('//STEHYPERLINK=', '[[').replace('\1//', ']]')#把STE超链接还原成[[]]
     
     def fromPDB(self, path):
-        "pdb=>byteList"
+        "从PDB文件中读取数据"
         f = open(path, 'rb')
         self.header = f.read(PDBHeaderStructLength)
         self.pdbName = self.header[:32].rstrip('\0')
@@ -69,7 +69,7 @@ class ZDic:
         self.lines = {}
         for i in range(self.bnum - 1):
             f.seek(PDBHeaderStructLength + (i + 1) * 8)
-            endOffset = unpack('>L',f.read(4))[0]
+            endOffset = unpack('>L', f.read(4))[0]
             f.seek(startOffset)
             if i == 0:
                 f.seek(7, 1)
@@ -101,20 +101,31 @@ class ZDic:
         for path in files:
             ext=os.path.splitext(path)[1].lower()#获取后缀名
             if ext in ['.xml', '.bz2']: #wiki xml
+                def trim(s):
+                    "处理XML文件标记"
+                    s = s.encode(enc,'replace').replace('&amp;', '&') #把UTF8编码转换为enc编码，无法编码的用?代替
+                    for name, char in replace_dic.iteritems(): #替换HTML命名字符
+                        s = s.replace(name, char)
+                    s = re.compile('(</?(p|font|br|tr|td|table|div|span|ref|small).*?>)|(\[\[[a-z]{2,3}(-[a-z]*?)?:[^\]]*?\]\])|(<!--.*?-->)',\
+                                    re.I|re.DOTALL).sub('', s) #替换部分HTML标记
+                    s = re.sub('\n{3,}','\n\n',s).replace('\n', r'\n') #把连续的多个换行符替换成两个换行符
+                    return s
+                def getData(page, title):
+                    "获取相应字段数据"
+                    try:
+                        return trim(page.getElementsByTagName(title)[0].childNodes[0].data)
+                    except:
+                        return ''
                 f = bz2.BZ2File(path) if ext == '.bz2' else open(path) #打开压缩或者不压缩格式均可
                 block = 1024*32 #每次读入32K
                 s = f.read(block)
                 tmp = ''
                 while 1:  
                     try:
-                        a = s.index('<title>')
-                        b = s.index('</title>',a)
-                        #ta = s.index('<timestamp>',b)
-                        #tb = s.index('</timestamp>',ta)#获取时间                        
-                        c = s.index('<text xml:space="preserve">',b)
-                        d = s.index('</text>',c)
-                        #timestamp = s[ta+11:tb].replace('T',' ').replace('Z', '')
-                        word, mean = self.trim(s[a+7:b]), self.trim(s[c+27:d])
+                        a = s.index('<page>')
+                        b = s.index('</page>',a + 6) + 7                #获取page段
+                        dom = parseString(s[a:b])
+                        word, mean = getData(dom, 'title'), getData(dom, 'text')
                         if ((word in self.lines) and (mean[:9].lower()=='#redirect')) \
                            or ((':' in word) and word[:word.index(':')] in removed_title):#跳过简繁转换后的重复词条或跳过某些类别词条
                             pass
@@ -122,7 +133,7 @@ class ZDic:
                             self.lines[word]+=r'\n\n\n' + self.ste(mean) #重复词条，合并成一条
                         else:
                             self.lines[word]=self.ste(mean)
-                        s=s[d:]
+                        s=s[b:]
                     except:
                         tmp=f.read(block)
                         if tmp:
@@ -135,13 +146,13 @@ class ZDic:
             else: #TXT dic
                 f=open(path,'rU')
                 for i in f:
-                    i = i.rstrip().replace(' /// ', '\t', 1)
+                    i = i.rstrip().replace(' /// ', '\t', 1)    #如果使用 /// 分隔，则替换成\t
                     if '\t' in i:
-                        word, mean = i.split('\t', 1)
+                        word, mean = i.split('\t', 1)           #分隔词语和释义
                         if word in self.lines:
                             self.lines[word]+=r'\n\n\n' + self.ste(mean) #重复词条，合并成一条
                         else:
-                            self.lines[word] = self.ste(mean)
+                            self.lines[word] = self.ste(mean)   #STE处理
         if bsddb_opt:
             self.lines.sync()
             self.lines.close()
@@ -151,13 +162,13 @@ class ZDic:
         tmp=''
         first=''
         f=open('tmp.pdb','wb')
-        if '' not in self.lines:
+        if '' not in self.lines: #判断有无词典信息，没有则自动添加
             self.lines['']=self.ste('<b>Welcome to //STEPURPLEFONT//%s//STECURRENTFONT//!</b>\\n<b>Words count:</b> //STEBLUEFONT//%d//STECURRENTFONT//\\n<b>Made time:</b> //STEREDFONT//%s'%(self.pdbName,len(self.lines),time.strftime("%Y.%m.%d")))
         for word in sorted(self.lines.keys()):
             line = "%s\t%s\n"%(word,self.lines[word])
             if first=='':
                 first=tmp
-            if len(tmp+line)<self.recordSize:
+            if len(tmp)+len(line)<self.recordSize:
                 tmp+=line
             else:
                 if tmp:
@@ -173,18 +184,13 @@ class ZDic:
                             tmpline=line
                             line=''
                         else:
-                            if '//STE' in line[blen-40:blen+4]: #split form //STE
-                                steindex=line[blen-40:blen+4].index('//STE')
-                                blen=blen-40+steindex
-                            elif '\\n' == line[blen-1:blen+1]: # split from \n
-                                blen=blen-1
-                            tmpline=line[:blen]
-                            line=line[blen:]
                             try:
-                                tmpline.decode('gbk')
+                                breakindex = line.rindex('\\n', 0, blen)#在换行符处截断
+                                tmpline = line[:breakindex]
+                                line = line[breakindex+2:]
                             except:
-                                line=tmpline[-1]+line
-                                tmpline=tmpline[:-1]                           
+                                tmpline = line[:blen]
+                                line = line[blen:]
                         self.compress("%s\t%s\n"%(tmpindex,tmpline),tmpindex,tmpindex,f)
                         i+=1
                 else:
@@ -223,7 +229,7 @@ class ZDic:
                             tmpline=line
                             line=''
                         else:
-                            if '//STE' in line[blen-40:blen+4]: #split form //STE
+                            """if '//STE' in line[blen-40:blen+4]: #split form //STE
                                 steindex=line[blen-40:blen+4].index('//STE')
                                 blen=blen-40+steindex
                             elif '\\n' == line[blen-1:blen+1]: # split from \n
@@ -234,7 +240,14 @@ class ZDic:
                                 tmpline.decode('gbk')
                             except:
                                 line=tmpline[-1]+line
-                                tmpline=tmpline[:-1]                           
+                                tmpline=tmpline[:-1]"""
+                            try:
+                                breakindex = line.rindex('\\n', 0, blen)#在换行符处截断
+                                tmpline=line[:breakindex]
+                                line=line[breakindex+2:]
+                            except:
+                                tmpline=line[:blen]
+                                line=line[blen:]                            
                         self.compress("%s\t%s\n"%(tmpindex,tmpline),tmpindex,tmpindex,f)
                         i+=1
                 else:
@@ -304,8 +317,7 @@ class ZDic:
 
     def p2t(self, path, patho):
         "pdb=>txt"
-        f = open(path, 'rb')
-        
+        f = open(path, 'rb')        
         f.seek(PDBHeaderStructLength - 4)
         self.bnum= unpack('>l',f.read(4))[0]
         firstOffset = unpack('>L', f.read(4))[0]
@@ -331,12 +343,11 @@ class ZDic:
             f.close()
 
     def toTXT(self, patho):
-        "直接将lines保存至txt文件中，便于编辑修改"
+        "将lines按序保存至txt文件中，便于编辑修改"
         f = open( patho, 'w')
-        for word, mean in self.lines.iteritems():
+        for word, mean in sorted(self.lines.iteritems()):
             print >>f, "%s\t%s" % (word, self.unste(mean))
-        f.close()
-        
+        f.close()        
 
 def log(msg):
     """打印日志"""
@@ -344,37 +355,37 @@ def log(msg):
     
 if __name__ == '__main__':    
     opts, argv = getopt.getopt(sys.argv[1:], 'bt')
-    if len(argv) == 2:
+    if len(argv) != 2:
+        log('语法： [-t] [-b] 文件名1 文件名2') #参数错误时给出语法提示
+    else:
         pathi, patho = argv
         try:
             s = time.time() #记录开始时间
-            log('Loading...')
+            log('读入文件...')
             app = ZDic()    #初使化ZDic数据结构
             app.pdbName = os.path.splitext(os.path.basename(patho))[0]
             if ('-t', '') in opts: #-t参数：转换为文本文件
-                log('Processing...')
                 if pathi.endswith('pdb'):
                     app.p2t(pathi, patho)
                 else:
                     app.fromPath(pathi)
-                    log('Saving...')
+                    log('保存文件...')
                     app.toTXT(patho)
             else:
-                bsddb_opt = ('-b', '') in opts #-b参数：使用bsddb，较小内存，较大文件
+                bsddb_opt = ('-b', '') in opts #-b参数：使用bsddb，较小内存，较大文件，较长时间
                 app.fromPath(pathi)
-                log('Processing...')
+                log('处理文件...')
                 if bsddb_opt:
                     app.resizeBlockB()
                 else:
                     app.resizeBlock()
-                log('Saving...')
+                log('保存文件...')
                 app.toPDB(patho)                
             cost = time.time() - s #计算花费时间
-            log('Success! %dh%dm%ds passed.' % (cost/3600, cost%3600/60, cost%60))
+            log('成功！共耗时 %dh%dm%ds 。' % (cost/3600, cost%3600/60, cost%60))
         except:
-            log('Error!')
-            raise      
-    else:
-        log('Syntax: [-t] file1 file2')
+            log('出错！')
+            raise
+        
 
 
