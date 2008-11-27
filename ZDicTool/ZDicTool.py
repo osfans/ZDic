@@ -1,46 +1,52 @@
 #!/usr/bin/env python
-# -*- coding: cp936 -*-
-"""
-ZDic×ª»»¹¤¾ß
-¿É½«ZDic±ê×¼ÎÄ±¾¸ñÊ½¡¢Î¬»ùXML¸ñÊ½×ª»»ÎªPDB´Êµä¸ñÊ½
-Ò²¿É½«PDB¸ñÊ½×ª»»ÎªÎÄ±¾¸ñÊ½
-±¾½Å±¾Ê¹ÓÃGBK¸ñÊ½±àÂë
+# -*- coding: utf-8 -*-
+U"""
+ZDicè½¬æ¢å·¥å…·
+å¯å°†ZDicæ ‡å‡†æ–‡æœ¬TXTã€ç»´åŸºXMLæˆ–BZ2å‹ç¼©æ ¼å¼ã€é‡‘å±±è¯éœ¸DA3æ ¼å¼è½¬æ¢ä¸ºPDBè¯å…¸æ ¼å¼
+ä¹Ÿå¯å°†PDBæ ¼å¼è½¬æ¢ä¸ºæ–‡æœ¬æ ¼å¼
+æœ¬è„šæœ¬ä½¿ç”¨UTF-8æ ¼å¼ç¼–ç 
 """
 
-import os, sys, getopt, bz2, time, datetime, re, htmlentitydefs, bsddb
+import os, sys, getopt, bz2, time, datetime, re, htmlentitydefs, bsddb, string
 from struct import *
 from xml.dom.minidom import parseString
+from xml.parsers.expat import ExpatError
 
-PDBHeaderStructString = '>32shhLLLlll4s4sllH'           #PDBÎÄ¼şÍ·
-PDBHeaderStructLength = calcsize(PDBHeaderStructString) #PDBÎÄ¼şÍ·³¤¶È
-padding = '\0\0'                                        #PDBÎÄ¼şÍ·²¹°×
+enc = sys.getfilesystemencoding()                       #ç³»ç»Ÿé»˜è®¤ç¼–ç 
+enc = 'gbk' if enc == 'UTF-8' else enc                  #å¦‚æœæ˜¯UTF-8ï¼Œåˆ™æ”¹ä¸ºGBKï¼Œå¦åˆ™ä¸å˜
 
-enc = sys.getfilesystemencoding()                       #ÏµÍ³Ä¬ÈÏ±àÂë
-enc = 'gbk' if enc == 'UTF-8' else enc                  #Èç¹ûÊÇUTF-8£¬Ôò¸ÄÎªGBK£¬·ñÔò²»±ä
-
-bsddb_opt = False                                       #Ä¬ÈÏ²»²ÉÓÃbsddb±£´æ
-
-replace_dic = {}                                        #±£´æĞèÒª×ª»»µÄHTMLÃüÃû×Ö·û£¬Èç&nbsp; &lt;µÈ
-for name, codepoint in htmlentitydefs.name2codepoint.items():
-    try:
-        char = unichr(codepoint).encode(enc)            #enc±àÂë¿ÉÏÔÊ¾¸ÃHTML¶ÔÏóÊ±£¬²Å½øĞĞÌæ»»
-        replace_dic['&%s;' % name.lower()] = char
-    except:
-        pass
+bsddb_opt = False                                       #é»˜è®¤ä¸é‡‡ç”¨bsddbä¿å­˜
+block_size = 1024 * 32 #è¯»å…¥å—å¤§å°
 
 replace_ste = [('<hr>', '//STEHORIZONTALLINE//\\n'),
                ('<center>', '//STECENTERALIGN//'), ('</center>','\\n'),
                ('<u>', '//STEHYPERLINK='), ('</u>', '\1//'),
-               ('<i>', '//STEBOLDFONT//'), ('</i>', '//STESTDFONT//'),
+               ('<i>', '//STEGRAYFONT//'), ('</i>', '//STECURRENTFONT//'),
                ('<b>', '//STEBOLDFONT//'), ('</b>', '//STESTDFONT//'),
-               ('<big>', '//STEBOLDFONT//'), ('</big>', '//STESTDFONT//')
-              ] #¿ÉÌæ»»³ÉSTEµÄHTML±ê¼Ç
-    
-removed_title = ['Help', 'Template', 'Image', 'Portal', 'Wikipedia', 'MediaWiki', 'WP'] #ÒªÉ¾³ıµÄWIKI´ÊÌõ
-  
+               ('<big>', '//STEBOLDFONT//'), ('</big>', '//STESTDFONT//'),
+               ('<sup>', '//STEREDFONT//'), ('</sup>', '//STECURRENTFONT//'),
+               ('<small>', '//STEGRAYFONT//'), ('</small>', '//STECURRENTFONT//')
+              ] #å¯æ›¿æ¢æˆSTEçš„HTMLæ ‡è®°
+
+def getData(page, title):
+    U"è·å–ç›¸åº”å­—æ®µæ•°æ®"
+    try:
+        return page.getElementsByTagName(title)[0].childNodes[0].data
+    except:
+        return ''
+
+def ste(s):       
+    for i, j in replace_ste: #æ›¿æ¢HTMLæ ‡è®°
+        s = s.replace(i, j)     
+    s = re.sub('\[\[([^\[/]*?)\]\]', '//STEHYPERLINK=\g<1>\1//', s) #æŠŠ[[]]å˜æˆSTEè¶…é“¾æ¥
+    return s
+
+def unste(s):    
+    return s.replace('//STEHYPERLINK=', '[[').replace('\1//', ']]')#æŠŠSTEè¶…é“¾æ¥è¿˜åŸæˆ[[]]
+                    
 class ZDic:
     def __init__(self, compressFlag = 2, recordSize = 0x4000):
-        "³õÊ¼»¯ZDicÀà£¬Ä¬ÈÏÎªZlibÑ¹Ëõ·½Ê½£¬16KÒ³Ãæ´óĞ¡"
+        U"åˆå§‹åŒ–ZDicç±»ï¼Œé»˜è®¤ä¸ºZlibå‹ç¼©æ–¹å¼ï¼Œ16Ké¡µé¢å¤§å°"
         self.index = ''
         self.byteLen = []
         self.lenSec = ''
@@ -49,26 +55,21 @@ class ZDic:
         self.maxWordLen = 32
         self.recordSize = recordSize        
         self.compressFlag = compressFlag
-
-    def ste(self,s):       
-        for i, j in replace_ste: #Ìæ»»HTML±ê¼Ç
-            s = s.replace(i, j)     
-        s = re.sub('\[\[([^\[/]*?)\]\]', '//STEHYPERLINK=\g<1>\1//', s) #°Ñ[[]]±ä³ÉSTE³¬Á´½Ó
-        return s
-
-    def unste(self,s):    
-        return s.replace('//STEHYPERLINK=', '[[').replace('\1//', ']]')#°ÑSTE³¬Á´½Ó»¹Ô­³É[[]]
+        self.PDBHeaderStructString = '>32shhLLLlll4s4sllH'           #PDBæ–‡ä»¶å¤´
+        self.PDBHeaderStructLength = calcsize(self.PDBHeaderStructString) #PDBæ–‡ä»¶å¤´é•¿åº¦
+        self.PDBHeaderPadding = '\0\0'                                     #PDBæ–‡ä»¶å¤´è¡¥ç™½
     
     def fromPDB(self, path):
-        "´ÓPDBÎÄ¼şÖĞ¶ÁÈ¡Êı¾İ"
+        U"ä»PDBæ–‡ä»¶ä¸­è¯»å–æ•°æ®"
         f = open(path, 'rb')
-        self.header = f.read(PDBHeaderStructLength)
+        self.header = f.read(self.PDBHeaderStructLength)
         self.pdbName = self.header[:32].rstrip('\0')
         self.bnum = unpack('>l',self.header[-4:])[0]
         startOffset = unpack('>L', f.read(4))[0]
         self.lines = {}
         for i in range(self.bnum - 1):
-            f.seek(PDBHeaderStructLength + (i + 1) * 8)
+            print '\b\b\b\b\b%3d%%' % (float(i*100)/self.bnum),
+            f.seek(self.PDBHeaderStructLength + (i + 1) * 8)
             endOffset = unpack('>L', f.read(4))[0]
             f.seek(startOffset)
             if i == 0:
@@ -91,80 +92,302 @@ class ZDic:
             self.lines[k] = v       
         f.close()
 
+    def fromWIKI(self, path):
+        U"ä»WIKi XMLæˆ–è€…xml.bz2ä¸­è¯»å–æ•°æ®"
+        ext = os.path.splitext(path)[1].lower() 
+        replace_dic = {}                                        #ä¿å­˜éœ€è¦è½¬æ¢çš„HTMLå‘½åå­—ç¬¦ï¼Œå¦‚&nbsp; &lt;ç­‰
+        for name, codepoint in htmlentitydefs.name2codepoint.items():
+            try:
+                char = unichr(codepoint).encode(enc)            #encç¼–ç å¯æ˜¾ç¤ºè¯¥HTMLå¯¹è±¡æ—¶ï¼Œæ‰è¿›è¡Œæ›¿æ¢
+                replace_dic['&%s;' % name.lower()] = char
+            except:
+                pass
+        removed_title = ['Help', 'Template', 'Image', 'Portal', 'Wikipedia', 'MediaWiki', 'WP'] #è¦åˆ é™¤çš„WIKIè¯æ¡
+        
+        def trim(s):
+            U"å¤„ç†XMLæ–‡ä»¶æ ‡è®°"
+            s = s.encode(enc, 'replace').replace('&amp;', '&')   #æŠŠUTF8ç¼–ç è½¬æ¢ä¸ºencç¼–ç ï¼Œæ— æ³•ç¼–ç çš„ç”¨?ä»£æ›¿
+            for name, char in replace_dic.iteritems():          #æ›¿æ¢HTMLå‘½åå­—ç¬¦
+                s = s.replace(name, char)
+            s = re.compile('(</?(p|font|br|tr|td|table|div|span|ref).*?>)|(\[\[[a-z]{2,3}(-[a-z]*?)?:[^\]]*?\]\])|(<!--.*?-->)',\
+                            re.I|re.DOTALL).sub('', s)          #æ›¿æ¢éƒ¨åˆ†HTMLæ ‡è®°
+            s = re.sub('\n{3,}','\n\n',s).replace('\n', r'\n')  #æŠŠè¿ç»­çš„å¤šä¸ªæ¢è¡Œç¬¦æ›¿æ¢æˆä¸¤ä¸ªæ¢è¡Œç¬¦
+            return s
+        
+        f = bz2.BZ2File(path) if ext == '.bz2' else open(path)  #æ‰“å¼€å‹ç¼©æˆ–è€…ä¸å‹ç¼©æ ¼å¼å‡å¯
+        percent = float(block_size)/os.path.getsize(path)
+        process = percent
+        s = f.read(block_size)
+        while 1:
+            try:
+                start = s.index('<page>')
+                end = s.index('</page>',start + 6) + 7                #è·å–pageæ®µ
+                dom = parseString(s[start:end])
+                word, mean = trim(getData(dom, 'title')), trim(getData(dom, 'text'))
+                if ((word in self.lines) and (mean[:9].lower()=='#redirect')) \
+                   or ((':' in word) and word[:word.index(':')] in removed_title):#è·³è¿‡ç®€ç¹è½¬æ¢åçš„é‡å¤è¯æ¡æˆ–è·³è¿‡æŸäº›ç±»åˆ«è¯æ¡
+                    pass
+                elif word in self.lines:
+                    self.lines[word]+=r'\n\n\n' + ste(mean) #é‡å¤è¯æ¡ï¼Œåˆå¹¶æˆä¸€æ¡
+                else:
+                    self.lines[word]=ste(mean)
+                s = s[end:]
+            except:
+                tmp = f.read(block_size)
+                process += percent
+                print '\b\b\b\b\b%3d%%' % (process*100),
+                if tmp:
+                    s += tmp
+                else:
+                    break
+        f.close()
+
+    def fromDIC(self, path):
+        U"ä»é‡‘å±±è¯éœ¸dicæ ¼å¼çš„è½¬æ¢ä¸ºrawæ ¼å¼çš„da3æ–‡ä»¶ï¼Œå†è°ƒç”¨fromDA3"
+        print
+        os.system('KSDrip.exe %s tmp /raw' % path)
+        self.fromDA3(os.path.join('tmp', 'tmp.da3'))
+
+    def fromDA3(self, path):
+        U"ä»é‡‘å±±è¯éœ¸rawæ ¼å¼çš„da3æ–‡ä»¶ä¸­è¯»å–æ•°æ®"
+        
+        self.dic_fmt={'YX':'//STEBOLDFONT//%s//STESTDFONT//', 'DX':'//STEBOLDFONT//%s//STESTDFONT//', #ç²—ä½“
+                 'JX':'*%s',                                    #åˆ—è¡¨
+                 'RP':'//STEORANGEFONT//%s//STECURRENTFONT//',  #å‡å                                 #éŸ³æ ‡
+                 'LY':'//STELEFTINDENT=10////STEREDFONT//%s//STECURRENTFONT////STELEFTINDENT=0//', 'LS':'//STELEFTINDENT=10////STEBLUEFONT//%s//STECURRENTFONT////STELEFTINDENT=0//', 
+                 }
+
+        self.dic_head = {'CY':U'åŸºæœ¬è¯ä¹‰',
+                    'YF':U'ç”¨æ³•',
+                    'JC':U'ç»§æ‰¿ç”¨æ³•',
+                    'TS':U'ç‰¹æ®Šç”¨æ³•',
+                    'XB':U'è¯æ€§å˜åŒ–',
+                    'PS':U'æ´¾ç”Ÿ',
+                    'YY':U'è¯­æº',
+                    'XY':U'ä¹ æƒ¯ç”¨è¯­',
+                    'CC':U'å‚è€ƒè¯æ±‡',
+                    'CZ':U'å¸¸ç”¨è¯ç»„'
+                    }
+        self.gmx = U"""\
+ ÉªÉ›Ã¦É‘ É”    Î¸  ÊŠÊŒÉ™ËŒÉœÉšÉá¹ƒá¹‡á¸·â€¦Å‹É’ Ã°ÊƒÊ’ËŒ\
+ !"#$%&Ëˆ()*+ï¼Œ-ï¼/0123456789Ëï¼›<=>?\
+@ABCDEFGHIJKLMNOPQÊ€STUVWXYZ[\]^_\
+`abcdefÉ¡hijklmnopqrstuvwxyz{|}Ìƒ \
+â‚¬ â€šÆ’â€â€¦â€ â€¡Ë†â€°Å â€¹Å’    â€˜â€™â€œâ€â€¢â€“â€”Ëœâ„¢Å¡â€ºÅ“  Å¸\
+ Â¡Â¢Â£Â¤Â¥Â¦Â§Â¨Â©ÂªÂ«Â¬Â­Â®Â¯Â°Â±Â²Â³Â´ÂµÂ¶â€¢Â¸Â¹ÂºÂ»Â¼Â½Â¾Â¿\
+Ã€ÃÃ‚ÃƒÃ„Ã…Ã†Ã‡ÃˆÃ‰ÃŠÃ‹ÃŒÃÃÃÃÃ‘Ã’Ã“Ã”Ã•Ã–Ã—Ã˜ÇœÇ˜ÇšÇ–Ã¼ÃÃŸ\
+Ã Ã¡ÇÃ£ÄÃ¥Ã¦Ã§Ã¨Ã©Ä›Ä“Ã¬Ã­ÇÄ«Ã°Ã±Ã²Ã³Ç’ÃµÅÃ·Ã¸Ã¹ÃºÇ”Å«Ã½Ã¾Ã¿"""
+        self.gmx_allo = dict(zip(U'Î²Éµâˆ«Æ·ï½ÉÃªÃ«É¨Ã´', U'ÃŸÎ¸ÊƒÊ’aÉ’Ã„ÃŠÃ‹Ã”'))    #å¯è½¬æ¢ä¸ºå·²æœ‰GMXå­—ç¬¦
+        self.gmx_trans = {   U'æ³•':'FR',
+                        U'å¾·':'DE',
+                        U'ä¿„':'RU',
+                        U'æ„':'IT',
+                        U'åŒˆ':'HU',
+                        U'çˆ±':'IE',
+                        U'è·':'NL',
+                        U'æ³•':'FR',
+                        U'å¾·':'DE',
+                        U'ç¾':'US',
+                        U'è‹±':'EN',
+                        U'Ê¤':'d\x1e'
+                        }
+        self.patternB = re.compile('&[Bb]\{([^\}]*?)\}') #ç²—ä½“
+        self.patternB2 = re.compile('\}(.*?)&[Bb]\{') #ç²—ä½“2ï¼Œé”™ä¹±çš„æ ‡è®°ï¼Œå‰åè°ƒæ•´ä¸€ä¸‹
+        self.patternB3 = re.compile('&[Bb]\{(.*?)\}') #ç²—ä½“3ï¼Œé”™ä¹±çš„æ ‡è®°ï¼Œåˆ é™¤
+        self.patternI = re.compile('&[Ii]\{([^\}]*?)\}') #æ–œä½“
+        self.patternL = re.compile('&[Ll]\{([^\}]*?)\}') #é“¾æ¥
+        self.patternP = re.compile('&\+\{([^\}]*?)\}')   #ä¸Šæ ‡
+        self.patternR = re.compile('<.*?>')          #åˆ é™¤
+
+        def trim(s):
+            s = s.replace('\n', r'\n')
+            s = self.patternI.sub('//STEGRAYFONT//\g<1>//STECURRENTFONT//', s)
+            s = self.patternL.sub('//STEHYPERLINK=\g<1>\1//', s)
+            s = self.patternP.sub('//STEREDFONT//\g<1>//STECURRENTFONT//', s)
+            s = self.patternB.sub('//STEBOLDFONT//\g<1>//STESTDFONT//', s)
+            s = self.patternB2.sub('//STEBOLDFONT//\g<1>//STESTDFONT//', s)
+            s = self.patternB3.sub('\g<1>', s) 
+            s = self.patternR.sub('', s)
+            return s
+
+        self.palm_trans=re.compile('&#(1[6-9][0-9]|2[0-4][0-9]|25[0-5]);')
+
+        def trimWord(s):
+            "è¯æ¡ä¸­&#161-255;æ¢æˆpalmå¯æ˜¾ç¤º"
+            return self.palm_trans.sub(lambda x:chr(int(x.group(1)))+ ' ', s)
+
+        def transform(dom):
+            U"""
+            &B{ç²—ä½“}, &I{æ–œä½“}, &+{ä¸Šæ ‡}, &L{é“¾æ¥}
+            CK:è¯åº“
+                DC:è¯å¤´ ç”Ÿè¯æœ¬
+                JS:è§£é‡Š
+                    CY:åŸºæœ¬è¯ä¹‰
+                    YF:ç”¨æ³•
+                    JC:ç»§æ‰¿ç”¨æ³•
+                    TS:ç‰¹æ®Šç”¨æ³•
+                    XB:è¯æ€§å˜åŒ–
+                    PS:æ´¾ç”Ÿ
+                    YY:è¯­æº
+                    XY:ä¹ æƒ¯ç”¨è¯­
+                    CC:å‚è€ƒè¯æ±‡
+                    CZ:å¸¸ç”¨è¯ç»„
+                        CX:
+                            YX:è¯­å¤´* å‘éŸ³
+                            æœªä½¿ç”¨ä¹‹æ–‡æœ¬ï¼ŒDX
+                            DX:è¯æ€§ã€è¯´æ˜ ç²—ä½“
+                                [infg:æ´¾ç”Ÿ
+                                    sy:å•å¤æ•°
+                                    inf:åç¼€
+                                sc:ä¸–çºª
+                                lg:
+                                ge:]
+                            YJ:
+                            GZ:*
+                            OJ:åˆä½œ
+                            YD:åŒå½¢è¯ åå¸¦ä¸Šæ ‡
+                            YB:éŸ³æ ‡
+                                RP:æ—¥è¯­å‡å
+                                CB:éŸ³æ ‡
+                                PY:æ‹¼éŸ³
+                            JX:* åˆ—è¡¨
+                            GZ:
+                            LJ:* è“è‰²ç¼©è¿›
+                                LY:åŸ
+                                LS:é‡Š                    
+                            GT:
+                                GY:åŸ
+                                GE:è§£
+                            XG:åŒä¹‰è¯
+            """
+            for node in dom.childNodes:
+                if node.nodeType==node.CDATA_SECTION_NODE:
+                    node.data = trim(node.data)
+                    if dom.tagName in ['CB', 'PY']:
+                        if node.data.startswith('&x{'):
+                            node.data = node.data[3:-1]
+                        tmpipa=''
+                        try:
+                            for c in node.data:
+                                if c in string.printable:
+                                    tmpipa += c.encode(enc)
+                                elif c in self.gmx:
+                                    tmpipa += chr(self.gmx.index(c))
+                                elif c in self.gmx_allo:
+                                    tmpipa += chr(self.gmx.index(self.gmx_allo[c]))
+                                elif c in self.gmx_trans:
+                                    tmpipa += self.gmx_trans[c]
+                                else:
+                                    raise
+                            self.mean += '[%s]' % tmpipa + r'\n'
+                        except:
+                            self.mean += node.data.encode(enc, 'xmlcharrefreplace') + r'\n'
+                            self.noipa += c                
+                    else:
+                        node.data = node.data.encode(enc, 'xmlcharrefreplace')  #encç¼–ç 
+                        if dom.tagName=='DC':
+                            self.word = node.data                                   #è¯æ¡å
+                        elif dom.tagName=='YX':
+                            if self.mean or (not(self.mean) and self.word != node.data):
+                                self.mean += self.dic_fmt[dom.tagName] % node.data + r'\n' #ä¸è¯æ¡åä¸åŒåˆ™æ·»åŠ 
+                        elif dom.tagName in self.dic_fmt:
+                            self.mean += self.dic_fmt[dom.tagName] % node.data + r'\n' #æ ¼å¼åŒ–
+                        else:
+                            self.mean += node.data + r'\n'
+                elif node.nodeType==node.ELEMENT_NODE:          
+                    if node.tagName in self.dic_head and self.mean:#å¤§æ ‡é¢˜ä¸­æ–‡å
+                        self.mean += '\\n//STEBLUEFONT////STEBOLDFONT//%s//STECURRENTFONT////STESTDFONT//\\n' % \
+                                     self.dic_head[node.tagName].encode(enc)
+                    transform(node)
+
+        file_enc = 'UTF-16LE'
+        tag_start = '<CK>'.encode(file_enc)
+        tag_end = '</CK>'.encode(file_enc)
+        tag_len = len(tag_end)
+        self.noipa = ''                      #è®°å½•GMXä¸­æ²¡æœ‰çš„éŸ³æ ‡
+        error_da3_filename = U'%s æ ¼å¼é”™è¯¯çš„.da3' % path.split('.',1)[0]
+        error_ipa_filename = U'%s æ— æ³•æ˜¾ç¤ºçš„éŸ³æ ‡.txt' % path.split('.',1)[0]
+        percent = float(block_size)/os.path.getsize(path) 
+        f = open(path, 'rb')
+        s = f.read(block_size)        
+        process = percent      
+        while 1:
+            try:
+                start = s.index(tag_start)
+                end = s.index(tag_end, start) + tag_len                
+                doc = s[start:end].decode(file_enc)
+                try:
+                    dom = parseString(doc.encode('U8')).childNodes[0]
+                    self.word, self.mean = '', ''
+                    transform(dom)                          #XMLè½¬æ¢
+                    self.lines[trimWord(self.word)] = self.mean[:-2]
+                except ExpatError, err:
+                    open(error_da3_filename, 'ab').write(err.message.encode(file_enc)+doc.encode(file_enc)+'\n\n'.encode(file_enc))
+                except:
+                    raise
+                s = s[end:]
+            except ValueError:
+                tmp = f.read(block_size)
+                process += percent
+                print '\b\b\b\b\b%3d%%' % (process*100), 
+                if tmp:
+                    s += tmp
+                else:
+                    break
+            except:
+                raise
+            
+        f.close()
+        if self.noipa:
+            open(error_ipa_filename,'w').write((U'è¿™äº›éŸ³æ ‡æœªåœ¨GMXä¸­æ‰¾åˆ°åŒ¹é…å­—ç¬¦ï¼š%s'% (''.join(set(self.noipa)))).encode('U8'))
+
+    def fromTXT(self, path):
+        U"ä»TXTä¸­è¯»å–æ•°æ®"
+        f=open(path,'rU')
+        for i in f:
+            i = i.rstrip().replace(' /// ', '\t', 1)    #å¦‚æœä½¿ç”¨ /// åˆ†éš”ï¼Œåˆ™æ›¿æ¢æˆ\t
+            if '\t' in i:
+                word, mean = i.split('\t', 1)           #åˆ†éš”è¯è¯­å’Œé‡Šä¹‰
+                if word in self.lines:
+                    self.lines[word] += r'\n\n\n' + ste(mean) #é‡å¤è¯æ¡ï¼Œåˆå¹¶æˆä¸€æ¡
+                else:
+                    self.lines[word] = self.ste(mean)   #STEå¤„ç†
+        f.close()
+
     def fromPath(self, path):
-        files = [] #±£´æËùÓĞÒª×ª»»µÄÎÄ¼ş       
+        U"è¯»å–æ–‡ä»¶"
+        files = [] #ä¿å­˜æ‰€æœ‰è¦è½¬æ¢çš„æ–‡ä»¶       
         if os.path.isdir(path):
             files = glob.glob(os.path.join(path, '*.*'))
         else:
             files = [path] 
-        self.lines = bsddb.btopen('tmp.db','c') if bsddb_opt else {}
+        self.lines = bsddb.btopen('tmp.db','c') if bsddb_opt else {}    #æ˜¯å¦ä½¿ç”¨bsddb
         for path in files:
-            ext=os.path.splitext(path)[1].lower()#»ñÈ¡ºó×ºÃû
-            if ext in ['.xml', '.bz2']: #wiki xml
-                def trim(s):
-                    "´¦ÀíXMLÎÄ¼ş±ê¼Ç"
-                    s = s.encode(enc,'replace').replace('&amp;', '&') #°ÑUTF8±àÂë×ª»»Îªenc±àÂë£¬ÎŞ·¨±àÂëµÄÓÃ?´úÌæ
-                    for name, char in replace_dic.iteritems(): #Ìæ»»HTMLÃüÃû×Ö·û
-                        s = s.replace(name, char)
-                    s = re.compile('(</?(p|font|br|tr|td|table|div|span|ref|small).*?>)|(\[\[[a-z]{2,3}(-[a-z]*?)?:[^\]]*?\]\])|(<!--.*?-->)',\
-                                    re.I|re.DOTALL).sub('', s) #Ìæ»»²¿·ÖHTML±ê¼Ç
-                    s = re.sub('\n{3,}','\n\n',s).replace('\n', r'\n') #°ÑÁ¬ĞøµÄ¶à¸ö»»ĞĞ·ûÌæ»»³ÉÁ½¸ö»»ĞĞ·û
-                    return s
-                def getData(page, title):
-                    "»ñÈ¡ÏàÓ¦×Ö¶ÎÊı¾İ"
-                    try:
-                        return trim(page.getElementsByTagName(title)[0].childNodes[0].data)
-                    except:
-                        return ''
-                f = bz2.BZ2File(path) if ext == '.bz2' else open(path) #´ò¿ªÑ¹Ëõ»òÕß²»Ñ¹Ëõ¸ñÊ½¾ù¿É
-                block = 1024*32 #Ã¿´Î¶ÁÈë32K
-                s = f.read(block)
-                tmp = ''
-                while 1:  
-                    try:
-                        a = s.index('<page>')
-                        b = s.index('</page>',a + 6) + 7                #»ñÈ¡page¶Î
-                        dom = parseString(s[a:b])
-                        word, mean = getData(dom, 'title'), getData(dom, 'text')
-                        if ((word in self.lines) and (mean[:9].lower()=='#redirect')) \
-                           or ((':' in word) and word[:word.index(':')] in removed_title):#Ìø¹ı¼ò·±×ª»»ºóµÄÖØ¸´´ÊÌõ»òÌø¹ıÄ³Ğ©Àà±ğ´ÊÌõ
-                            pass
-                        elif word in self.lines:
-                            self.lines[word]+=r'\n\n\n' + self.ste(mean) #ÖØ¸´´ÊÌõ£¬ºÏ²¢³ÉÒ»Ìõ
-                        else:
-                            self.lines[word]=self.ste(mean)
-                        s=s[b:]
-                    except:
-                        tmp=f.read(block)
-                        if tmp:
-                            s+=tmp
-                        else:
-                            break
-                f.close()
-            elif ext == '.pdb': #PDB dic
-                self.fromPDB(path) 
-            else: #TXT dic
-                f=open(path,'rU')
-                for i in f:
-                    i = i.rstrip().replace(' /// ', '\t', 1)    #Èç¹ûÊ¹ÓÃ /// ·Ö¸ô£¬ÔòÌæ»»³É\t
-                    if '\t' in i:
-                        word, mean = i.split('\t', 1)           #·Ö¸ô´ÊÓïºÍÊÍÒå
-                        if word in self.lines:
-                            self.lines[word]+=r'\n\n\n' + self.ste(mean) #ÖØ¸´´ÊÌõ£¬ºÏ²¢³ÉÒ»Ìõ
-                        else:
-                            self.lines[word] = self.ste(mean)   #STE´¦Àí
+            print 'Init',
+            ext = os.path.splitext(path)[1].upper()                     #è·å–åç¼€å
+            if ext in ['.XML', '.BZ2']:                                 #WIKI XML
+                self.fromWIKI(path)
+            elif ext in ['.DA3', '.PDB', '.DIC', '.TXT']:
+                eval('self.from%s(path)' % ext[1:])
+            else:                                                       #é»˜è®¤ä¸ºTXT
+                self.fromTXT(path)
+            print '\b\b\b\b\bDone',
         if bsddb_opt:
             self.lines.sync()
-            self.lines.close()
-            
+            self.lines.close()            
 
     def resizeBlock(self):
         tmp=''
         first=''
         f=open('tmp.pdb','wb')
-        if '' not in self.lines: #ÅĞ¶ÏÓĞÎŞ´ÊµäĞÅÏ¢£¬Ã»ÓĞÔò×Ô¶¯Ìí¼Ó
-            self.lines['']=self.ste('<b>Welcome to //STEPURPLEFONT//%s//STECURRENTFONT//!</b>\\n<b>Words count:</b> //STEBLUEFONT//%d//STECURRENTFONT//\\n<b>Made time:</b> //STEREDFONT//%s'%(self.pdbName,len(self.lines),time.strftime("%Y.%m.%d")))
+        if '' not in self.lines: #åˆ¤æ–­æœ‰æ— è¯å…¸ä¿¡æ¯ï¼Œæ²¡æœ‰åˆ™è‡ªåŠ¨æ·»åŠ 
+            self.lines[''] = ste('<b>Welcome to //STEPURPLEFONT//%s//STECURRENTFONT//!</b>\\n<b>Words count:</b> //STEBLUEFONT//%d//STECURRENTFONT//\\n<b>Made time:</b> //STEREDFONT//%s'%(self.pdbName,len(self.lines),time.strftime("%Y.%m.%d")))
+        lnum = len(self.lines)
+        count = 0
+        print 'Init',
         for word in sorted(self.lines.keys()):
+            count += 1
+            print '\b\b\b\b\b%3d%%' % (float(count)/lnum*100),
             line = "%s\t%s\n"%(word,self.lines[word])
             if first=='':
                 first=tmp
@@ -185,7 +408,7 @@ class ZDic:
                             line=''
                         else:
                             try:
-                                breakindex = line.rindex('\\n', 0, blen)#ÔÚ»»ĞĞ·û´¦½Ø¶Ï
+                                breakindex = line.rindex('\\n', 0, blen)#åœ¨æ¢è¡Œç¬¦å¤„æˆªæ–­
                                 tmpline = line[:breakindex]
                                 line = line[breakindex+2:]
                             except:
@@ -199,6 +422,7 @@ class ZDic:
         if tmp:
             self.compress(tmp,first.split('\t',1)[0],line.rsplit('\n',2)[-2].split('\t',1)[0],f)
         f.close()
+        print '\b\b\b\b\bDone',
 
     def resizeBlockB(self):
         """bsddb version by emfox"""
@@ -207,7 +431,7 @@ class ZDic:
         f=open('tmp.pdb','wb')
         dbf = bsddb.btopen('tmp.db','w')
         if '' not in dbf:
-            dbf['']=self.ste('<b>Welcome to //STEPURPLEFONT//%s//STECURRENTFONT//!</b>\\n<b>Words count:</b> //STEBLUEFONT//%d//STECURRENTFONT//\\n<b>Made time:</b> //STEREDFONT//%s'%(self.pdbName,len(dbf),time.strftime("%Y.%m.%d")))
+            dbf[''] = ste('<b>Welcome to //STEPURPLEFONT//%s//STECURRENTFONT//!</b>\\n<b>Words count:</b> //STEBLUEFONT//%d//STECURRENTFONT//\\n<b>Made time:</b> //STEREDFONT//%s'%(self.pdbName,len(dbf),time.strftime("%Y.%m.%d")))
         word,mean = dbf.first()
         while 1:
             line = "%s\t%s\n"%(word,mean)
@@ -242,7 +466,7 @@ class ZDic:
                                 line=tmpline[-1]+line
                                 tmpline=tmpline[:-1]"""
                             try:
-                                breakindex = line.rindex('\\n', 0, blen)#ÔÚ»»ĞĞ·û´¦½Ø¶Ï
+                                breakindex = line.rindex('\\n', 0, blen)#åœ¨æ¢è¡Œç¬¦å¤„æˆªæ–­
                                 tmpline=line[:breakindex]
                                 line=line[breakindex+2:]
                             except:
@@ -277,7 +501,7 @@ class ZDic:
         return int(time.mktime(variable.timetuple())+PILOT_TIME_DELTA)
         
     def packPDBHeader(self):
-        return pack(PDBHeaderStructString,
+        return pack(self.PDBHeaderStructString,
                     self.pdbName,0,0,
                     self.packPalmDate(),0,0,0,0,0,
                     self.pdbType,self.creatorID,0,0,self.bnum
@@ -291,34 +515,39 @@ class ZDic:
         self.byteLen.insert(0,len(self.index))
         self.bnum+=1
         towrite=self.packPDBHeader()
-        offset=PDBHeaderStructLength + 8 * self.bnum +len(padding)
+        offset=self.PDBHeaderStructLength + 8 * self.bnum +len(self.PDBHeaderPadding)
         uid=0x406F8000      
         for i in self.byteLen:
-            towrite+=pack('>2L', offset, uid) 
-            offset+=i
-            uid+=1
+            towrite += pack('>2L', offset, uid) 
+            offset += i
+            uid += 1
         del offset,uid,i,self.byteLen
-        towrite+=padding
-        f=open(path,'wb')
+        towrite += self.PDBHeaderPadding
+        f = open(path,'wb')
         #header and index
         f.write(towrite+self.index)
-        del towrite,self.index
-        block=1024*1024*10 #
-        tmp=open('tmp.pdb','rb')
+        del towrite, self.index
+        percent = float(block_size)/os.path.getsize('tmp.pdb')
+        process = 0
+        print '%3d%%' % 0,
+        tmp = open('tmp.pdb','rb')
         while 1:
-            cont=tmp.read(block)
-            if cont:
-                f.write(cont)
+            s=tmp.read(block_size)
+            process += percent
+            print '\b\b\b\b\b%3d%%' % (process*100),
+            if s:
+                f.write(s)
             else:
                 break
-        tmp.close()        
+        tmp.close()
+        print '\b\b\b\b\bDone',
         os.remove('tmp.pdb')
         f.close()
 
     def p2t(self, path, patho):
-        "pdb=>txt"
+        U"ä»PDBæ–‡ä»¶å¿«é€Ÿè½¬æ¢ä¸ºTXTæ–‡ä»¶ï¼Œä¸éœ€è¦æ’åº"
         f = open(path, 'rb')        
-        f.seek(PDBHeaderStructLength - 4)
+        f.seek(self.PDBHeaderStructLength - 4)
         self.bnum= unpack('>l',f.read(4))[0]
         firstOffset = unpack('>L', f.read(4))[0]
         f.seek(4, 1)
@@ -332,59 +561,71 @@ class ZDic:
         else:
             t = open(patho, 'wb')
             for i in range(1, self.bnum - 1):
-                f.seek(PDBHeaderStructLength + (i + 1) * 8)
+                f.seek(self.PDBHeaderStructLength + (i + 1) * 8)
                 endOffset = unpack('>L',f.read(4))[0]
                 f.seek(startOffset)
-                t.write(self.unste(f.read(endOffset - startOffset).decode('zlib')))
+                t.write(unste(f.read(endOffset - startOffset).decode('zlib')))
                 startOffset = endOffset
             f.seek(startOffset)
-            t.write(self.unste(f.read().decode('zlib')))
+            t.write(unste(f.read().decode('zlib')))
             t.close()
             f.close()
 
     def toTXT(self, patho):
-        "½«lines°´Ğò±£´æÖÁtxtÎÄ¼şÖĞ£¬±ãÓÚ±à¼­ĞŞ¸Ä"
-        f = open( patho, 'w')
+        U"å°†linesæŒ‰åºä¿å­˜è‡³txtæ–‡ä»¶ä¸­"
+        f = open(patho, 'w')
+        lnum = len(self.lines)
+        count = 0
+        print '%3d%%' % count,
         for word, mean in sorted(self.lines.iteritems()):
-            print >>f, "%s\t%s" % (word, self.unste(mean))
+            count += 1
+            print '\b\b\b\b\b%3d%%' % (float(count)/lnum*100),
+            print >>f, "%s\t%s" % (word, unste(mean))
+        print '\b\b\b\b\bDone',
         f.close()        
 
 def log(msg):
-    """´òÓ¡ÈÕÖ¾"""
-    print '[%s]%s'%(time.strftime('%X'), msg)
+    U"æ‰“å°æ—¥å¿—"
+    print '[%s]%s'%(time.strftime('%X'), msg),
     
-if __name__ == '__main__':    
+if __name__ == '__main__':   
     opts, argv = getopt.getopt(sys.argv[1:], 'bt')
     if len(argv) != 2:
-        log('Óï·¨£º [-t] [-b] ÎÄ¼şÃû1 ÎÄ¼şÃû2') #²ÎÊı´íÎóÊ±¸ø³öÓï·¨ÌáÊ¾
+        log(U'Syntax: [-t] [-b] filename1 filename2') #å‚æ•°é”™è¯¯æ—¶ç»™å‡ºè¯­æ³•æç¤º
     else:
         pathi, patho = argv
         try:
-            s = time.time() #¼ÇÂ¼¿ªÊ¼Ê±¼ä
-            log('¶ÁÈëÎÄ¼ş...')
-            app = ZDic()    #³õÊ¹»¯ZDicÊı¾İ½á¹¹
+            s = time.time() #è®°å½•å¼€å§‹æ—¶é—´
+            log(U'Loading...')
+            app = ZDic()    #åˆä½¿åŒ–ZDicæ•°æ®ç»“æ„
             app.pdbName = os.path.splitext(os.path.basename(patho))[0]
-            if ('-t', '') in opts: #-t²ÎÊı£º×ª»»ÎªÎÄ±¾ÎÄ¼ş
+            if ('-t', '') in opts: #-tå‚æ•°ï¼šè½¬æ¢ä¸ºæ–‡æœ¬æ–‡ä»¶
                 if pathi.endswith('pdb'):
                     app.p2t(pathi, patho)
+                    print
                 else:
                     app.fromPath(pathi)
-                    log('±£´æÎÄ¼ş...')
+                    print
+                    log(U'Saving...')
                     app.toTXT(patho)
+                    print
             else:
-                bsddb_opt = ('-b', '') in opts #-b²ÎÊı£ºÊ¹ÓÃbsddb£¬½ÏĞ¡ÄÚ´æ£¬½Ï´óÎÄ¼ş£¬½Ï³¤Ê±¼ä
+                bsddb_opt = ('-b', '') in opts #-bå‚æ•°ï¼šä½¿ç”¨bsddbï¼Œè¾ƒå°å†…å­˜ï¼Œè¾ƒå¤§æ–‡ä»¶ï¼Œè¾ƒé•¿æ—¶é—´
                 app.fromPath(pathi)
-                log('´¦ÀíÎÄ¼ş...')
+                print
+                log(U'Processing...')
                 if bsddb_opt:
                     app.resizeBlockB()
                 else:
                     app.resizeBlock()
-                log('±£´æÎÄ¼ş...')
-                app.toPDB(patho)                
-            cost = time.time() - s #¼ÆËã»¨·ÑÊ±¼ä
-            log('³É¹¦£¡¹²ºÄÊ± %dh%dm%ds ¡£' % (cost/3600, cost%3600/60, cost%60))
+                print
+                log(U'Saving...')
+                app.toPDB(patho)
+                print
+            cost = time.time() - s #è®¡ç®—èŠ±è´¹æ—¶é—´
+            log(U'Success! It costs %dh%dm%ds.\n' % (cost/3600, cost%3600/60, cost%60))
         except:
-            log('³ö´í£¡')
+            log(U'Error!\n')
             raise
         
 
