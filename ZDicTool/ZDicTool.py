@@ -560,7 +560,9 @@ class ZDic:
             os.system('ren %s.tab %s' %(path, patho))
         else:
             t = open(patho, 'wb')
+            print 'Init',
             for i in range(1, self.bnum - 1):
+                print '\b\b\b\b\b%3d%%' % (float(i)/self.bnum*100),
                 f.seek(self.PDBHeaderStructLength + (i + 1) * 8)
                 endOffset = unpack('>L',f.read(4))[0]
                 f.seek(startOffset)
@@ -570,6 +572,7 @@ class ZDic:
             t.write(unste(f.read().decode('zlib')))
             t.close()
             f.close()
+            print '\b\b\b\b\bDone',
 
     def toTXT(self, patho):
         U"将lines按序保存至txt文件中"
@@ -591,7 +594,7 @@ def log(msg):
 if __name__ == '__main__':   
     opts, argv = getopt.getopt(sys.argv[1:], 'bt')
     if len(argv) != 2:
-        log(U'Syntax: [-t] [-b] filename1 filename2') #参数错误时给出语法提示
+        log(U'Syntax: [-b] [-t] filename1 filename2') #参数错误时给出语法提示
     else:
         pathi, patho = argv
         try:
@@ -599,7 +602,7 @@ if __name__ == '__main__':
             log(U'Loading...')
             app = ZDic()    #初使化ZDic数据结构
             app.pdbName = os.path.splitext(os.path.basename(patho))[0]
-            if ('-t', '') in opts: #-t参数：转换为文本文件
+            if patho[-3:].lower() == 'txt' or ('-t', '') in opts: #目标文件为文本文件时，转换为文本文件
                 if pathi.endswith('pdb'):
                     app.p2t(pathi, patho)
                     print
