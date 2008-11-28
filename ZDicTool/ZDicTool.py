@@ -351,7 +351,7 @@ class ZDic:
                 if word in self.lines:
                     self.lines[word] += r'\n\n\n' + ste(mean) #重复词条，合并成一条
                 else:
-                    self.lines[word] = self.ste(mean)   #STE处理
+                    self.lines[word] = ste(mean)   #STE处理
         f.close()
 
     def fromPath(self, path):
