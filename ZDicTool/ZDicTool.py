@@ -170,15 +170,16 @@ class ZDic:
                     }
         self.gmx = U"""\
  ɪɛæɑ ɔ    θ  ʊʌəˌɜɚɝṃṇḷ…ŋɒ ðʃʒˌ\
- !"#$%&ˈ()*+，-．/0123456789ː；<=>?\
-@ABCDEFGHIJKLMNOPQʀSTUVWXYZ[\]^_\
+ !"#$%&ˈ（）*+，-．/0123456789ː；<=>?\
+@ABCDEFGHIJKLMNOPQʀＳTＵVWXYZ[\]^_\
 `abcdefɡhijklmnopqrstuvwxyz{|}̃ \
 € ‚ƒ„…†‡ˆ‰Š‹Œ    ‘’“”•–—˜™š›œ  Ÿ\
  ¡¢£¤¥¦§¨©ª«¬­®¯°±²³´µ¶•¸¹º»¼½¾¿\
 ÀÁÂÃÄÅÆÇÈÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØǜǘǚǖüÞß\
 àáǎãāåæçèéěēìíǐīðñòóǒõō÷øùúǔūýþÿ"""
-        self.gmx_allo = dict(zip(U'βɵ∫Ʒａɐêëɨô', U'ßθʃʒaɒÄÊËÔ'))    #可转换为已有GMX字符
-        self.gmx_trans = {   U'法':'FR',
+        #ńäë
+        self.gmx_allo = dict(zip(U'Зβ∫Ʒａɐäêëɨô', U'ɜßθʃʒaɒÄÊËÔ'))    #可转换为已有GMX字符
+        self.gmx_trans = {U'法':'FR',
                         U'德':'DE',
                         U'俄':'RU',
                         U'意':'IT',
@@ -189,6 +190,7 @@ class ZDic:
                         U'德':'DE',
                         U'美':'US',
                         U'英':'EN',
+                        U'西':'SP',
                         U'ʤ':'d\x1e'
                         }
         self.patternB = re.compile('&[Bb]\{([^\}]*?)\}') #粗体
@@ -233,7 +235,7 @@ class ZDic:
                     CC:参考词汇
                     CZ:常用词组
                         CX:
-                            YX:语头* 发音
+                            YX:原形*
                             未使用之文本，DX
                             DX:词性、说明 粗体
                                 [infg:派生
@@ -282,7 +284,7 @@ class ZDic:
                             self.mean += '[%s]' % tmpipa + r'\n'
                         except:
                             self.mean += node.data.encode(enc, 'xmlcharrefreplace') + r'\n'
-                            self.noipa += c                
+                            self.noipa += '%s\t%s\n' % (self.word.decode(enc), node.data)
                     else:
                         node.data = node.data.encode(enc, 'xmlcharrefreplace')  #enc编码
                         if dom.tagName=='DC':
@@ -339,7 +341,7 @@ class ZDic:
             
         f.close()
         if self.noipa:
-            open(error_ipa_filename,'w').write((U'这些音标未在GMX中找到匹配字符：%s'% (''.join(set(self.noipa)))).encode('U8'))
+            open(error_ipa_filename,'w').write((U'这些音标未在GMX中找到匹配字符：%s\n%s'% (''.join(sorted(set(self.noipa)-set(string.printable))), self.noipa)).encode('U8'))
 
     def fromTXT(self, path):
         U"从TXT中读取数据"
