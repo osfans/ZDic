@@ -5240,10 +5240,10 @@ static Boolean DAFormHandleEvent( EventType * eventP )
 	if (eventP->eType == penDownEvent)
 	{
 		STEHandlePenDownEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
-		STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
-		return STEHasHotRectSelection(global->smtLibRefNum, global->smtEngineRefNum);		
+		if(STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
+			return STEHasHotRectSelection(global->smtLibRefNum, global->smtEngineRefNum);		
 	}
-	if(STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
+	else if(STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
 		return true;
 	
     switch ( eventP->eType )
@@ -5296,7 +5296,7 @@ static Boolean DAFormHandleEvent( EventType * eventP )
         {
             frmP = FrmGetActiveForm ();
             FrmDrawForm ( frmP );
-            DAFormSearch( false, false, false, global->prefs.enableAutoSpeech );
+            DAFormSearch( false,  global->prefs.enableHighlightWord, false, global->prefs.enableAutoSpeech );
         }
         break;
 
@@ -7049,10 +7049,10 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 	if (eventP->eType == penDownEvent)
 	{
 		STEHandlePenDownEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
-		STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
-		return STEHasHotRectSelection(global->smtLibRefNum, global->smtEngineRefNum);		
+		if(STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
+			return STEHasHotRectSelection(global->smtLibRefNum, global->smtEngineRefNum);		
 	}
-	if(STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
+	else if(STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
 		return true;	
     switch ( eventP->eType )
     {
