@@ -143,7 +143,7 @@ static void AppendStr(Char *data)//append data rendered with STE
 			 ipaS+=2;
 			 global->phonetic[0] = chrNull;
 		}		
-	}	
+	}
 	STEAppendTextToEngine(global->smtLibRefNum, global->smtEngineRefNum, data+j+1, false);
 }
 
@@ -4827,6 +4827,9 @@ void DAFormAdjustFormBounds ( AppGlobalType	*global, FormPtr frmP,
         curBounds.topLeft.y = DAFormBorder;
     displayBounds.extent.x -= DAFormBorder;
     displayBounds.extent.y -= DAFormBorder;
+	
+	
+	
     if ( curBounds.topLeft.x + curBounds.extent.x > displayBounds.extent.x )
         curBounds.topLeft.x = displayBounds.extent.x - curBounds.extent.x;
     if ( curBounds.topLeft.y + curBounds.extent.y > displayBounds.extent.y )
@@ -4837,11 +4840,12 @@ void DAFormAdjustFormBounds ( AppGlobalType	*global, FormPtr frmP,
     curBounds.topLeft = global->prefs.daFormLocation;
     WinSetBounds( FrmGetWindowHandle ( frmP ), &curBounds );
     
-    displayBounds.topLeft.x+=2;
-    displayBounds.topLeft.y+=14;
-    displayBounds.extent.x-=18;
-    displayBounds.extent.y-=(global->prefs.daSize == 0)?100:38;
-    flags =  (global->prefs.fontDA == largeFont?steLargeFont:0);
+    displayBounds.topLeft.x += 1;
+	displayBounds.topLeft.y += 14;
+	displayBounds.extent.x = 140;
+	displayBounds.extent.y = (global->prefs.daSize == 0)?57:121;
+	
+    flags = (global->prefs.fontDA == largeFont?steLargeFont:0);
 	if(global->smtEngineRefNum)STEResetEngine(global->smtLibRefNum, global->smtEngineRefNum);
 	STEInitializeEngine(global->smtLibRefNum, &global->smtEngineRefNum, &displayBounds, DADescriptionScrollBar, flags,
 							kSTEGreen /* phone numbers */, global->prefs.linkColor /* urls */, kSTEPurple /* email */);
@@ -5233,8 +5237,14 @@ static Boolean DAFormHandleEvent( EventType * eventP )
 
     global = AppGetGlobal();
 	
-	handled = STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
-	if(handled)return true;
+	if (eventP->eType == penDownEvent)
+	{
+		STEHandlePenDownEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
+		STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
+		return STEHasHotRectSelection(global->smtLibRefNum, global->smtEngineRefNum);		
+	}
+	if(STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
+		return true;
 	
     switch ( eventP->eType )
     {
@@ -6560,9 +6570,9 @@ static Boolean FormJumpSearch( UInt16 field, Boolean hyperlink )
     {
         // put old word into history and search new word and put it into history.
                 
-        buf=STEGetSelectedText(global->smtLibRefNum, global->smtEngineRefNum);
-        
-        if(buf){
+        if(STEHasTextSelection(global->smtLibRefNum, global->smtEngineRefNum))
+        {
+        	buf=STEGetSelectedText(global->smtLibRefNum, global->smtEngineRefNum);
     		ToolsPutWordFieldToHistory( field );
     		ToolsSetFieldPtr( field, buf, StrLen( buf ), true );
 			field ==DAWordField?DAFormSearch( true, global->prefs.enableHighlightWord, false, global->prefs.enableAutoSpeech ):\
@@ -7035,9 +7045,15 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 
 
     global = AppGetGlobal();
-
-	handled = STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
-	if(handled)return true;
+	
+	if (eventP->eType == penDownEvent)
+	{
+		STEHandlePenDownEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
+		STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
+		return STEHasHotRectSelection(global->smtLibRefNum, global->smtEngineRefNum);		
+	}
+	if(STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
+		return true;	
     switch ( eventP->eType )
     {
     case menuEvent:
@@ -7613,7 +7629,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
             break;
         }
 
-	case penUpEvent://fldEnterEvent:
+	case penUpEvent://fldEnterEvent://
 		{
 			handled = FormJumpSearch( MainWordField, false );
  			break;

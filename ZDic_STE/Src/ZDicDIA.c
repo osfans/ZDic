@@ -42,7 +42,7 @@ Err ZDicDIAFormLoadInitial ( AppGlobalType* global, FormPtr frmP )
         err = FrmSetDIAPolicyAttr ( frmP, frmDIAPolicyCustom );
     
         // Enable the input trigger in normal launch else disable.
-        err = PINSetInputTriggerState( global->subLaunch ? pinInputTriggerDisabled : pinInputTriggerEnabled);
+        //err = PINSetInputTriggerState( global->subLaunch ? pinInputTriggerDisabled : pinInputTriggerEnabled);
         err = PINSetInputAreaState ( global->diaPinInputAreaState );
         formWinH = FrmGetWindowHandle (frmP);
         WinSetConstraintsSize(formWinH, 160, 225, 225, 160, 160, 160);
@@ -99,8 +99,8 @@ Boolean ZDicDIAWinEnter (  AppGlobalType* global, EventType * eventP )
             EvtAddUniqueEventToQueue(&resizedEvent, 0, true);
             
             // Enable the input trigger in normal launch else disable.
-            err = PINSetInputTriggerState( global->subLaunch ? pinInputTriggerDisabled : pinInputTriggerEnabled);
-                
+            //err = PINSetInputTriggerState( global->subLaunch ? pinInputTriggerDisabled : pinInputTriggerEnabled);
+               
             // restore input area
             err = PINSetInputAreaState ( global->diaPinInputAreaState );
 

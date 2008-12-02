@@ -510,9 +510,9 @@ BEGIN
 	CHECKBOX "Get word from Clipboard at start" ID DetailsGetClipBoardAtStart  AT (4 15 AUTO AUTO)
 	CHECKBOX "Enable incremental search" ID DetailsEnableIncSearch  AT (4 75 AUTO AUTO)
 	CHECKBOX "Search word for single tap" ID DetailsEnableSingleTap   AT (4 27 AUTO AUTO)
-	CHECKBOX "Highlight word field" ID DetailsEnableHighlightWord   AT (4 39 AUTO AUTO)
+	CHECKBOX "Highlight word field" ID DetailsEnableHighlightWord   AT (4 39 AUTO AUTO)   
 	CHECKBOX "Try lower case on search failed" DetailsEnableTryLowerSearch AT (4 51 AUTO AUTO)
-	CHECKBOX "Disable font inside (need reload)" DetailsDisablePhoneticFont AT (4 63 AUTO AUTO)
+	CHECKBOX "Disable font inside (need reload)" DetailsDisablePhoneticFont AT (4 63 AUTO AUTO) NONUSABLE
 	CHECKBOX "Automatic speech" DetailsEnableAutoSpeech AT (4 101 AUTO AUTO)
 	BUTTON "Done" ID DetailsDoneButton   AT (6 140 40 12)
 	SLIDER DetailSearchDelay AT (50 86 100 12) MIN 0 MAX 10 PAGESIZE 1 VALUE 5
@@ -1029,6 +1029,11 @@ END
 BITMAPFAMILYEX ID 9025 COMPRESS
 BEGIN
 	BITMAP "25.bmp" BPP 16 DENSITY 144
+END
+
+BITMAPFAMILYEX ID 9026 COMPRESS
+BEGIN
+	BITMAP "26.bmp" BPP 16 DENSITY 144
 END
 
 BITMAPFAMILYEX ID 9028 COMPRESS

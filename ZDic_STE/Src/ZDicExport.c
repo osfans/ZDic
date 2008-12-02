@@ -608,6 +608,7 @@ Err ExportToSMemo(Char *str, UInt16 command)
 	        recHeadImageH = DmGetResource( 'data', SugarMemoDefaultRecordHead );
 	        recHeadImageP = ( SugarMemoRecHeadType * ) MemHandleLock( recHeadImageH );
 	        recHead = *recHeadImageP;
+	        DateSecondsToDate (TimGetSeconds(), (DateType *)(&recHead.recHead[22]));//today
 	        recHead.keywordLen = chrNullOffset[ 1 ] + 1;
 	        	    
 	        MemHandleUnlock( recHeadImageH );
