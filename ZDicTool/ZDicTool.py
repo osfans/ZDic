@@ -115,8 +115,7 @@ class ZDic:
             return s
         
         f = bz2.BZ2File(path) if ext == '.bz2' else open(path)  #打开压缩或者不压缩格式均可
-        percent = float(block_size)/os.path.getsize(path)
-        process = percent
+        f_size=os.path.getsize(path)
         s = f.read(block_size)
         while 1:
             try:
@@ -134,8 +133,7 @@ class ZDic:
                 s = s[end:]
             except:
                 tmp = f.read(block_size)
-                process += percent
-                print '\b\b\b\b\b%3d%%' % (process*100),
+                print '\b\b\b\b\b%3d%%' % (float(f.tell()*100)/f_size),
                 if tmp:
                     s += tmp
                 else:
@@ -345,8 +343,12 @@ class ZDic:
 
     def fromTXT(self, path):
         U"从TXT中读取数据"
+        f_size=os.path.getsize(path)
+        process = 0
         f=open(path,'rU')
         for i in f:
+            process += len(i)
+            print '\b\b\b\b\b%3d%%' % (float(process*100)/f_size), 
             i = i.rstrip().replace(' /// ', '\t', 1)    #如果使用 /// 分隔，则替换成\t
             if '\t' in i:
                 word, mean = i.split('\t', 1)           #分隔词语和释义
