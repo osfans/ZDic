@@ -29,10 +29,10 @@
 #define COORD_SCROLLBAR_WIDTH   7
 #define WORDLIST_HEIGHT_HALF    58
 #define WORDLIST_HEIGHT_FULL    112
-#define COORD_TOOLBAR_HEIGHT         15
+#define COORD_TOOLBAR_HEIGHT         16
 #define COORD_SPACE             1
 #define COORD_START_Y               15
-#define COORD_START_X               0
+#define COORD_START_X               1
 #define COORD_SCROLL_BTON_HIGHT     8
 #define COORD_GOLDEN_SCALE      (16)/(26)                     // 1.618
 
@@ -93,6 +93,8 @@ typedef struct ZDicPreferenceType
 	Boolean useSystemFont;						            // true if disable phonetic font support(use system standar font).
 	Boolean enableJumpSearch;								// true if enable jump search else false.
 	Boolean enableAutoSpeech;                               // true if enable automatic speech.
+	Boolean useSkin;
+	UInt16	mainFormID;
 	
 	UInt8	dictMenu;										// Dict Menu use which list
 	UInt8	menuType;										// Dict Menu use which type
@@ -238,7 +240,6 @@ typedef struct AppGlobalObj{
     /*UInt16          fontLibrefNum;              // ZDic font share library.
     Boolean         fontLibLoad;                // True is be load else false.
 	ZDicFontType    font;*/                       // font data.
-	
 	UInt16      zdicLibRefNum;                  // ZDic Library Reference Number
 	UInt32      zdicLibClientContext;           // ZDic Library Client Context
 	

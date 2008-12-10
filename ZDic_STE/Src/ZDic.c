@@ -1731,7 +1731,7 @@ static void ToolsNextDictionaryCommand(WinDirectionType direction,  UInt16 wordF
 		    dicIndex = 0;
 		}
 	}
-	formId = (wordFieldID==MainWordField) ? MainForm: ( global->prefs.daSize ? DAFormLarge : DAForm);
+	formId = (wordFieldID==MainWordField) ? global->prefs.mainFormID: ( global->prefs.daSize ? DAFormLarge : DAForm);
     ToolsChangeDictionaryCommand(formId, dicIndex + ZDIC_DICT_MENUID);
 }
 /***********************************************************************
@@ -2326,7 +2326,7 @@ static void AppEventLoop()
 
     // Remember the original form
     originalForm = FrmGetActiveForm();
-    form = FrmInitForm( MainForm );
+    form = FrmInitForm( global->prefs.mainFormID );
     FrmSetActiveForm( form );
 
     event.eType = frmOpenEvent;
@@ -2450,7 +2450,7 @@ static void AppDAEventLoop( Boolean enableSmallDA, Boolean *bGotoMainForm )
     {
         MainFormHandleEvent( &event );
         WinSetDrawMode(winOverlay);
-		WinPaintChars(global->dictTriggerName,StrLen(global->dictTriggerName),90,2);
+        WinPaintChars(global->dictTriggerName,StrLen(global->dictTriggerName),90,2);
 	}
 
     do
@@ -2645,7 +2645,6 @@ static Err AppStart( Boolean subLaunch,UInt8 dictMenu )
     prefsSize = sizeof( global->prefs );//获取之前global->prefs的大小
     prefsVersion = PrefGetAppPreferences( appFileCreator, appPrefID, &global->prefs, &prefsSize, true );
     										//获取当前数据的版本，并且把之前的数据保存到global->prefs中
-    
     if ( prefsVersion != appPrefVersionNum || prefsSize != sizeof( global->prefs ) )//比较版本，比较当前global->prefs和之前global->prefs的大小
     {
         prefsVersion = noPreferenceFound;
@@ -2693,6 +2692,8 @@ static Err AppStart( Boolean subLaunch,UInt8 dictMenu )
         global->prefs.exportCagetoryIndex = dmUnfiledCategory;
         global->prefs.exportPrivate = false;
         global->prefs.exportAppCreatorID = sysFileCMemo;
+        global->prefs.useSkin = false;
+        global->prefs.mainFormID = MainFormNoSkin;
 
         global->prefs.OptUD = false;
         global->prefs.UD = false;
@@ -2779,7 +2780,6 @@ static Err AppStart( Boolean subLaunch,UInt8 dictMenu )
 			goto exit_lib;
 		}
     }
-
 	// Open SMT Lib
 	err = ZDicToolsOpenSMTLib(&global->smtLibRefNum);
 	if (err != errNone || global->smtLibRefNum == sysInvalidRefNum) 
@@ -2890,6 +2890,7 @@ static void AppStop(void)
          * Write the saved preferences / saved-state information.  This
          * data will be saved during a HotSync backup. 
          */
+        global->prefs.mainFormID = global->prefs.useSkin ? MainFormSkin : MainFormNoSkin;
         PrefSetAppPreferences(
             appFileCreator, appPrefID, appPrefVersionNum,
             &global->prefs, sizeof( global->prefs ), true );
@@ -3029,8 +3030,7 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags )
 
             // Remember the original form
             originalForm = FrmGetActiveForm();
-            
-            form = FrmInitForm( global->prefs.daSize == 0 ? DAForm : (global->prefs.daSize == 1 ?DAFormLarge: MainForm) );
+            form = FrmInitForm( global->prefs.daSize == 0 ? DAForm : (global->prefs.daSize == 1 ?DAFormLarge: global->prefs.mainFormID) );
             FrmSetActiveForm( form ); 
             AppDAEventLoop( global->prefs.daSize < 2, &bGotoMainForm );
 
@@ -3042,7 +3042,7 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags )
             {
                 // Remember the original form
                 originalForm = FrmGetActiveForm();
-                form = FrmInitForm( MainForm );
+                form = FrmInitForm( global->prefs.mainFormID );
                 FrmSetActiveForm( form );
 
                 AppDAEventLoop( false, &bGotoMainForm );
@@ -3275,7 +3275,7 @@ static void ShortcutPopEventHandler()
 	    		if( event.data.keyDown.chr == (WChar)dictInfo->keyShortcutChr[shortcutInfo->dictIndex[i]] && 
 	    			event.data.keyDown.keyCode == (WChar)dictInfo->keyShortcutKeycode[shortcutInfo->dictIndex[i]] )
 	    		{
-	    			ToolsChangeListDictionaryCommand(MainForm,shortcutInfo->dictIndex[i]);
+	    			ToolsChangeListDictionaryCommand(global->prefs.mainFormID,shortcutInfo->dictIndex[i]);
 					exit = true;
 					goto pupopformexit;
 	    		}
@@ -3361,7 +3361,7 @@ static void ShortcutPopEventHandler()
 			{
 		        if ( event.data.lstSelect.listID == PopShortcutList )
 		        {
-		            ToolsChangeListDictionaryCommand(MainForm,shortcutInfo->dictIndex[LstGetSelection(lstP)] );
+		            ToolsChangeListDictionaryCommand(global->prefs.mainFormID,shortcutInfo->dictIndex[LstGetSelection(lstP)] );
 		            exit = true;
 		        }
 		        break;
@@ -4480,7 +4480,10 @@ static void DetailsFormInit( FormType *frmP )
 
     // Set the disable phonetic font support inside.
     CtlSetValue ( GetObjectPtr ( DetailsDisablePhoneticFont ), global->prefs.useSystemFont );
-
+	
+	// Set the mainFormID
+	CtlSetValue ( GetObjectPtr ( DetailsEnableSkin ), global->prefs.useSkin );
+    
     // Set the slider values of incremental search delay.
     CtlSetSliderValues ( GetObjectPtr ( DetailSearchDelay ), NULL, NULL, NULL, &global->prefs.incSearchDelay );
 
@@ -4573,6 +4576,9 @@ static Boolean DetailsFormHandleEvent( FormType * frmP, EventType * eventP, Bool
 
 	                // Get the disable phonetic font support inside.
 	                global->prefs.useSystemFont = ( CtlGetValue ( GetObjectPtr ( DetailsDisablePhoneticFont ) ) != 0 );
+					
+					// Get mainFormID
+					global->prefs.useSkin = ( CtlGetValue ( GetObjectPtr ( DetailsEnableSkin ) ) != 0 );
 
 	                // Get the enable automatic speech.
 	                global->prefs.enableAutoSpeech = ( CtlGetValue ( GetObjectPtr ( DetailsEnableAutoSpeech ) ) != 0 );
@@ -5237,11 +5243,13 @@ static Boolean DAFormHandleEvent( EventType * eventP )
 
     global = AppGetGlobal();
 	
-	if (eventP->eType == penDownEvent)
+	if (global->prefs.enableSingleTap && eventP->eType == penDownEvent)
 	{
-		STEHandlePenDownEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
-		if(STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
-			return STEHasHotRectSelection(global->smtLibRefNum, global->smtEngineRefNum);		
+		if(STEHandlePenDownEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
+		{
+			STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
+			return STEHasHotRectSelection(global->smtLibRefNum, global->smtEngineRefNum);
+		}
 	}
 	else if(STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
 		return true;
@@ -5732,10 +5740,10 @@ Err MainFormAdjustObject ( const RectanglePtr toBoundsP )
         //HideObject( frmP, MainDescriptionField );
         HideObject( frmP, MainDescScrollBar );
 
-        descFieldBound.topLeft.x = COORD_START_X + 1;
+        descFieldBound.topLeft.x = COORD_START_X;
         descFieldBound.topLeft.y = COORD_START_Y;
-        descFieldBound.extent.x = ( toBoundsP->extent.x - COORD_SCROLLBAR_WIDTH -1);
-        descFieldBound.extent.y = ( toBoundsP->extent.y + 2 - COORD_START_Y - COORD_TOOLBAR_HEIGHT );
+        descFieldBound.extent.x = ( toBoundsP->extent.x - COORD_SCROLLBAR_WIDTH - COORD_SPACE);
+        descFieldBound.extent.y = ( toBoundsP->extent.y + (global->prefs.mainFormID==MainFormSkin?3:0) - COORD_START_Y - COORD_TOOLBAR_HEIGHT );
         //FrmSetObjectBounds( frmP, descFieldIndex, &descFieldBound );
 
         descScrollBarBound.topLeft.x = descFieldBound.topLeft.x + descFieldBound.extent.x;
@@ -5757,8 +5765,8 @@ Err MainFormAdjustObject ( const RectanglePtr toBoundsP )
         //HideObject( frmP, MainDescriptionField );
         HideObject( frmP, MainDescScrollBar );
 
-        wordListBound.topLeft.x = COORD_START_X + COORD_SPACE;
-        wordListBound.topLeft.y = toBoundsP->extent.y - COORD_TOOLBAR_HEIGHT - wordListBound.extent.y;
+        wordListBound.topLeft.x = COORD_START_X ;
+        wordListBound.topLeft.y = toBoundsP->extent.y + (global->prefs.mainFormID==MainFormSkin?3:0) - COORD_SPACE - COORD_TOOLBAR_HEIGHT - wordListBound.extent.y;
         wordListBound.extent.x = toBoundsP->extent.x - COORD_SPACE * 4 - COORD_SCROLLBAR_WIDTH;
         FrmSetObjectBounds ( frmP, wordListIndex, &wordListBound );
 
@@ -5776,8 +5784,8 @@ Err MainFormAdjustObject ( const RectanglePtr toBoundsP )
         
         descFieldBound.topLeft.x = COORD_START_X;
         descFieldBound.topLeft.y = COORD_START_Y;
-        descFieldBound.extent.x = ( toBoundsP->extent.x - COORD_SCROLLBAR_WIDTH );
-        descFieldBound.extent.y = wordListBound.topLeft.y + 2 - descFieldBound.topLeft.y - COORD_SPACE;
+        descFieldBound.extent.x = ( toBoundsP->extent.x - COORD_SCROLLBAR_WIDTH - COORD_SPACE);
+        descFieldBound.extent.y = wordListBound.topLeft.y  - descFieldBound.topLeft.y - COORD_SPACE;
         //FrmSetObjectBounds ( frmP, descFieldIndex, &descFieldBound );
 
         descScrollBarBound.topLeft.x = descFieldBound.topLeft.x + descFieldBound.extent.x;
@@ -5814,20 +5822,10 @@ Err MainFormAdjustObject ( const RectanglePtr toBoundsP )
 			STEAppendTextToEngine(global->smtLibRefNum, global->smtEngineRefNum, "",false);
 			STERenderList(global->smtLibRefNum, global->smtEngineRefNum);
 		}
-        /*if(global->prefs.font == global->font.smallTinyFontID ||global->prefs.font == global->font.largeTinyFontID)
-	    {
-			upBtonBound.topLeft.x = COORD_START_X;
-	        upBtonBound.topLeft.y = COORD_START_Y + COORD_SPACE;
-	        upBtonBound.extent.x = ( toBoundsP->extent.x - COORD_SCROLLBAR_WIDTH ) * 3 / 8;
-	        upBtonBound.extent.y = COORD_SCROLLBAR_WIDTH + COORD_SPACE;
-	    }
-	    else if(global->prefs.font == global->font.smallFontID ||global->prefs.font == global->font.largeFontID)
-	    {*/
-	    	upBtonBound.topLeft.x = COORD_START_X;
-	        upBtonBound.topLeft.y = COORD_START_Y + COORD_SPACE + 1;
-	        upBtonBound.extent.x = ( toBoundsP->extent.x - COORD_SCROLLBAR_WIDTH ) * 3 / 8;
-	        upBtonBound.extent.y = COORD_SCROLLBAR_WIDTH + COORD_SPACE;
-	    //}
+    	upBtonBound.topLeft.x = COORD_START_X;
+        upBtonBound.topLeft.y = COORD_START_Y + COORD_SPACE;
+        upBtonBound.extent.x = ( toBoundsP->extent.x - COORD_SCROLLBAR_WIDTH ) * 3 / 8;
+        upBtonBound.extent.y = COORD_SCROLLBAR_WIDTH + COORD_SPACE;
 	    FrmSetObjectBounds ( frmP, upBtonIndex, &upBtonBound );
 	    
         wordListBound.topLeft.x = upBtonBound.topLeft.x + COORD_SPACE;
@@ -5844,7 +5842,7 @@ Err MainFormAdjustObject ( const RectanglePtr toBoundsP )
         descFieldBound.topLeft.x = wordListBound.topLeft.x + wordListBound.extent.x + 2 * COORD_SPACE + 1;
         descFieldBound.topLeft.y = COORD_START_Y;
         descFieldBound.extent.x = ( toBoundsP->extent.x - COORD_SCROLLBAR_WIDTH ) - descFieldBound.topLeft.x;
-        descFieldBound.extent.y = ( toBoundsP->extent.y + 2 - COORD_START_Y - COORD_TOOLBAR_HEIGHT);
+        descFieldBound.extent.y = ( toBoundsP->extent.y +  (global->prefs.mainFormID==MainFormSkin?3:0) - COORD_START_Y - COORD_TOOLBAR_HEIGHT);
         //FrmSetObjectBounds( frmP, descFieldIndex, &descFieldBound );
 
         descScrollBarBound.topLeft.x = descFieldBound.topLeft.x + descFieldBound.extent.x;
@@ -5932,14 +5930,14 @@ static Err FormHistorySeekBack( UInt16 formId )
         return ~errNone;
     }
 	
-	if(formId == MainForm)
+	if(formId == global->prefs.mainFormID)
 	{
 	    // put history word to search, but not put it to history list.
 	    ToolsSetFieldPtr ( MainWordField, &global->prefs.history[ global->historySeekIdx ][ 0 ],
 	                       StrLen( &global->prefs.history[ global->historySeekIdx ][ 0 ] ), true );
 	    MainFormSearch( false, true, global->prefs.enableHighlightWord, true, false, global->prefs.enableAutoSpeech );
 	}
-	if(formId == DAForm)
+	else if(formId == DAForm)
 	{
 	    // put history word to search, but not put it to history list.
 	    ToolsSetFieldPtr ( DAWordField, &global->prefs.history[ global->historySeekIdx ][ 0 ],
@@ -6332,14 +6330,14 @@ static Err FormPopupDictList( UInt16 formId )
         *( itemsPtr + i ) = &global->popuplistItem[ i ][ 0 ];
     }
 	
-	if(formId == MainForm)
+	if(formId == global->prefs.mainFormID)
 		lstP = GetObjectPtr( lstMainPopup );
 	else if(formId == DAForm)
 		lstP = GetObjectPtr( lstDAPopup );
 
     LstSetListChoices ( lstP, itemsPtr, count );
     
-    if(formId == MainForm)//设置list行数
+    if(formId == global->prefs.mainFormID)//设置list行数
 	{
 		if(count < 13)
 	    {
@@ -6387,8 +6385,8 @@ static Err FormPopupDictList( UInt16 formId )
     
     if ( selection != noListSelection )
     {
-    	if(formId == MainForm)
-			ToolsChangeListDictionaryCommand(MainForm, popupInfo->dictIndex[selection] );
+    	if(formId == global->prefs.mainFormID)
+			ToolsChangeListDictionaryCommand(global->prefs.mainFormID, popupInfo->dictIndex[selection] );
 		else if(formId == DAForm)
 			ToolsChangeListDictionaryCommand(DAForm, popupInfo->dictIndex[selection] );
     	
@@ -6568,13 +6566,14 @@ static Boolean FormJumpSearch( UInt16 field, Boolean hyperlink )
 
     if ( global->prefs.enableJumpSearch || hyperlink )
     {
-        // put old word into history and search new word and put it into history.
-                
+        // put old word into history and search new word and put it into history.       
         if(STEHasTextSelection(global->smtLibRefNum, global->smtEngineRefNum))
         {
+        	UInt16 selectionLength;
         	buf=STEGetSelectedText(global->smtLibRefNum, global->smtEngineRefNum);
+        	selectionLength = StrLen( buf );
     		ToolsPutWordFieldToHistory( field );
-    		ToolsSetFieldPtr( field, buf, StrLen( buf ), true );
+    		ToolsSetFieldPtr( field, buf, selectionLength > MAX_WORD_LEN ? 2 : selectionLength, true );
 			field ==DAWordField?DAFormSearch( true, global->prefs.enableHighlightWord, false, global->prefs.enableAutoSpeech ):\
 										MainFormSearch( true, true, global->prefs.enableHighlightWord, true, false, global->prefs.enableAutoSpeech );
             frmP = FrmGetActiveForm ();
@@ -6628,20 +6627,21 @@ static void MainFormUpdateDisplay( UInt16 updateCode )
 
         
         frmP = FrmGetActiveForm ();
+        
         ShowObject(frmP,DictSelButton);
 		WinSetDrawMode(winOverlay);
 		ZDicToolsWinGetBounds ( FrmGetWindowHandle ( frmP ), &formBounds );
 		
 		// Update dictionary name and research current word.
     	//FrmDrawForm( FrmGetActiveForm() );
-        StrCopy( global->dictTriggerName, &dictInfo->displayName[ dictInfo->curMainDictIndex ][ 0 ] );
-		
-		if(formBounds.extent.x<=formBounds.extent.y)ToolsFontTruncateName( global->dictTriggerName, stdFont, ResLoadConstant( DictionaryNameMaxLenInPixels ));
-		
-		
-		//WinPaintChars(global->dictTriggerName,StrLen(global->dictTriggerName),90,2);
-		//ShowObject(frmP,DictSelButton);
-		//CtlSetLabel  ( GetObjectPtr(DictSelButton),global->dictTriggerName );
+    	StrCopy( global->dictTriggerName, &dictInfo->displayName[ dictInfo->curMainDictIndex ][ 0 ] );
+	
+		if(formBounds.extent.x<=formBounds.extent.y)
+			ToolsFontTruncateName( global->dictTriggerName, stdFont, ResLoadConstant( DictionaryNameMaxLenInPixels ));
+	
+	
+	//WinPaintChars(global->dictTriggerName,StrLen(global->dictTriggerName),90,2);
+	//ShowObject(frmP,DictSelButton);
 		WinPaintChars(global->dictTriggerName,StrLen(global->dictTriggerName),90,2);
 		ShowObject(frmP,MainExitButton);
         MainFormSearch( false, true, global->prefs.enableHighlightWord, true, false, global->prefs.enableAutoSpeech );
@@ -6857,7 +6857,7 @@ static Boolean MainFormDoCommand( UInt16 command )
     
     if ( command >= ZDIC_DICT_MENUID )
     {
-        handled = ToolsChangeDictionaryCommand( MainForm, command );
+        handled = ToolsChangeDictionaryCommand( global->prefs.mainFormID, command );
         return handled;
     }
 
@@ -7046,11 +7046,12 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 
     global = AppGetGlobal();
 	
-	if (eventP->eType == penDownEvent)
+	if (global->prefs.enableSingleTap && eventP->eType == penDownEvent)
 	{
-		STEHandlePenDownEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
-		if(STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
-			return STEHasHotRectSelection(global->smtLibRefNum, global->smtEngineRefNum);		
+		if(STEHandlePenDownEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
+		{	STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
+			return STEHasHotRectSelection(global->smtLibRefNum, global->smtEngineRefNum);
+		}
 	}
 	else if(STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
 		return true;	
@@ -7270,7 +7271,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
                 break;
 
             case MainBackHistoryRepeatButton:
-                FormHistorySeekBack (MainForm);
+                FormHistorySeekBack (global->prefs.mainFormID);
                 break;
             }
         }
@@ -7448,7 +7449,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 	                		}
 	                		case 5:
 	                		{
-	                			FormHistorySeekBack (MainForm);
+	                			FormHistorySeekBack (global->prefs.mainFormID);
 	                			break;
 	                		}
 	                		case 6:
@@ -7463,7 +7464,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 	                		}
 	                		case 8:
 	                		{
-	                			FormPopupDictList(MainForm);
+	                			FormPopupDictList(global->prefs.mainFormID);
 	                			break;
 	                		}
 	                		case 9:
@@ -7515,7 +7516,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 	                		}
 	                		case 5:
 	                		{
-	                			FormHistorySeekBack (MainForm);
+	                			FormHistorySeekBack (global->prefs.mainFormID);
 	                			break;
 	                		}
 	                		case 6:
@@ -7530,7 +7531,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 	                		}
 	                		case 8:
 	                		{
-	                			FormPopupDictList(MainForm);
+	                			FormPopupDictList(global->prefs.mainFormID);
 	                			break;
 	                		}
 	                		case 9:
@@ -7598,13 +7599,13 @@ static Boolean MainFormHandleEvent( EventType * eventP )
                 else if( eventP->data.keyDown.chr == (WChar)global->prefs.keyPopupChr &&
                 		 eventP->data.keyDown.keyCode == (WChar)global->prefs.keyPopupKeycode)
                 {
-                	FormPopupDictList(MainForm);
+                	FormPopupDictList(global->prefs.mainFormID);
                 	handled = true;
                 }
                 else if( eventP->data.keyDown.chr == (WChar)global->prefs.keyGobackChr &&
                 		 eventP->data.keyDown.keyCode == (WChar)global->prefs.keyGobackKeycode)
                 {
-                	FormHistorySeekBack (MainForm);
+                	FormHistorySeekBack (global->prefs.mainFormID);
                 	handled = true;
                 }
                 else if( eventP->data.keyDown.chr == (WChar)global->prefs.keySearchAllChr &&

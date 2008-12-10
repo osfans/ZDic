@@ -220,7 +220,8 @@ Boolean ZDicDIADisplayChange ( AppGlobalType* global )
 
         switch ( FrmGetFormId ( frmP ) )
         {
-	        case MainForm:            
+	        case MainFormSkin:
+	        case MainFormNoSkin:            
 	            ZDicDIAResizeForm ( frmP, &curBounds, &displayBounds, global );
 	            WinSetBounds ( FrmGetWindowHandle ( frmP ), &displayBounds );
 	            break;

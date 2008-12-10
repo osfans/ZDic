@@ -42,7 +42,6 @@ BEGIN
 "Alert" = "Äµ§i"
 "Not Enough Memory!" = "°O¾ÐÅé¤£¨¬¡I"
 "ZDic font share library not found!" = "¥¼µo²{ZDic ¦rÅé¦@¥Î®w¡I"
-"ZDic-must long than 16 bytes" = "ZDic ¥²¶·ªø©ó 16 ¦ì¤¸²Õ"
 "W:" = "µü"
 "Go" = "¬d"
 "Clr" = "²M"
@@ -146,7 +145,8 @@ BEGIN
  "Copy" = "¸´ÖÆ"  
  "Paste" = "Õ³Ìù"  
  "Select All" = "È«Ñ¡"  
- "Keyboard" = "¼üÅÌ"  
+ "Keyboard" = "¼üÅÌ"
+ "Graffiti Help" = "¼üÅÌ°ïÖú"  
  
  "Options" = "Ñ¡Ïî"  
  "Preferences... " = "²ÎÊýÉèÖÃ..."  
@@ -170,8 +170,6 @@ BEGIN
  "Not Enough Memory!" = "ÄÚ´æ²»×ã£¡"
  "Library Not Found" = "Î´·¢ÏÖ¿â"
  "^1 not installed." = "Î´°²×° ^1 ¿â¡£" 
- //"ZDic font share library not found!" = "ZDic ×ÖÌå¹²Ïí¿âÎ´·¢ÏÖ£¡"  
- "ZDic-must long than 16 bytes" = "ZDic ±ØÐë³¤ÓÚ 16 ×Ö½Ú"  
  "Go" = "²é"  
  "Clr" = "Çå" 
   
@@ -207,11 +205,12 @@ BEGIN
  
   
  "Preferences" = "²ÎÊýÉèÖÃ"    
- "Get word from Clipboard at start" = "Æô¶¯Ê±´Ó¼ôÇÐ°åÖÐ»ñÈ¡´ÊÓï"  
- "Enable incremental search" = "ÆôÓÃÔöÁ¿ËÑË÷"  
- "Search word for single tap" = "Ò»¼üËÑË÷"  
+ "Get word from Clipboard at start" = "Æô¶¯Ê±´Ó¼ôÇÐ°å»ñÈ¡´ÊÓï"  
+ "Enable incremental search" = "ÆôÓÃ½¥½ø²éÕÒ"  
+ "Search word for single tap" = "µ¥»÷Ñ¡´Ê"  
  "Highlight word field" = "¸ßÁÁÏÔÊ¾´ÊÓï¿ò"    
- "Try lower case on search failed" = "¼ìË÷²»µ½Ê±³¢ÊÔÐ¡Ð´×ÖÄ¸"    
+ "Try lower case on search failed" = "¼ìË÷Ê§°ÜÊ±³¢ÊÔÐ¡Ð´×ÖÄ¸"
+ "Use skin (need reload)" = "Ê¹ÓÃÆ¤·ô£¨ÐèÖØÆô£©"    
  "Disable font inside (need reload)" = "½ûÓÃÄÚ²¿×ÖÌå£¨ÐèÖØÆô£©"  
  "Automatic speech" = "×Ô¶¯·¢Òô"  
  "Custom Keys" = "×Ô¶¨Òå°´¼ü"    
@@ -384,13 +383,13 @@ BEGIN
      BUTTONS "OK" 
 END*/
 
-FORM ID MainForm AT (0 0 160 160)
+FORM ID MainFormSkin AT (0 0 160 160)
 	SAVEBEHIND NOFRAME
 	MENUID MainMenuBar SAVEBEHIND     
 BEGIN
 	 TITLE "ZDic-must long than 16 bytes"
 	
-	GRAFFITISTATEINDICATOR AT (65 2)
+	//GRAFFITISTATEINDICATOR AT (0 149)
 	BUTTON "" MainToolbarBtBg AT (12 147 124 13)  NOFRAME  BITMAPID InputBitmapFamily SELECTEDBITMAPID InputBitmapFamily GRAPHICAL DISABLED 
 	//FORMBITMAP AT (12 147) BITMAP InputBitmapFamily
 	FORMBITMAP AT (0 13) BITMAP ToolbarUpBitmapFamily
@@ -439,17 +438,60 @@ BEGIN
 	LIST "" ID lstMainPopup      AT (0 16 80 90) VISIBLEITEMS 8 NONUSABLE
 END
 
+FORM ID MainFormNoSkin AT (0 0 160 160)
+	NOFRAME
+	MENUID MainMenuBar    SAVEBEHIND  NONUSABLE     
+BEGIN
+	TITLE "ZDic"
+	
+	//BUTTON "S" ID MainBtnHeadButton AT (107 147 1 13) NONUSABLE
+	//BUTTON "" MainToolbarBtBg AT (0 0 0 0)
+	
+	BUTTON  "J" ID MainJumpPushButton  AT (29 2 14 10)
+	BUTTON  "j" MainSelectPushButton AT (PREVLEFT PREVTOP PREVWIDTH PREVHEIGHT)
+	BUTTON "V" ID MainAutoVoiceOnButton AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT)
+	BUTTON "v" ID MainAutoVoiceOffButton AT (PREVLEFT PREVTOP PREVWIDTH PREVHEIGHT)	 
+	BUTTON "S" ID MainAutoSearchOnButton AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT)   
+	BUTTON "s" ID MainAutoSearchOffButton  AT (PREVLEFT PREVTOP PREVWIDTH PREVHEIGHT)	  
+	BUTTON "P" ID MainPlayVoice  AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT) NONUSABLE
+	BUTTON "p" ID MainPlayNoneVoice  AT (0 0 0 0) NONUSABLE DISABLED
+	
+	BUTTON "                           "  ID DictSelButton  AT (90 0 126 13) NOFRAME DISABLED
+	BUTTON "x" ID MainExitButton  AT (151 0 10 10) NOFRAME
+
+	BUTTON "\11" ID MainWordButton  AT (0 145 15 14) NOFRAME FONT 3
+	FIELD ID MainWordField  AT (PREVRIGHT PREVTOP+2 78 PREVHEIGHT) MAXCHARS 255 EDITABLE UNDERLINED	
+	POPUPTRIGGER "" ID MainHistoryTrigger  AT (PREVRIGHT-2 145 15 PREVHEIGHT)  LEFTANCHOR
+	REPEATBUTTON "\3" MainBackHistoryRepeatButton AT (PREVRIGHT-2 PREVTOP PREVWIDTH PREVHEIGHT) NOFRAME FONT 3
+	BUTTON "Clr" ID MainNewButton  AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT)
+	BUTTON "E" ID MainExportToMemo   AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT)	
+	GRAFFITISTATEINDICATOR AT (PREVRIGHT+1 PREVTOP+4) 
+	
+	LIST ""   ID MainHistoryPopupList  AT (5 143 104 2) VISIBLEITEMS 0 NONUSABLE
+	
+	BUTTON "\12" ID MainAboutButton  AT (88 120 6 13)  NOFRAME FONT 3 NONUSABLE DISABLED
+	REPEATBUTTON "Aa" ID MainCapChange   AT (99 123 10 13) FRAME NONUSABLE DISABLED
+	BUTTON "S" ID MainSettingButton AT (113 124 13 13)   BITMAPID 9002 SELECTEDBITMAPID 9003  NONUSABLE DISABLED 
+	BUTTON "Go" ID MainGotoButton   AT (132 124 15 13) NONUSABLE DISABLED	
+		
+	SCROLLBAR ID MainDescScrollBar   AT (153 15 7 133)  VALUE 0 MIN 0 MAX 0 PAGESIZE 0
+	REPEATBUTTON "\10" ID MainWordListUpRepeatButton  AT (0 17 61 9) FONT 3 NOFRAME
+	REPEATBUTTON "\7" ID MainWordListDownRepeatButton   AT (1 137 61 9) FONT 3 NOFRAME
+	LIST "" ID MainWordList AT (4 28 59 112) VISIBLEITEMS 10
+	LIST "" ID lstMainPopup AT (12 23 80 90) VISIBLEITEMS 8 NONUSABLE
+END
+
 FORM ID AboutForm AT (2 2 156 156)
     SAVEBEHIND FRAME 
     DEFAULTBTNID AboutOKButton  SAVEBEHIND MODAL
 BEGIN
 	TITLE "About ZDic"
-	LABEL "ZDic 2.45" AUTOID AT (CENTER 21) FONT 7
+	LABEL "ZDic 2.46" AUTOID AT (CENTER 21) FONT 7
 	LABEL "Copyright © 2003-2004 neisoo" AUTOID AT (CENTER 43)
 	LABEL "Thank you for using ZDic!" AUTOID AT (CENTER 62) FONT 2
 	LABEL "JEMYZHANG(v2.34)" AUTOID AT (35 81)
 	LABEL "BobGreen (v2.34-2.41)" AUTOID AT (CENTER 94)	
-	LABEL "osfans (v2.42-2.45)" AUTOID AT (CENTER 107)
+	LABEL "osfans (v2.42-2.46)" AUTOID AT (CENTER 107)
 	LABEL "Yang Zhiqiang (v2.44)" AUTOID AT (35 120)
 	BUTTON "OK" ID AboutOKButton AT (58 137 40 12)	
 END
@@ -512,6 +554,7 @@ BEGIN
 	CHECKBOX "Search word for single tap" ID DetailsEnableSingleTap   AT (4 27 AUTO AUTO)
 	CHECKBOX "Highlight word field" ID DetailsEnableHighlightWord   AT (4 39 AUTO AUTO)   
 	CHECKBOX "Try lower case on search failed" DetailsEnableTryLowerSearch AT (4 51 AUTO AUTO)
+	CHECKBOX "Use skin (need reload)" DetailsEnableSkin AT (4 63 AUTO AUTO)
 	CHECKBOX "Disable font inside (need reload)" DetailsDisablePhoneticFont AT (4 63 AUTO AUTO) NONUSABLE
 	CHECKBOX "Automatic speech" DetailsEnableAutoSpeech AT (4 101 AUTO AUTO)
 	BUTTON "Done" ID DetailsDoneButton   AT (6 140 40 12)
