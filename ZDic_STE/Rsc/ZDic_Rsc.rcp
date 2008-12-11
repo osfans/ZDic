@@ -51,7 +51,7 @@ BEGIN
 "Dict Options" = "Ãã¨å¿ï¶µ"
 "Done" = "§¹¦¨"
 "Dictionary:" = "Ãã¨å¡G"
-"Phonetic" = "­µ¼Ð"
+"Phonetic:" = "­µ¼Ð"
 "ZDic DA Font:" = "ZDic DA ¦rÅé"
 
 "Shortcut List" = "§Ö±¶¦Cªí"
@@ -61,7 +61,7 @@ BEGIN
 "Select Item" = "¿ï¾Ü¶µ¥Ø"
 "Set" = "³]¸m"
 
-"ZDic Font:" = "ZDic ¦rÅé¡G"
+"ZDic Font:" = "¦rÅé¡G"
 "Preferences" = "°Ñ¼Æ³]¸m"
 "Get word from Clipboard at start" = "±Ò°Ê®É±q°Å¶KªO¤¤Àò¨úµü»y"
 "Enable incremental search" = "±Ò¥Î¼W¶q·j´M"
@@ -180,7 +180,7 @@ BEGIN
  "Dict Options" = "´ÊµäÑ¡Ïî"  
  "Done" = "Íê³É"  
  "Dictionary:" = "´Êµä£º"  
- "Phonetic" = "Òô±ê"  
+ "Phonetic:" = "Òô±ê£º"  
  "ZDic DA Font:" = "ZDic DA ×ÖÌå"   
  
  "Shortcut List" = "¿ì½ÝÁÐ±í"  
@@ -190,7 +190,7 @@ BEGIN
  "Select Item" = "Ñ¡ÔñÏîÄ¿"    
  "Set" = "ÉèÖÃ"  
  
- "ZDic Font:" = "ZDic ×ÖÌå£º"
+ "Font:" = "×ÖÌå£º"
  "Black" = "ºÚÉ«"
  "Blue" = "À¶É«"
  "Red" = "ºìÉ«"
@@ -390,7 +390,6 @@ BEGIN
 	 TITLE "ZDic-must long than 16 bytes"
 	
 	//GRAFFITISTATEINDICATOR AT (0 149)
-	BUTTON "" MainToolbarBtBg AT (12 147 124 13)  NOFRAME  BITMAPID InputBitmapFamily SELECTEDBITMAPID InputBitmapFamily GRAPHICAL DISABLED 
 	//FORMBITMAP AT (12 147) BITMAP InputBitmapFamily
 	FORMBITMAP AT (0 13) BITMAP ToolbarUpBitmapFamily
 	FORMBITMAP AT (0 0) BITMAP MenuBitmapFamily
@@ -398,43 +397,42 @@ BEGIN
 	FORMBITMAP AT (62 0) BITMAP BtnEndBitmapFamily
 	//FORMBITMAP AT (87 0) BITMAP DictBitmapFamily
 	
-	FIELD ID MainWordField  AT (12 148 60 Auto) MAXCHARS 255 EDITABLE 
 	//FIELD ID MainDescriptionField AT (62 15 89 133) MULTIPLELINES MAXCHARS 8192  NONEDITABLE HASSCROLLBAR
 	SCROLLBAR ID MainDescScrollBar   AT (153 15 7 132)  VALUE 0 MIN 0 MAX 0 PAGESIZE 0
 
-	BUTTON  "S" ID MainSelectPushButton AT (10 0 13 13) NOFRAME BITMAPID SelectJumpBitmapFamily SELECTEDBITMAPID SelectJumpBitmapFamily GRAPHICAL
-	BUTTON  "J" ID MainJumpPushButton  AT (10 0 13 13) NOFRAME BITMAPID JumpSelectBitmapFamily SELECTEDBITMAPID JumpSelectBitmapFamily GRAPHICAL
-
-	BUTTON  "voiceon" ID MainAutoVoiceOnButton AT (23 0 13 13) NOFRAME BITMAPID AutoSpeechOnBitmapFamily SELECTEDBITMAPID AutoSpeechOnBitmapFamily GRAPHICAL
-	BUTTON  "voiceoff" ID MainAutoVoiceOffButton  AT (23 0 13 13) NOFRAME BITMAPID AutoSpeechOffBitmapFamily SELECTEDBITMAPID AutoSpeechOffBitmapFamily GRAPHICAL
-
-	BUTTON  "searchon" ID MainAutoSearchOnButton AT (36 0 13 13) NOFRAME BITMAPID AutoSearchOnBitmapFamily SELECTEDBITMAPID AutoSearchOnBitmapFamily GRAPHICAL
-	BUTTON  "searchoff" ID MainAutoSearchOffButton  AT (36 0 13 13) NOFRAME BITMAPID AutoSearchOffBitmapFamily SELECTEDBITMAPID AutoSearchOffBitmapFamily GRAPHICAL
-
-	BUTTON  "About" ID MainAboutButton  AT (49 0 13 13) NOFRAME BITMAPID AboutBitmapFamily SELECTEDBITMAPID AboutBitmapFamily GRAPHICAL
+	BUTTON  "J" ID MainJumpOnButton  AT (10 0 13 13) NOFRAME BITMAPID JumpSelectBitmapFamily SELECTEDBITMAPID JumpSelectBitmapFamily GRAPHICAL
+	BUTTON  "S" ID MainJumpOffButton AT (PREVLEFT PREVTOP PREVWIDTH PREVHEIGHT) NOFRAME BITMAPID SelectJumpBitmapFamily SELECTEDBITMAPID SelectJumpBitmapFamily GRAPHICAL
+	BUTTON  "voiceon" ID MainAutoVoiceOnButton AT (PREVRIGHT PREVTOP PREVWIDTH PREVHEIGHT) NOFRAME BITMAPID AutoSpeechOnBitmapFamily SELECTEDBITMAPID AutoSpeechOnBitmapFamily GRAPHICAL
+	BUTTON  "voiceoff" ID MainAutoVoiceOffButton  AT (PREVLEFT PREVTOP PREVWIDTH PREVHEIGHT) NOFRAME BITMAPID AutoSpeechOffBitmapFamily SELECTEDBITMAPID AutoSpeechOffBitmapFamily GRAPHICAL
+	BUTTON  "searchon" ID MainAutoSearchOnButton AT (PREVRIGHT PREVTOP PREVWIDTH PREVHEIGHT) NOFRAME BITMAPID AutoSearchOnBitmapFamily SELECTEDBITMAPID AutoSearchOnBitmapFamily GRAPHICAL
+	BUTTON  "searchoff" ID MainAutoSearchOffButton  AT (PREVLEFT PREVTOP PREVWIDTH PREVHEIGHT) NOFRAME BITMAPID AutoSearchOffBitmapFamily SELECTEDBITMAPID AutoSearchOffBitmapFamily GRAPHICAL
+	BUTTON  "About" ID MainAboutButton  AT (PREVRIGHT PREVTOP PREVWIDTH PREVHEIGHT) NOFRAME BITMAPID AboutBitmapFamily SELECTEDBITMAPID AboutBitmapFamily GRAPHICAL
 
 	BUTTON "P" ID MainPlayNoneVoice  AT (63 0 24 13) NOFRAME  BITMAPID PlayNoneBitmapFamily SELECTEDBITMAPID PlayNoneBitmapFamily GRAPHICAL 
-	BUTTON "P" ID MainPlayVoice  AT (63 0 24 13) NOFRAME  BITMAPID PlayBitmapFamily SELECTEDBITMAPID PlayBitmapFamily GRAPHICAL  
+	BUTTON "P" ID MainPlayVoice  AT (PREVLEFT PREVTOP PREVWIDTH PREVHEIGHT) NOFRAME  BITMAPID PlayBitmapFamily SELECTEDBITMAPID PlayBitmapFamily GRAPHICAL  
+
+	BUTTON "" ID DictSelButton  AT (87 0 126 13) NOFRAME  BITMAPID DictBitmapFamily SELECTEDBITMAPID DictBitmapFamily GRAPHICAL DISABLED
+	BUTTON "x" ID MainExitButton  AT (147 0 13 13)  NOFRAME  BITMAPID CloseBitmapFamily SELECTEDBITMAPID CloseBitmapFamily GRAPHICAL 
 	
-	BUTTON "H" ID MainHistoryTrigger  AT (72 147 7 13) NOFRAME GRAPHICAL BITMAPID HistoryBitmapFamily SELECTEDBITMAPID HistoryBitmapFamily 
 	LIST ""   ID MainHistoryPopupList  AT (13 135 81 2) VISIBLEITEMS 0 NONUSABLE
 		
-	BUTTON "Word :" ID MainWordButton  AT (0 147 12 13) NOFRAME  BITMAPID WordListBitmapFamily SELECTEDBITMAPID WordListBitmapFamily GRAPHICAL   
 	REPEATBUTTON "\10" ID MainWordListUpRepeatButton  AT (0 16 61 8) FONT 3 NOFRAME
 	REPEATBUTTON "\7" ID MainWordListDownRepeatButton   AT (0 136 61 8) FONT 3 NOFRAME
 	LIST ""      ID MainWordList  AT (1 25 59 112) VISIBLEITEMS 10
+
+	BUTTON "Word :" ID MainWordButton  AT (0 147 12 13) NOFRAME  BITMAPID WordListBitmapFamily SELECTEDBITMAPID WordListBitmapFamily GRAPHICAL   
+	BUTTON "" MainToolbarBtBg AT (PREVRIGHT PREVTOP 124 PREVHEIGHT)  NOFRAME  BITMAPID InputBitmapFamily SELECTEDBITMAPID InputBitmapFamily GRAPHICAL DISABLED 	 
+	FIELD ID MainWordField  AT (PREVLEFT PREVTOP+1 60 Auto) MAXCHARS 255 EDITABLE
+	BUTTON "H" ID MainHistoryTrigger  AT (PREVRIGHT 147 7 13) NOFRAME GRAPHICAL BITMAPID HistoryBitmapFamily SELECTEDBITMAPID HistoryBitmapFamily 	
+	BUTTON "Goto" ID MainGotoButton   AT (PREVRIGHT PREVTOP 15 PREVHEIGHT) NOFRAME  BITMAPID FindBitmapFamily SELECTEDBITMAPID FindBitmapFamily GRAPHICAL
+	BUTTON "Clear" ID MainNewButton  AT (PREVRIGHT PREVTOP 13 PREVHEIGHT)	NOFRAME  BITMAPID ClearBitmapFamily SELECTEDBITMAPID ClearBitmapFamily GRAPHICAL
 	
-	BUTTON "Goto" ID MainGotoButton   AT (79 147 15 13) NOFRAME  BITMAPID FindBitmapFamily SELECTEDBITMAPID FindBitmapFamily GRAPHICAL
-	BUTTON "Clear" ID MainNewButton  AT (94 147 13 13)	NOFRAME  BITMAPID ClearBitmapFamily SELECTEDBITMAPID ClearBitmapFamily GRAPHICAL
+	BUTTON "S" ID MainBtnHeadButton AT (PREVRIGHT PREVTOP 1 PREVHEIGHT) NOFRAME  BITMAPID BtnHeadBitmapFamily SELECTEDBITMAPID BtnHeadBitmapFamily GRAPHICAL
+	REPEATBUTTON "R" ID MainBackHistoryRepeatButton AT (PREVRIGHT PREVTOP 13 PREVHEIGHT) NOFRAME  BITMAPID RecallWordBitmapFamily SELECTEDBITMAPID RecallWordBitmapFamily GRAPHICAL
+	BUTTON "C" ID MainCapChange   AT (PREVRIGHT PREVTOP PREVWIDTH PREVHEIGHT) NOFRAME  BITMAPID CapBitmapFamily SELECTEDBITMAPID CapBitmapFamily GRAPHICAL
+	BUTTON "E" ID MainExportToMemo   AT (PREVRIGHT PREVTOP PREVWIDTH PREVHEIGHT) NOFRAME  BITMAPID ExportBitmapFamily SELECTEDBITMAPID ExportBitmapFamily GRAPHICAL
+	BUTTON "S" ID MainSettingButton AT (PREVRIGHT PREVTOP PREVWIDTH PREVHEIGHT) NOFRAME  BITMAPID SettingBitmapFamily SELECTEDBITMAPID SettingBitmapFamily GRAPHICAL
 	
-	REPEATBUTTON "R" ID MainBackHistoryRepeatButton AT (108 147 13 13) NOFRAME  BITMAPID RecallWordBitmapFamily SELECTEDBITMAPID RecallWordBitmapFamily GRAPHICAL
-	BUTTON "C" ID MainCapChange   AT (121 147 13 13) NOFRAME  BITMAPID CapBitmapFamily SELECTEDBITMAPID CapBitmapFamily GRAPHICAL
-	BUTTON "E" ID MainExportToMemo   AT (134 147 13 13) NOFRAME  BITMAPID ExportBitmapFamily SELECTEDBITMAPID ExportBitmapFamily GRAPHICAL
-	BUTTON "S" ID MainSettingButton AT (147 147 13 13) NOFRAME  BITMAPID SettingBitmapFamily SELECTEDBITMAPID SettingBitmapFamily GRAPHICAL
-	BUTTON "S" ID MainBtnHeadButton AT (107 147 1 13) NOFRAME  BITMAPID BtnHeadBitmapFamily SELECTEDBITMAPID BtnHeadBitmapFamily GRAPHICAL
-	
-	BUTTON "" ID DictSelButton  AT (87 0 126 13) NOFRAME  BITMAPID DictBitmapFamily SELECTEDBITMAPID DictBitmapFamily GRAPHICAL DISABLED
-	BUTTON "x" ID MainExitButton  AT (147 0 13 13)  NOFRAME  BITMAPID CloseBitmapFamily SELECTEDBITMAPID CloseBitmapFamily GRAPHICAL 
 	LIST "" ID lstMainPopup      AT (0 16 80 90) VISIBLEITEMS 8 NONUSABLE
 END
 
@@ -447,15 +445,15 @@ BEGIN
 	//BUTTON "S" ID MainBtnHeadButton AT (107 147 1 13) NONUSABLE
 	//BUTTON "" MainToolbarBtBg AT (0 0 0 0)
 	
-	BUTTON  "J" ID MainJumpPushButton  AT (29 2 14 10)
-	BUTTON  "j" MainSelectPushButton AT (PREVLEFT PREVTOP PREVWIDTH PREVHEIGHT)
-	BUTTON "V" ID MainAutoVoiceOnButton AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT)
-	BUTTON "v" ID MainAutoVoiceOffButton AT (PREVLEFT PREVTOP PREVWIDTH PREVHEIGHT)	 
-	BUTTON "S" ID MainAutoSearchOnButton AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT)   
-	BUTTON "s" ID MainAutoSearchOffButton  AT (PREVLEFT PREVTOP PREVWIDTH PREVHEIGHT)	  
+	PUSHBUTTON "J" ID MainJumpPushButton  AT (29 2 14 10)
+	PUSHBUTTON "V" ID MainAutoVoicePushButton AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT)
+	PUSHBUTTON "S" ID MainAutoSearchPushButton AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT)   
 	BUTTON "P" ID MainPlayVoice  AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT) NONUSABLE
 	BUTTON "p" ID MainPlayNoneVoice  AT (0 0 0 0) NONUSABLE DISABLED
 	
+	
+	//POPUPTRIGGER "" ID DictSelButton  AT (90 0 63 13)  LEFTANCHOR
+	//POPUPLIST ID DictSelButton  lstMainPopup
 	BUTTON "                           "  ID DictSelButton  AT (90 0 126 13) NOFRAME DISABLED
 	BUTTON "x" ID MainExitButton  AT (151 0 10 10) NOFRAME
 
@@ -478,7 +476,7 @@ BEGIN
 	REPEATBUTTON "\10" ID MainWordListUpRepeatButton  AT (0 17 61 9) FONT 3 NOFRAME
 	REPEATBUTTON "\7" ID MainWordListDownRepeatButton   AT (1 137 61 9) FONT 3 NOFRAME
 	LIST "" ID MainWordList AT (4 28 59 112) VISIBLEITEMS 10
-	LIST "" ID lstMainPopup AT (12 23 80 90) VISIBLEITEMS 8 NONUSABLE
+	LIST  "" ID lstMainPopup AT (12 23 80 90) VISIBLEITEMS 8 NONUSABLE
 END
 
 FORM ID AboutForm AT (2 2 156 156)
@@ -486,12 +484,12 @@ FORM ID AboutForm AT (2 2 156 156)
     DEFAULTBTNID AboutOKButton  SAVEBEHIND MODAL
 BEGIN
 	TITLE "About ZDic"
-	LABEL "ZDic 2.46" AUTOID AT (CENTER 21) FONT 7
+	LABEL "ZDic 2.50" AUTOID AT (CENTER 21) FONT 7
 	LABEL "Copyright © 2003-2004 neisoo" AUTOID AT (CENTER 43)
 	LABEL "Thank you for using ZDic!" AUTOID AT (CENTER 62) FONT 2
 	LABEL "JEMYZHANG(v2.34)" AUTOID AT (35 81)
 	LABEL "BobGreen (v2.34-2.41)" AUTOID AT (CENTER 94)	
-	LABEL "osfans (v2.42-2.46)" AUTOID AT (CENTER 107)
+	LABEL "osfans (v2.42-2.50)" AUTOID AT (CENTER 107)
 	LABEL "Yang Zhiqiang (v2.44)" AUTOID AT (35 120)
 	BUTTON "OK" ID AboutOKButton AT (58 137 40 12)	
 END
@@ -504,11 +502,9 @@ BEGIN
     TITLE "Dict Options"
     BUTTON "Done" ID PrefsDoneButton  AT (4 142 30 12)
     LABEL "Dictionary:" ID PrefsDictLabel   AT (3 14) FONT 1
-	LABEL "Phonetic" ID PrefsPhoneticLabel  AT (85 14) FONT 1
-	
+	LABEL "Phonetic:" ID PrefsPhoneticLabel  AT (83 14) FONT 1	
 
 	LIST "One" "Two" "Three" ID PrefsDictList  AT (3 26 80 101) VISIBLEITEMS 9
-
 	BUTTON "\1" ID PrefsUpButton  AT (4 128 37 10) FONT 5
 	BUTTON "\2" ID PrefsDownButton  AT (45 128 37 10) FRAME FONT 5
 	BUTTON "Shortcut List" ID btnShortcut   AT (45 142 59 12)
@@ -526,23 +522,25 @@ POPUPLIST ID triggerPhonetic  PrefsPhoneticList
 	LABEL "Menu+" AUTOID AT (85 37) FONT 1
 	GRAFFITISTATEINDICATOR AT (147 116)
 	
-	PUSHBUTTON  "A" ID PrefsFontSmallDAPushButton      AT (90 63 12 12) FONT 0 GROUP 2
-	PUSHBUTTON  "A" ID PrefsFontLargeDAPushButton    AT (103 63 12 12) FONT 2 GROUP 2
+	//PUSHBUTTON  "A" ID PrefsFontSmallDAPushButton      AT (90 63 12 12) FONT 0 GROUP 2 NONUSABLE
+	
 	//PUSHBUTTON  "A" ID PrefsFontSmallTinyDAPushButton      AT (87 102 12 12) GROUP 2 FONT 0
 	//PUSHBUTTON  "A" ID PrefsFontLargeTinyDAPushButton    AT (100 102 12 12) FONT 2 GROUP 2
-	LABEL "ZDic Font:" ID PrefsFontLabel  AT (85 51) FONT 1
-	PUSHBUTTON  "A" ID PrefsFontSmallPushButton    AT (119 63 12 12) FONT 0 GROUP 1
-	PUSHBUTTON  "A" ID PrefsFontLargePushButton  AT (132 63 12 12) FONT 2 GROUP 1
+	LABEL "Font:" ID PrefsFontLabel  AT (85 52) FONT 1
+	//PUSHBUTTON  "A" ID PrefsFontSmallPushButton    AT (119 63 12 12) FONT 0 GROUP 1 NONUSABLE
+	PUSHBUTTON  "A" ID PrefsFontLargeDAPushButton    AT (125 PREVTOP 12 12) FONT 2
+	PUSHBUTTON  "A" ID PrefsFontLargePushButton  AT (PREVRIGHT+1 PREVTOP 12 12) FONT 2
 	//PUSHBUTTON  "A" ID PrefsFontSmallTinyPushButton     AT (87 77 12 12) GROUP 1 FONT 0
 	//PUSHBUTTON  "A" ID PrefsFontLargeTinyPushButton   AT (100 77 12 12) FONT 2 GROUP 1
 	
-	POPUPTRIGGER "Black" ID triggerHeadColor  AT (84 76 41 AUTO) 
+	POPUPTRIGGER "Black" ID triggerHeadColor  AT (84 PREVBOTTOM+3 AUTO AUTO)
+	LIST  "Black" "Blue" "Red" "Green" "Yellow" "Purple" "Orange" "Gray"   ID lstFontColor  AT (PREVLEFT+15 PREVTOP AUTO AUTO) VISIBLEITEMS 8 NONUSABLE
+	PUSHBUTTON "B" ID chkHeadBold   AT (131 PREVTOP AUTO AUTO)  FONT 1
+
 	POPUPLIST ID triggerHeadColor   lstFontColor
-	LIST  "Black" "Blue" "Red" "Green" "Yellow" "Purple" "Orange" "Gray"   ID lstFontColor  AT (PREVLEFT 36 PREVWIDTH 90) VISIBLEITEMS 8 NONUSABLE
-	CHECKBOX "B" ID chkHeadBold   AT (132 76 AUTO AUTO) CHECKED
-	BUTTON "TC" ID BodyColorButton  AT (88 90 24 12) FONT 0
-	BUTTON "Link Color" ID LinkColorButton  AT (88 103 47 12)	
-	BUTTON "BC" ID BackColorButton  AT (113 90 24 12)
+	BUTTON "TC" ID BodyColorButton  AT (87 84 24 12)
+	BUTTON "BC" ID BackColorButton  AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT)
+	BUTTON "Link Color" ID LinkColorButton  AT (88 101 47 12)	
 END
 
 FORM ID DetailsForm AT ( 2 2 156 156 )
@@ -2173,5 +2171,3 @@ BITMAPFAMILYEX ID 9257 COMPRESS
 BEGIN
 	BITMAP "257.bmp" BPP 16 DENSITY 144
 END
-
-

@@ -40,6 +40,8 @@
 //smart text engine
 #include <SmartTextEngine.h>
 
+  
+
 /*********************************************************************
  * Entry Points
  *********************************************************************/
@@ -84,7 +86,7 @@ static Boolean FormIncrementalSearch( UInt16 wordFieldID, EventType * event );
 //
 static void HyperlinkCallback(UInt32 refNum)//main window hyperlink callback
 {
-	FormJumpSearch(MainWordField, true);
+	FormJumpSearch(MainWordField, true);	
 }
 
 static void DAHyperlinkCallback(UInt32 refNum)//da window hyperlink callback
@@ -145,6 +147,11 @@ static void AppendStr(Char *data)//append data rendered with STE
 		}		
 	}
 	STEAppendTextToEngine(global->smtLibRefNum, global->smtEngineRefNum, data+j+1, false);
+	if(StrNCaselessCompare(data+j+1,"#redirect",9)==0)//ÖØ¶¨Ïò
+	{
+		if (*(data+j+11)!='/')
+			STESetCurrentTextSelection(global->smtLibRefNum, global->smtEngineRefNum, 2, 9+(*(data+j+10)==chrSpace), kSelectUntilEnd);
+	}
 }
 
 static void RenderStr(Char *data)//render data with STE from the beginning
@@ -815,7 +822,7 @@ static Err ToolsSetFieldHandle( UInt16 objID, MemHandle newTxtH, Boolean redraw 
     // free the old text handle
     if ( oldTxtH != NULL )
         MemHandleFree( oldTxtH );
-
+        
     return errNone;
 }
 
@@ -2735,7 +2742,7 @@ static Err AppStart( Boolean subLaunch,UInt8 dictMenu )
         // 3. open dictionary fail.
 		
 		// Open ZLib 
-		err = ZDicToolsOpenZLib(&global->zlibRefNum);
+		err = ZDicToolsOpenZLib(&global->zlibRefNum, &global->zlibFound);
 		if (err != errNone || global->zlibRefNum == sysInvalidRefNum) 
 		{
 			FrmCustomAlert(LibNotFoundAlert, "ZLib", NULL, NULL);
@@ -2743,7 +2750,7 @@ static Err AppStart( Boolean subLaunch,UInt8 dictMenu )
 		}
 		
 		// Open ZDic Library
-		err = ZDicLib_OpenLibrary(&global->zdicLibRefNum, &global->zdicLibClientContext);
+		err = ZDicLib_OpenLibrary(&global->zdicLibRefNum, &global->zdicLibClientContext, &global->zdicLibFound);
 		if (err != errNone || global->zdicLibRefNum == sysInvalidRefNum) 
 		{
 			FrmCustomAlert(LibNotFoundAlert, "ZDicLib", NULL, NULL);
@@ -2765,7 +2772,7 @@ static Err AppStart( Boolean subLaunch,UInt8 dictMenu )
     else 
     {
     	// Open ZLib 
-		err = ZDicToolsOpenZLib(&global->zlibRefNum);
+		err = ZDicToolsOpenZLib(&global->zlibRefNum, &global->zlibFound);
 		if (err != errNone || global->zlibRefNum == sysInvalidRefNum) 
 		{
 			FrmCustomAlert(LibNotFoundAlert, "ZLib", NULL, NULL);
@@ -2773,7 +2780,7 @@ static Err AppStart( Boolean subLaunch,UInt8 dictMenu )
 		}
 		
 		// Open ZDic Library
-		err = ZDicLib_OpenLibrary(&global->zdicLibRefNum, &global->zdicLibClientContext);
+		err = ZDicLib_OpenLibrary(&global->zdicLibRefNum, &global->zdicLibClientContext, &global->zdicLibFound);
 		if (err != errNone || global->zdicLibRefNum == sysInvalidRefNum) 
 		{
 			FrmCustomAlert(LibNotFoundAlert, "ZDicLib", NULL, NULL);
@@ -2781,7 +2788,7 @@ static Err AppStart( Boolean subLaunch,UInt8 dictMenu )
 		}
     }
 	// Open SMT Lib
-	err = ZDicToolsOpenSMTLib(&global->smtLibRefNum);
+	err = ZDicToolsOpenSMTLib(&global->smtLibRefNum, &global->STEFound);
 	if (err != errNone || global->smtLibRefNum == sysInvalidRefNum) 
 	{
 		FrmCustomAlert(LibNotFoundAlert, "SmartTextEngine", NULL, NULL);
@@ -2874,16 +2881,16 @@ static void AppStop(void)
 
         //ZDicToolsLibRelease( global->fontLibrefNum, global->fontLibLoad );
 	   	// Close ZDic Library
-		ZDicLib_CloseLibrary(global->zdicLibRefNum, global->zdicLibClientContext);
+		ZDicLib_CloseLibrary(global->zdicLibRefNum, global->zdicLibClientContext, global->zdicLibFound);
 		global->zdicLibRefNum = sysInvalidRefNum;
 
 		// Close SMT Libarary
-		ZDicToolsCloseSMTLib(global->smtLibRefNum);
+		ZDicToolsCloseSMTLib(global->smtLibRefNum, global->STEFound);
 		global->smtLibRefNum = sysInvalidRefNum;
 		global->smtEngineRefNum = 0;
 
 		// Close ZLib Libarary
-		ZDicToolsCloseZLib(global->zlibRefNum);
+		ZDicToolsCloseZLib(global->zlibRefNum, global->zlibFound);
 		global->zlibRefNum = sysInvalidRefNum;
 		
         /*
@@ -3710,8 +3717,10 @@ static void PrefFormInit( FormType *frmP )
     if(global->prefs.fontDA == global->font.largeFontID)
     	FrmSetControlGroupSelection ( frmP, 2,PrefsFontLargeDAPushButton );*/
     
-    FrmSetControlGroupSelection ( frmP, 1,(global->prefs.font == stdFont)?PrefsFontSmallPushButton:PrefsFontLargePushButton );
-    FrmSetControlGroupSelection ( frmP, 2,(global->prefs.fontDA == stdFont)?PrefsFontSmallDAPushButton:PrefsFontLargeDAPushButton );
+    //FrmSetControlGroupSelection ( frmP, 1,(global->prefs.font == stdFont)?PrefsFontSmallPushButton:PrefsFontLargePushButton );
+    //FrmSetControlGroupSelection ( frmP, 2,(global->prefs.fontDA == stdFont)?PrefsFontSmallDAPushButton:PrefsFontLargeDAPushButton );
+    CtlSetValue ( GetObjectPtr ( PrefsFontLargePushButton ), global->prefs.font != stdFont );	
+    CtlSetValue ( GetObjectPtr ( PrefsFontLargeDAPushButton ), global->prefs.fontDA != stdFont );
     
     LstSetSelection(lstP2,global->prefs.dictMenu);
 	CtlSetLabel(triP2,LstGetSelectionText(lstP2,global->prefs.dictMenu));
@@ -4215,10 +4224,10 @@ static Err PrefFormPopupPrefsDialog( void )
 
         global = AppGetGlobal();
         
-	    newFont = FrmGetObjectId ( frmP,FrmGetControlGroupSelection ( frmP, 1 ))==PrefsFontSmallPushButton ? stdFont : largeFont;
-	    
-	    newFontDA = FrmGetObjectId ( frmP,FrmGetControlGroupSelection ( frmP, 2 )) == PrefsFontSmallDAPushButton ? stdFont : largeFont;
-	    
+	    //newFont = FrmGetObjectId ( frmP,FrmGetControlGroupSelection ( frmP, 1 ))==PrefsFontSmallPushButton ? stdFont : largeFont;
+	    newFont = CtlGetValue ( GetObjectPtr ( PrefsFontLargePushButton )) ? largeFont : stdFont;
+	    //newFontDA = FrmGetObjectId ( frmP,FrmGetControlGroupSelection ( frmP, 2 )) == PrefsFontSmallDAPushButton ? stdFont : largeFont;
+	    newFontDA = CtlGetValue ( GetObjectPtr ( PrefsFontLargeDAPushButton )) ? largeFont : stdFont;
 	  	oldLinkColor = WinSetForeColor(NULL);
 	    
         if ( newFont != global->prefs.font || newFontDA != global->prefs.fontDA || oldLinkColor !=  global->prefs.linkColor)
@@ -6572,12 +6581,15 @@ static Boolean FormJumpSearch( UInt16 field, Boolean hyperlink )
         	UInt16 selectionLength;
         	buf=STEGetSelectedText(global->smtLibRefNum, global->smtEngineRefNum);
         	selectionLength = StrLen( buf );
-    		ToolsPutWordFieldToHistory( field );
-    		ToolsSetFieldPtr( field, buf, selectionLength > MAX_WORD_LEN ? 2 : selectionLength, true );
-			field ==DAWordField?DAFormSearch( true, global->prefs.enableHighlightWord, false, global->prefs.enableAutoSpeech ):\
-										MainFormSearch( true, true, global->prefs.enableHighlightWord, true, false, global->prefs.enableAutoSpeech );
-            frmP = FrmGetActiveForm ();
-            FrmSetFocus( frmP, FrmGetObjectIndex( frmP, field ) ); 
+        	if (selectionLength > 0)
+    		{
+	    		ToolsPutWordFieldToHistory( field );
+	    		ToolsSetFieldPtr( field, buf, selectionLength > MAX_WORD_LEN ? 2 : selectionLength, true );
+				field ==DAWordField?DAFormSearch( true, global->prefs.enableHighlightWord, false, global->prefs.enableAutoSpeech ):\
+											MainFormSearch( true, true, global->prefs.enableHighlightWord, true, false, global->prefs.enableAutoSpeech );
+	            frmP = FrmGetActiveForm ();
+	            FrmSetFocus( frmP, FrmGetObjectIndex( frmP, field ) ); 
+	        }
         }
     }
     handled = true;
@@ -6798,30 +6810,40 @@ static void MainFormInit( FormType *frmP )
     global->wordListIsOn = global->prefs.enableWordList;
     MainFormWordListUseAble( false, false );
 
-    // Set enable jump search group selection.
-    if(global->prefs.enableJumpSearch){
-		HideObject( frmP, MainSelectPushButton);
-		ShowObject( frmP, MainJumpPushButton);
-    }else{
-    	HideObject( frmP, MainJumpPushButton);
-    	ShowObject( frmP, MainSelectPushButton);
-    }
-    // Set enable inc search group selection.
-    if(global->prefs.enableIncSearch){
-		HideObject( frmP, MainAutoSearchOffButton);
-		ShowObject( frmP, MainAutoSearchOnButton);
-    }else{
-    	HideObject( frmP, MainAutoSearchOnButton);
-    	ShowObject( frmP, MainAutoSearchOffButton);
-    }
-    // Set enable auto speech group selection.
-    if(global->prefs.enableAutoSpeech){
-		HideObject( frmP, MainAutoVoiceOffButton);
-		ShowObject( frmP, MainAutoVoiceOnButton);
-    }else{
-    	HideObject( frmP, MainAutoVoiceOnButton);
-    	ShowObject( frmP, MainAutoVoiceOffButton);
-    }
+    
+    if(global->prefs.mainFormID == MainFormSkin)
+    {
+	    // Set enable jump search group selection.
+	    if(global->prefs.enableJumpSearch){
+			HideObject( frmP, MainJumpOffButton);
+			ShowObject( frmP, MainJumpOnButton);
+	    }else{
+	    	HideObject( frmP, MainJumpOnButton);
+	    	ShowObject( frmP, MainJumpOffButton);
+	    }
+	    // Set enable inc search group selection.
+	    if(global->prefs.enableIncSearch){
+			HideObject( frmP, MainAutoSearchOffButton);
+			ShowObject( frmP, MainAutoSearchOnButton);
+	    }else{
+	    	HideObject( frmP, MainAutoSearchOnButton);
+	    	ShowObject( frmP, MainAutoSearchOffButton);
+	    }
+	    // Set enable auto speech group selection.
+	    if(global->prefs.enableAutoSpeech){
+			HideObject( frmP, MainAutoVoiceOffButton);
+			ShowObject( frmP, MainAutoVoiceOnButton);
+	    }else{
+	    	HideObject( frmP, MainAutoVoiceOnButton);
+	    	ShowObject( frmP, MainAutoVoiceOffButton);
+	    }
+	}
+	else
+	{
+    	CtlSetValue ( GetObjectPtr (MainJumpPushButton), global->prefs.enableJumpSearch);
+	    CtlSetValue ( GetObjectPtr (MainAutoSearchPushButton), global->prefs.enableIncSearch);
+	    CtlSetValue ( GetObjectPtr (MainAutoVoicePushButton), global->prefs.enableAutoSpeech);
+	}
 /*
     FrmSetControlGroupSelection ( frmP, 1,
                                   global->prefs.enableJumpSearch ?
@@ -7046,7 +7068,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 
     global = AppGetGlobal();
 	
-	if (global->prefs.enableSingleTap && eventP->eType == penDownEvent)
+	if (eventP->eType == penDownEvent && global->prefs.enableSingleTap)
 	{
 		if(STEHandlePenDownEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
 		{	STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
@@ -7179,22 +7201,6 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 	                handled = true;
 	                break;
             	}
-				case MainSelectPushButton:
-				case MainJumpPushButton:
-	            {
-	                global->prefs.enableJumpSearch =
-	                    eventP->data.ctlSelect.controlID == MainJumpPushButton ? false : true;
-	                frmP = FrmGetActiveForm();
-	                if(global->prefs.enableJumpSearch){
-	                	HideObject( frmP, MainSelectPushButton);
-	                	ShowObject( frmP, MainJumpPushButton);
-	                }else{
-	                	HideObject( frmP, MainJumpPushButton);
-	                	ShowObject( frmP, MainSelectPushButton);
-	                }
-	                handled = true;
-	                break;
-	            }
 				case MainPlayVoice:
 	            {
 	                ToolsPlayVoice ();
@@ -7222,36 +7228,76 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 	            	handled = MainFormDoCommand(OptionsChangeCase);
 		            break;
 		        }
+				case MainJumpOffButton:
+				{					
+					frmP = FrmGetActiveForm();
+					HideObject( frmP, MainJumpOffButton);
+		            ShowObject( frmP, MainJumpOnButton);
+		            global->prefs.enableJumpSearch = true;
+		            handled = true;
+	                break;
+				}
+				case MainJumpOnButton:
+	            {	                
+	                frmP = FrmGetActiveForm();
+	                HideObject( frmP, MainJumpOnButton);
+                	ShowObject( frmP, MainJumpOffButton);
+                	global->prefs.enableJumpSearch = false;
+                	handled = true;
+               		break;	                
+	            }
+	            case MainJumpPushButton:
+	            {
+	         		global->prefs.enableJumpSearch = (CtlGetValue ( GetObjectPtr (MainJumpPushButton))!=0);	             
+	         		handled = true;
+	         		break;
+	            }
 				case MainAutoVoiceOnButton:
+				{
+					frmP = FrmGetActiveForm();
+					HideObject( frmP, MainAutoVoiceOnButton);
+		            ShowObject( frmP, MainAutoVoiceOffButton);
+		            global->prefs.enableAutoSpeech = false;
+		            handled = true;
+	                break;
+				}
 				case MainAutoVoiceOffButton:
 	            {
-	                global->prefs.enableAutoSpeech =
-	                    eventP->data.ctlSelect.controlID == MainAutoVoiceOnButton ? false : true;
-	                frmP = FrmGetActiveForm();
-	                if(global->prefs.enableAutoSpeech){
-	                	HideObject( frmP, MainAutoVoiceOffButton);
-	                	ShowObject( frmP, MainAutoVoiceOnButton);
-	                }else{
-	                	HideObject( frmP, MainAutoVoiceOnButton);
-	                	ShowObject( frmP, MainAutoVoiceOffButton);
-	                }
+		            frmP = FrmGetActiveForm();
+                	HideObject( frmP, MainAutoVoiceOffButton);
+                	ShowObject( frmP, MainAutoVoiceOnButton);
+                	global->prefs.enableAutoSpeech = true;
 	                handled = true;
 	                break;
 	            }
-				case MainAutoSearchOnButton:
-				case MainAutoSearchOffButton:
+	            case MainAutoVoicePushButton:
 	            {
-	                global->prefs.enableIncSearch =
-	                    eventP->data.ctlSelect.controlID == MainAutoSearchOnButton ? false : true;
+	            	global->prefs.enableAutoSpeech = (CtlGetValue ( GetObjectPtr (MainAutoVoicePushButton))!=0);
+	            	handled = true;
+	                break;
+	            }
+				case MainAutoSearchOnButton:
+				{
+					frmP = FrmGetActiveForm();
+					HideObject( frmP, MainAutoSearchOnButton);
+		            ShowObject( frmP, MainAutoSearchOffButton);
+		            global->prefs.enableIncSearch = false;
+		            handled = true;
+	                break;
+				}
+				case MainAutoSearchOffButton:
+	            {	                
 	                frmP = FrmGetActiveForm();
-	                if(global->prefs.enableIncSearch){
-	                	HideObject( frmP, MainAutoSearchOffButton);
-	                	ShowObject( frmP, MainAutoSearchOnButton);
-	                }else{
-	                	HideObject( frmP, MainAutoSearchOnButton);
-	                	ShowObject( frmP, MainAutoSearchOffButton);
-	                }
+                	HideObject( frmP, MainAutoSearchOffButton);
+                	ShowObject( frmP, MainAutoSearchOnButton);
+		            global->prefs.enableIncSearch = true;
 	                handled = true;
+	                break;
+	            }
+	            case MainAutoSearchPushButton:
+	            {
+	            	global->prefs.enableIncSearch = (CtlGetValue ( GetObjectPtr (MainAutoSearchPushButton))!=0);
+	            	handled = true;
 	                break;
 	            }
 	        break;
@@ -7632,7 +7678,14 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 
 	case penUpEvent://fldEnterEvent://
 		{
-			handled = FormJumpSearch( MainWordField, false );
+			handled = true;
+			if(SysLCDBrightness(false, 0) == 0)
+				SysLCDBrightness(true, global->brightness ? global->brightness : 80);
+			else if(eventP->screenX > 90 && eventP->screenX < 145 && eventP->screenY > 0 && eventP->screenY < 10)
+				global->brightness = SysLCDBrightness(true, 0);
+			else
+				handled = FormJumpSearch( MainWordField, false );
+			//EvtEnqueueKey(vchrBacklight, 0, 0);
  			break;
   		}
 

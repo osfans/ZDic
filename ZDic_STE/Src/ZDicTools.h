@@ -14,13 +14,13 @@
 
 #include <PalmOS.h>
 
-extern Err ZDicToolsOpenZLib(UInt16 *refNumP);
-extern Err ZDicToolsCloseZLib(UInt16 refNum);
-extern Err ZDicToolsOpenSMTLib(UInt16 *refNumP);
-extern Err ZDicToolsCloseSMTLib(UInt16 refNum);
+extern Err ZDicToolsOpenZLib(UInt16 *refNumP, Boolean *found);
+extern Err ZDicToolsCloseZLib(UInt16 refNum, Boolean found);
+extern Err ZDicToolsOpenSMTLib(UInt16 *refNumP, Boolean *found);
+extern Err ZDicToolsCloseSMTLib(UInt16 refNum, Boolean found);
 extern void * GetObjectPtr(UInt16 objectID);
 extern void ZDicToolsWinGetBounds(WinHandle winH, RectangleType* rP);
-extern Err ZDicLib_CloseLibrary(UInt16 refNum, UInt32 clientContext);
-extern Err ZDicLib_OpenLibrary(UInt16 *refNumP, UInt32 * clientContextP);
+extern Err ZDicLib_OpenLibrary(UInt16 *refNumP, UInt32 * clientContextP, Boolean *found);
+extern Err ZDicLib_CloseLibrary(UInt16 refNum, UInt32 clientContext, Boolean found);
 
 #endif // _ZDIC_TOOLS_H

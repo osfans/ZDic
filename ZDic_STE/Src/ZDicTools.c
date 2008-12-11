@@ -9,7 +9,7 @@
 #pragma mark -
 
 
-Err ZDicToolsOpenZLib(UInt16 *refNumP)
+Err ZDicToolsOpenZLib(UInt16 *refNumP, Boolean *found)
 {
 	Err error;
 	Boolean loaded = false;
@@ -22,7 +22,10 @@ Err ZDicToolsOpenZLib(UInt16 *refNumP)
 	{
 		error = SysLibLoad('libr', 'ZLib', refNumP);
 		loaded = true;
+		*found = false;
 	}
+	else
+		*found = true;
 	
 	if (error == errNone)
 	{
@@ -41,7 +44,7 @@ Err ZDicToolsOpenZLib(UInt16 *refNumP)
 	return error;
 }
 
-Err ZDicToolsCloseZLib(UInt16 refNum)
+Err ZDicToolsCloseZLib(UInt16 refNum, Boolean found)
 {
 	Err error;
 	UInt16 numsApp = 0;
@@ -53,7 +56,7 @@ Err ZDicToolsCloseZLib(UInt16 refNum)
 
 	error = ZLibClose(refNum, &numsApp);
 
-	if (error == errNone)
+	if (error == errNone && ! found)
 	{
 		/* no users left, so unload library */
 		SysLibRemove(refNum);
@@ -63,7 +66,7 @@ Err ZDicToolsCloseZLib(UInt16 refNum)
 }
 
 
-Err ZDicToolsOpenSMTLib(UInt16 *refNumP)
+Err ZDicToolsOpenSMTLib(UInt16 *refNumP, Boolean *found)
 {
 	Err error;
 	Boolean loaded = false;
@@ -76,7 +79,10 @@ Err ZDicToolsOpenSMTLib(UInt16 *refNumP)
 	{
 		error = SysLibLoad(sysFileTLibrary, hsFileCSmartTextEngine, refNumP);
 		loaded = true;
+		*found = false;
 	}
+	else
+		*found = true;
 	
 	if (error == errNone)
 	{
@@ -95,7 +101,7 @@ Err ZDicToolsOpenSMTLib(UInt16 *refNumP)
 	return error;
 }
 
-Err ZDicToolsCloseSMTLib(UInt16 refNum)
+Err ZDicToolsCloseSMTLib(UInt16 refNum, Boolean found)
 {
 	Err error;
 	
@@ -106,7 +112,7 @@ Err ZDicToolsCloseSMTLib(UInt16 refNum)
 
 	error = STEClose(refNum);
 
-	if (error == errNone)
+	if (error == errNone && !found)
 	{
 		/* no users left, so unload library */
 		SysLibRemove(refNum);
@@ -209,7 +215,7 @@ void ZDicToolsWinGetBounds(WinHandle winH, RectangleType* rP)
  *      error.
  */
  
-Err ZDicLib_OpenLibrary(UInt16 *refNumP, UInt32 * clientContextP)
+Err ZDicLib_OpenLibrary(UInt16 *refNumP, UInt32 * clientContextP, Boolean *found)
 {
 	Err error;
 	Boolean loaded = false;
@@ -222,7 +228,10 @@ Err ZDicLib_OpenLibrary(UInt16 *refNumP, UInt32 * clientContextP)
 	{
 		error = SysLibLoad(ZDicLibTypeID, ZDicLibCreatorID, refNumP);
 		loaded = true;
+		*found = false;
 	}
+	else
+		*found = true;
 	
 	if (error == errNone)
 	{
@@ -264,7 +273,7 @@ Err ZDicLib_OpenLibrary(UInt16 *refNumP, UInt32 * clientContextP)
  *		sysErrParamErr
  */
 
-Err ZDicLib_CloseLibrary(UInt16 refNum, UInt32 clientContext)
+Err ZDicLib_CloseLibrary(UInt16 refNum, UInt32 clientContext, Boolean found)
 {
 	Err error;
 	
@@ -275,7 +284,7 @@ Err ZDicLib_CloseLibrary(UInt16 refNum, UInt32 clientContext)
 
 	error = ZDicLibClose(refNum, clientContext);
 
-	if (error == errNone)
+	if (error == errNone && !found)
 	{
 		/* no users left, so unload library */
 		SysLibRemove(refNum);

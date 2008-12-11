@@ -300,8 +300,11 @@ typedef struct AppGlobalObj{
 	}data;
 	
 	Char		optflag;						//option key flag, 0: not pressed, 1: pressed once 2: always on
-	Char 		phonetic[MAX_IPA_LEN + MAX_WORD_LEN + 1];					//ipa phonetic
-	
+	Char 		phonetic[MAX_IPA_LEN + MAX_WORD_LEN + 1];					//ipa phonetic	
+	UInt8		brightness;
+	Boolean		zlibFound;		//zdiclib or zlib or ste opened
+	Boolean		zdicLibFound;
+	Boolean		STEFound;
 } AppGlobalType;
 
 #endif /* ZDIC_COMMON_H_ */
