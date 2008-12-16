@@ -94,6 +94,7 @@ typedef struct ZDicPreferenceType
 	Boolean enableAutoSpeech;                               // true if enable automatic speech.
 	Boolean enableSkin;										// true if use skin main form
 	Boolean enableScreenOff;								// true if click battery to turn off screen
+	Boolean enableAutoPage;									// true if go to next page when at ends
 	
 	UInt8 	searchType;										// 0 = no search, 1 = jump search, 2 = popup da search
 	UInt8	dictMenu;										// Dict Menu use which list

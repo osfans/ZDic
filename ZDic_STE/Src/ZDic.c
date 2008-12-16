@@ -1093,9 +1093,6 @@ static void ToolsScrollWord ( WinDirectionType direction, UInt16 inputFieldID,
             HideObject ( frmP, playerBtonID );
             ShowObject ( frmP, hidePlayerBtonID );
         }
-
-
-
     }
 }
 
@@ -2788,6 +2785,7 @@ static Err AppStart( Boolean subLaunch,UInt8 dictMenu )
         global->prefs.exportAppCreatorID = sysFileCMemo;
         global->prefs.enableSkin = false;
         global->prefs.enableScreenOff = true;
+        global->prefs.enableAutoPage = true;
 
         global->prefs.OptUD = false;
         global->prefs.UD = false;
@@ -4587,7 +4585,10 @@ static void DetailsFormInit( FormType *frmP )
 	
 	// Set the enable Screen Off when clicking battery.
 	CtlSetValue ( GetObjectPtr ( DetailsEnableScreenOff ), global->prefs.enableScreenOff );
-    
+	
+	// Set the enable Auto page when at ends
+	CtlSetValue ( GetObjectPtr ( DetailsEnableAutoPage ), global->prefs.enableAutoPage );
+	    
     // Set the slider values of incremental search delay.
     CtlSetSliderValues ( GetObjectPtr ( DetailSearchDelay ), NULL, NULL, NULL, &global->prefs.incSearchDelay );
 
@@ -4687,6 +4688,9 @@ static Boolean DetailsFormHandleEvent( FormType * frmP, EventType * eventP, Bool
 					
 					// 保存省电或是检查电量
 					global->prefs.enableScreenOff = ( CtlGetValue ( GetObjectPtr ( DetailsEnableScreenOff ) ) != 0 );
+
+					// 是否自动翻页
+					global->prefs.enableAutoPage = ( CtlGetValue ( GetObjectPtr ( DetailsEnableAutoPage ) ) != 0 );
 
 	                // Get the enable automatic speech.
 	                global->prefs.enableAutoSpeech = ( CtlGetValue ( GetObjectPtr ( DetailsEnableAutoSpeech ) ) != 0 );
@@ -5325,25 +5329,29 @@ static void DAFormInit( FormType *frmP )
 	
     return ;
 }
-//
-static void ChangeWordDict(Boolean opt, Boolean modifersPressed, Boolean Enable, Boolean SwitchDict, Boolean enableHighlightWord, WinDirectionType direction, UInt16 wordFieldID)
+//----------------
+//切换词典或词条
+static Boolean ChangeWordDict(Boolean opt, Boolean modifersPressed, Boolean Enable, Boolean SwitchDict, WinDirectionType direction, UInt16 wordFieldID, Boolean enableHighlightWord)
 {
 	Char s = ToolsGetOptKeyStatus();
+	Boolean handled = false;
 	if (Enable && ((opt && (modifersPressed || s>0)) || (!opt && !modifersPressed)))
 	{
 		if(SwitchDict)
-			ToolsNextDictionaryCommand(winUp,  DAWordField);
+			ToolsNextDictionaryCommand(direction,  wordFieldID);
 		else{
 			if(wordFieldID == DAWordField)
-				ToolsScrollWord ( winUp,  DAWordField, DAPlayVoice, DAPlayNoneVoice, enableHighlightWord );
+				ToolsScrollWord ( direction,  DAWordField, DAPlayVoice, DAPlayNoneVoice, enableHighlightWord );
 			else
 			{
-				ToolsScrollWord ( winUp,  MainWordField, MainPlayVoice, MainPlayNoneVoice, enableHighlightWord );
+				ToolsScrollWord ( direction,  MainWordField, MainPlayVoice, MainPlayNoneVoice, enableHighlightWord );
 				MainFormUpdateWordList();
 			}
 		}
+		handled = true;
 	}
-	if((modifersPressed || s>0) && s < 2) ToolsSetOptKeyStatus(0);	
+	if((modifersPressed || s>0) && s < 2) ToolsSetOptKeyStatus(0);
+	return handled;
 }
 
 /*
@@ -5369,7 +5377,19 @@ static Boolean DAFormHandleEvent( EventType * eventP )
     AppGlobalType	*global;
 
     global = AppGetGlobal();
-	
+    
+	if (eventP->eType == keyDownEvent){ //上下键切换词典或单词
+		if ( NavDirectionPressed( eventP, Up ) || ( eventP->data.keyDown.chr ) == vchrRockerUp || ( eventP->data.keyDown.chr ) == vchrPageUp  || ( eventP->data.keyDown.chr ) == vchrThumbWheelUp)// || (eventP->data.keyDown.chr) == vchrJogUp
+	    {
+	    	handled = ChangeWordDict(global->prefs.OptUD, hasOptionPressed(eventP->data.keyDown.modifiers), global->prefs.UD, !global->prefs.SwitchUDLR, winUp, DAWordField, global->prefs.enableHighlightWord );
+	    }
+	    else if ( NavDirectionPressed( eventP, Down )  || ( eventP->data.keyDown.chr ) == vchrRockerDown || ( eventP->data.keyDown.chr ) == vchrPageDown || ( eventP->data.keyDown.chr ) == vchrThumbWheelDown)// || (eventP->data.keyDown.chr) == vchrJogDown
+	    {
+	    	handled = ChangeWordDict(global->prefs.OptUD, hasOptionPressed(eventP->data.keyDown.modifiers), global->prefs.UD, !global->prefs.SwitchUDLR, winDown, DAWordField, global->prefs.enableHighlightWord );	        
+	    }
+	    if (handled)
+	    	return true;
+	}	
 	if (global->prefs.enableSingleTap && eventP->eType == penDownEvent)
 	{
 		if(STEHandlePenDownEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
@@ -5465,15 +5485,21 @@ static Boolean DAFormHandleEvent( EventType * eventP )
             }
             else if ( EvtKeydownIsVirtual( eventP ) )
             {
-                if ( NavDirectionPressed( eventP, Up ) || eventP->data.keyDown.chr == vchrRockerUp || eventP->data.keyDown.chr == vchrPageUp  || eventP->data.keyDown.chr == vchrThumbWheelUp/* || (eventP->data.keyDown.chr) == vchrJogUp*/)
+                if ( NavDirectionPressed( eventP, Up ) || ( eventP->data.keyDown.chr ) == vchrRockerUp || ( eventP->data.keyDown.chr ) == vchrPageUp  || ( eventP->data.keyDown.chr ) == vchrThumbWheelUp)// || (eventP->data.keyDown.chr) == vchrJogUp
                 {
-					ChangeWordDict(global->prefs.OptUD, eventP->data.keyDown.modifiers, global->prefs.UD, !global->prefs.SwitchUDLR, winUp, DAWordField, global->prefs.enableHighlightWord );
-                    handled = true;
+					 if(global->prefs.enableAutoPage)
+					 {
+						 ToolsScrollWord ( winUp,  DAWordField, DAPlayVoice, DAPlayNoneVoice, global->prefs.enableHighlightWord );
+					 }
+				     handled = true;
                 }
-                else if ( NavDirectionPressed( eventP, Down )  || eventP->data.keyDown.chr == vchrRockerDown || eventP->data.keyDown.chr == vchrPageDown || eventP->data.keyDown.chr == vchrThumbWheelDown/* || (eventP->data.keyDown.chr) == vchrJogDown*/)
+                else if ( NavDirectionPressed( eventP, Down )  || ( eventP->data.keyDown.chr ) == vchrRockerDown || ( eventP->data.keyDown.chr ) == vchrPageDown || ( eventP->data.keyDown.chr ) == vchrThumbWheelDown)// || (eventP->data.keyDown.chr) == vchrJogDown
                 {
-					ChangeWordDict(global->prefs.OptUD, hasOptionPressed(eventP->data.keyDown.modifiers), global->prefs.UD, !global->prefs.SwitchUDLR, winDown, DAWordField, global->prefs.enableHighlightWord );
-                    handled = true;
+					 if(global->prefs.enableAutoPage)
+					 {
+					 	 ToolsScrollWord ( winDown,  DAWordField, DAPlayVoice, DAPlayNoneVoice, global->prefs.enableHighlightWord );
+					 }
+				     handled = true;
                 }
                 else if ( NavDirectionPressed( eventP, Left ) && global->prefs.LR)
                 {
@@ -7112,19 +7138,31 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 
     global = AppGetGlobal();
 	
-	if (eventP->eType == penDownEvent && (SysLCDBrightness(false, 0) == 0) )
+	if (eventP->eType == penDownEvent && (SysLCDBrightness(false, 0) == 0) )//开灯
 	{
 		SysLCDBrightness(true, global->brightness ? global->brightness : 80);
-		handled = true;
+		return true;
 	}
-	else if (eventP->eType == penDownEvent && global->prefs.enableSingleTap)
+	if (eventP->eType == keyDownEvent){ //上下键切换词典或单词
+		if ( NavDirectionPressed( eventP, Up ) || ( eventP->data.keyDown.chr ) == vchrRockerUp || ( eventP->data.keyDown.chr ) == vchrPageUp  || ( eventP->data.keyDown.chr ) == vchrThumbWheelUp)// || (eventP->data.keyDown.chr) == vchrJogUp
+	    {
+	    	handled = ChangeWordDict(global->prefs.OptUD, hasOptionPressed(eventP->data.keyDown.modifiers), global->prefs.UD, !global->prefs.SwitchUDLR, winUp, MainWordField, global->prefs.enableHighlightWord );
+	    }
+	    else if ( NavDirectionPressed( eventP, Down )  || ( eventP->data.keyDown.chr ) == vchrRockerDown || ( eventP->data.keyDown.chr ) == vchrPageDown || ( eventP->data.keyDown.chr ) == vchrThumbWheelDown)// || (eventP->data.keyDown.chr) == vchrJogDown
+	    {
+	    	handled = ChangeWordDict(global->prefs.OptUD, hasOptionPressed(eventP->data.keyDown.modifiers), global->prefs.UD, !global->prefs.SwitchUDLR, winDown, MainWordField, global->prefs.enableHighlightWord );	        
+	    }
+	    if (handled)
+	    	return true;
+	}	
+	if (eventP->eType == penDownEvent && global->prefs.enableSingleTap)//一键搜索
 	{
 		if(STEHandlePenDownEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
 		{	STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
 			return STEHasHotRectSelection(global->smtLibRefNum, global->smtEngineRefNum);
 		}
-	}	
-	else if(STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
+	}
+	else if(STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))//翻页超链接等STE标准操作
 		return true;	
     switch ( eventP->eType )
     {
@@ -7402,15 +7440,23 @@ static Boolean MainFormHandleEvent( EventType * eventP )
             }
             else if ( EvtKeydownIsVirtual( eventP ) )
             {
-                if ( NavDirectionPressed( eventP, Up ) || ( eventP->data.keyDown.chr ) == vchrRockerUp || ( eventP->data.keyDown.chr ) == vchrPageUp  || ( eventP->data.keyDown.chr ) == vchrThumbWheelUp/* || (eventP->data.keyDown.chr) == vchrJogUp*/)
+                if ( NavDirectionPressed( eventP, Up ) || ( eventP->data.keyDown.chr ) == vchrRockerUp || ( eventP->data.keyDown.chr ) == vchrPageUp  || ( eventP->data.keyDown.chr ) == vchrThumbWheelUp)// || (eventP->data.keyDown.chr) == vchrJogUp
                 {
-                	ChangeWordDict(global->prefs.OptUD, hasOptionPressed(eventP->data.keyDown.modifiers), global->prefs.UD, !global->prefs.SwitchUDLR, winUp, MainWordField, global->prefs.enableHighlightWord );
-                    handled = true;
+					 if(global->prefs.enableAutoPage)
+					 {
+						 ToolsScrollWord ( winUp,  MainWordField, MainPlayVoice, MainPlayNoneVoice, global->prefs.enableHighlightWord );
+						 MainFormUpdateWordList();
+					 }
+				     handled = true;
                 }
-                else if ( NavDirectionPressed( eventP, Down )  || ( eventP->data.keyDown.chr ) == vchrRockerDown || ( eventP->data.keyDown.chr ) == vchrPageDown || ( eventP->data.keyDown.chr ) == vchrThumbWheelDown/* || (eventP->data.keyDown.chr) == vchrJogDown*/)
+                else if ( NavDirectionPressed( eventP, Down )  || ( eventP->data.keyDown.chr ) == vchrRockerDown || ( eventP->data.keyDown.chr ) == vchrPageDown || ( eventP->data.keyDown.chr ) == vchrThumbWheelDown)// || (eventP->data.keyDown.chr) == vchrJogDown
                 {
-                	ChangeWordDict(global->prefs.OptUD, hasOptionPressed(eventP->data.keyDown.modifiers), global->prefs.UD, !global->prefs.SwitchUDLR, winDown, MainWordField, global->prefs.enableHighlightWord );
-                    handled = true;
+					 if(global->prefs.enableAutoPage)
+					 {
+					 	 ToolsScrollWord ( winDown,  MainWordField, MainPlayVoice, MainPlayNoneVoice, global->prefs.enableHighlightWord );
+					 	 MainFormUpdateWordList();
+					 }
+				     handled = true;
                 }
                 else if ( NavDirectionPressed( eventP, Left ) && global->prefs.LR )
                 {

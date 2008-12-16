@@ -216,7 +216,8 @@ BEGIN
  "Try lowercase" = "尝试小写字母"
  "Use skin" = "使用皮肤"    
  "Disable font inside (need reload)" = "禁用内部字体（需重启）"  
- "Auto speech" = "自动发音"  
+ "Auto speech" = "自动发音"
+ "Enable auto page when at ends" = "到达两端时自动翻页"
  "Custom Keys" = "自定义按键"    
  "Type" = "类型"  
  "Menu Type:" = "菜单类型："
@@ -456,12 +457,11 @@ BEGIN
 	PUSHBUTTON "S" ID MainAutoSearchPushButton AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT)
 	   
 	BUTTON "P" ID MainPlayVoice  AT (30 2 14 10) NONUSABLE
-	BUTTON "Z" ID MainDAButton   AT (41 2 14 10)
-	BUTTON "p" ID MainPlayNoneVoice  AT (160 160 14 10) NONUSABLE DISABLED
+	BUTTON "Z" ID MainDAButton   AT (45 2 14 10)
+	BUTTON "p" ID MainPlayNoneVoice  AT (0 0 0 0) NONUSABLE DISABLED	
 	
-	
-	POPUPTRIGGER "       " ID DictSelButton  AT (56 0 80 13)  LEFTANCHOR
-	LIST   "" ID lstMainPopup AT (50 0 80 90) VISIBLEITEMS 8 NONUSABLE
+	POPUPTRIGGER "" ID DictSelButton  AT (60 0 80 13)  LEFTANCHOR
+	LIST   "" ID lstMainPopup AT (PREVLEFT 0 80 90) VISIBLEITEMS 8 NONUSABLE
 	POPUPLIST ID DictSelButton  lstMainPopup
 	BUTTON "\11" ID MainWordButton  AT (0 145 15 14) NOFRAME FONT 3
 	FIELD ID MainWordField  AT (PREVRIGHT PREVTOP+2 78 PREVHEIGHT) MAXCHARS 255 EDITABLE UNDERLINED	
@@ -580,7 +580,8 @@ BEGIN
 	CHECKBOX "Click battery to turn off screen" ID DetailsEnableScreenOff AT (4 101 AUTO AUTO) CHECKED
 	POPUPLIST ID DetailsEnableSingleTap  lstClick
 	POPUPLIST ID triggerSearchType  lstSearchType
-END
+	CHECKBOX "Enable auto page when at ends" ID DetailsEnableAutoPage  AT (4 115 AUTO AUTO) CHECKED 
+END 
 
 FORM ID ExportOptionsForm   AT ( 2 65 156 93 )
 MODAL DEFAULTBTNID ExportOptionsOKBton
