@@ -191,11 +191,11 @@ static void AppendStr(Char *data)//append data rendered with STE
 		}		
 	}
 	STEAppendTextToEngine(global->smtLibRefNum, global->smtEngineRefNum, data+j+1, false);
-	if(StrNCaselessCompare(data+j+1,"#redirect",9)==0)//重定向
+	/*if(StrNCaselessCompare(data+j+1,"#redirect",9)==0)//重定向
 	{
 		if (*(data+j+11)!='/')
 			STESetCurrentTextSelection(global->smtLibRefNum, global->smtEngineRefNum, 2, 9+(*(data+j+10)==chrSpace), kSelectUntilEnd);
-	}
+	}*/
 }
 
 static void RenderStr(Char *data)//render data with STE from the beginning
@@ -5404,7 +5404,7 @@ static Boolean DAFormHandleEvent( EventType * eventP )
         DAFormInit( frmP );
         ZDicDIADisplayChange ( global );
         FrmDrawForm ( frmP );
-        FrmSetFocus( frmP, FrmGetObjectIndex( frmP, DAWordField ) );
+        //FrmSetFocus( frmP, FrmGetObjectIndex( frmP, DAWordField ) );
       	global->highlightWordField = global->prefs.enableHighlightWord;
 		if ( global->prefs.enableHighlightWord )
 			ToolsHighlightField( DAWordField );
@@ -5670,6 +5670,8 @@ static Boolean DAFormHandleEvent( EventType * eventP )
         
     case penUpEvent://fldEnterEvent:
     	handled = FormJumpSearch(DAWordField, false);
+		frmP = FrmGetActiveForm();
+		FrmSetFocus( frmP, FrmGetObjectIndex( frmP, MainWordField ) );
     	break;
 
     case ctlSelectEvent:
@@ -6128,8 +6130,10 @@ static Err MainFormSearch( Boolean putinHistory, Boolean updateWordList,
         else{
             HideObject ( frmP, MainPlayVoice );
             ShowObject ( frmP, MainPlayNoneVoice);
-            }
+        }
+        FrmSetFocus( frmP, FrmGetObjectIndex( frmP, MainWordField ) );
     }
+    
 
     return errNone;
 }
@@ -6623,8 +6627,7 @@ static Boolean FormJumpSearch( UInt16 field, Boolean hyperlink )
 		            STEClearCurrentSelection(global->smtLibRefNum, global->smtEngineRefNum);
 				}
 	            frmP = FrmGetActiveForm ();
-	            FrmSetFocus( frmP, FrmGetObjectIndex( frmP, field ) );
-	            
+	            FrmSetFocus( frmP, FrmGetObjectIndex( frmP, field ) );	            
 	        }
         }
     }
@@ -7068,6 +7071,7 @@ static Boolean MainFormDoCommand( UInt16 command )
             }
             command==OptionsExportMemo?ExportToMemo(buf):ExportToSMemo(buf, command);
             if(buf)MemPtrFree(buf);
+            
             handled = true;
             break;
         }
@@ -7106,21 +7110,20 @@ static Boolean MainFormHandleEvent( EventType * eventP )
     FormType	*frmP;
     AppGlobalType	*global;
 
-
     global = AppGetGlobal();
 	
-	if (eventP->eType == penDownEvent && global->prefs.enableSingleTap)
+	if (eventP->eType == penDownEvent && (SysLCDBrightness(false, 0) == 0) )
+	{
+		SysLCDBrightness(true, global->brightness ? global->brightness : 80);
+		handled = true;
+	}
+	else if (eventP->eType == penDownEvent && global->prefs.enableSingleTap)
 	{
 		if(STEHandlePenDownEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
 		{	STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP);
 			return STEHasHotRectSelection(global->smtLibRefNum, global->smtEngineRefNum);
 		}
-	}
-	else if (eventP->eType == penDownEvent && (SysLCDBrightness(false, 0) == 0) )
-	{
-		SysLCDBrightness(true, global->brightness ? global->brightness : 80);
-		handled = true;
-	}
+	}	
 	else if(STEHandleEvent(global->smtLibRefNum, global->smtEngineRefNum, eventP))
 		return true;	
     switch ( eventP->eType )
@@ -7359,7 +7362,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 	            	FormPopupSearch();
 	            	handled = true;
 	            	break;
-	            }	            
+	            }
 	        break;
 	        }
         }
@@ -7665,6 +7668,8 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 	case penUpEvent://fldEnterEvent://
 		{				
 			handled = FormJumpSearch( MainWordField, false );
+			frmP = FrmGetActiveForm();
+			FrmSetFocus( frmP, FrmGetObjectIndex( frmP, MainWordField ) );
  			break;
   		}
 
@@ -7678,7 +7683,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
         }
 
     }
-
+    
     return handled;
 }
 
