@@ -29,7 +29,7 @@ Err ZDicToolsOpenZLib(UInt16 *refNumP, Boolean *found)
 	
 	if (error == errNone)
 	{
-		error = STEOpen(*refNumP);
+		error = ZLibOpen(*refNumP);
 		if (error != errNone)
 		{
 			if (loaded)
@@ -86,7 +86,7 @@ Err ZDicToolsOpenSMTLib(UInt16 *refNumP, Boolean *found)
 	
 	if (error == errNone)
 	{
-		error = ZLibOpen(*refNumP);
+		error = STEOpen(*refNumP);
 		if (error != errNone)
 		{
 			if (loaded)

@@ -91,11 +91,11 @@ typedef struct ZDicPreferenceType
 	Boolean enableHighlightWord;							// true if always highlight word field.
 	Boolean enableTryLowerSearch;							// true if try lower case on search failed.
 	Boolean useSystemFont;						            // true if disable phonetic font support(use system standar font).
-	Boolean enableJumpSearch;								// true if enable jump search else false.
 	Boolean enableAutoSpeech;                               // true if enable automatic speech.
-	Boolean useSkin;
-	UInt16	mainFormID;
+	Boolean enableSkin;										// true if use skin main form
+	Boolean enableScreenOff;								// true if click battery to turn off screen
 	
+	UInt8 	searchType;										// 0 = no search, 1 = jump search, 2 = popup da search
 	UInt8	dictMenu;										// Dict Menu use which list
 	UInt8	menuType;										// Dict Menu use which type
 	UInt8	daSize;											// DA window Size
@@ -300,7 +300,8 @@ typedef struct AppGlobalObj{
 	}data;
 	
 	Char		optflag;						//option key flag, 0: not pressed, 1: pressed once 2: always on
-	Char 		phonetic[MAX_IPA_LEN + MAX_WORD_LEN + 1];					//ipa phonetic	
+	Char 		phonetic[MAX_IPA_LEN + MAX_WORD_LEN + 1];					//ipa phonetic
+	UInt16		mainFormID;	
 	UInt8		brightness;
 	Boolean		zlibFound;		//zdiclib or zlib or ste opened
 	Boolean		zdicLibFound;

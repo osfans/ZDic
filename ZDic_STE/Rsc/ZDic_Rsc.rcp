@@ -205,25 +205,30 @@ BEGIN
  
   
  "Preferences" = "²ÎÊýÉèÖÃ"    
- "Get word from Clipboard at start" = "Æô¶¯Ê±´Ó¼ôÇÐ°å»ñÈ¡´ÊÓï"  
- "Enable incremental search" = "ÆôÓÃ½¥½ø²éÕÒ"  
- "Search word for single tap" = "µ¥»÷Ñ¡´Ê"  
- "Highlight word field" = "¸ßÁÁÏÔÊ¾´ÊÓï¿ò"    
- "Try lower case on search failed" = "¼ìË÷Ê§°ÜÊ±³¢ÊÔÐ¡Ð´×ÖÄ¸"
- "Use skin (need reload)" = "Ê¹ÓÃÆ¤·ô£¨ÐèÖØÆô£©"    
+ "Load from Clipboard" = "Æô¶¯Ê±´Ó¼ôÇÐ°å»ñÈ¡´ÊÓï"  
+ "Auto search" = "½¥½ø²éÕÒ"  
+ "Single click" = "µ¥»÷"
+ "Double click" = "Ë«»÷"
+ "select word only" = "Ñ¡ÖÐ´ÊÓï"  
+ "jump search" = "Ìø×ª²é´Ê"
+ "popup DA search" = "¸¡¶¯²é´Ê"
+ "Highlight field" = "¸ßÁÁ´ÊÓï¿ò"    
+ "Try lowercase" = "³¢ÊÔÐ¡Ð´×ÖÄ¸"
+ "Use skin" = "Ê¹ÓÃÆ¤·ô"    
  "Disable font inside (need reload)" = "½ûÓÃÄÚ²¿×ÖÌå£¨ÐèÖØÆô£©"  
- "Automatic speech" = "×Ô¶¯·¢Òô"  
+ "Auto speech" = "×Ô¶¯·¢Òô"  
  "Custom Keys" = "×Ô¶¨Òå°´¼ü"    
  "Type" = "ÀàÐÍ"  
  "Menu Type:" = "²Ëµ¥ÀàÐÍ£º"
- "Numerical" = "Êý×Ö"
- "Alphabetic" = "×ÖÄ¸"
- "User Defined" = "×Ô¶¨Òå"  
+ "Numerical menu" = "Êý×Ö²Ëµ¥"
+ "Letter menu" = "×ÖÄ¸²Ëµ¥"
+ "Customized menu" = "×Ô¶¨²Ëµ¥"  
  "DA size" = "DA ³ß´ç"    
  "DA Size:" = "DA ³ß´ç£º"
  "Large DA" = "´ó DA"
  "Small DA" = "Ð¡ DA"
- "Fullscreen" = "È«ÆÁ"  
+ "Full DA" = "È«ÆÁ DA"
+ "Click battery to turn off screen" = "µ¥»÷µç³ØÍ¼±ê¹Ø±ÕÆÁÄ»"  
  "Export Options" = "µ¼³öÑ¡Ïî"  
  "Cancel" = "È¡Ïû"  
  "Category:" = "·ÖÀà£º"    
@@ -434,6 +439,7 @@ BEGIN
 	BUTTON "S" ID MainSettingButton AT (PREVRIGHT PREVTOP PREVWIDTH PREVHEIGHT) NOFRAME  BITMAPID SettingBitmapFamily SELECTEDBITMAPID SettingBitmapFamily GRAPHICAL
 	
 	LIST "" ID lstMainPopup      AT (0 16 80 90) VISIBLEITEMS 8 NONUSABLE
+	//GADGET ID NetworkBatteryGadget AT (67 1 10 12)
 END
 
 FORM ID MainFormNoSkin AT (0 0 160 160)
@@ -445,23 +451,23 @@ BEGIN
 	//BUTTON "S" ID MainBtnHeadButton AT (107 147 1 13) NONUSABLE
 	//BUTTON "" MainToolbarBtBg AT (0 0 0 0)
 	
-	PUSHBUTTON "J" ID MainJumpPushButton  AT (29 2 14 10)
+	PUSHBUTTON "J" ID MainJumpPushButton  AT (160 160 14 10)
 	PUSHBUTTON "V" ID MainAutoVoicePushButton AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT)
-	PUSHBUTTON "S" ID MainAutoSearchPushButton AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT)   
-	BUTTON "P" ID MainPlayVoice  AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT) NONUSABLE
-	BUTTON "p" ID MainPlayNoneVoice  AT (0 0 0 0) NONUSABLE DISABLED
+	PUSHBUTTON "S" ID MainAutoSearchPushButton AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT)
+	   
+	BUTTON "P" ID MainPlayVoice  AT (30 2 14 10) NONUSABLE
+	BUTTON "Z" ID MainDAButton   AT (41 2 14 10)
+	BUTTON "p" ID MainPlayNoneVoice  AT (160 160 14 10) NONUSABLE DISABLED
 	
 	
-	//POPUPTRIGGER "" ID DictSelButton  AT (90 0 63 13)  LEFTANCHOR
-	//POPUPLIST ID DictSelButton  lstMainPopup
-	BUTTON "                           "  ID DictSelButton  AT (90 0 126 13) NOFRAME DISABLED
-	BUTTON "x" ID MainExitButton  AT (151 0 10 10) NOFRAME
-
+	POPUPTRIGGER "       " ID DictSelButton  AT (56 0 80 13)  LEFTANCHOR
+	LIST   "" ID lstMainPopup AT (50 0 80 90) VISIBLEITEMS 8 NONUSABLE
+	POPUPLIST ID DictSelButton  lstMainPopup
 	BUTTON "\11" ID MainWordButton  AT (0 145 15 14) NOFRAME FONT 3
 	FIELD ID MainWordField  AT (PREVRIGHT PREVTOP+2 78 PREVHEIGHT) MAXCHARS 255 EDITABLE UNDERLINED	
 	POPUPTRIGGER "" ID MainHistoryTrigger  AT (PREVRIGHT-2 145 15 PREVHEIGHT)  LEFTANCHOR
 	REPEATBUTTON "\3" MainBackHistoryRepeatButton AT (PREVRIGHT-2 PREVTOP PREVWIDTH PREVHEIGHT) NOFRAME FONT 3
-	BUTTON "Clr" ID MainNewButton  AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT)
+	BUTTON "Clr" ID MainNewButton  AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT) FRAME
 	BUTTON "E" ID MainExportToMemo   AT (PREVRIGHT+1 PREVTOP PREVWIDTH PREVHEIGHT)	
 	GRAFFITISTATEINDICATOR AT (PREVRIGHT+1 PREVTOP+4) 
 	
@@ -475,21 +481,25 @@ BEGIN
 	SCROLLBAR ID MainDescScrollBar   AT (153 15 7 133)  VALUE 0 MIN 0 MAX 0 PAGESIZE 0
 	REPEATBUTTON "\10" ID MainWordListUpRepeatButton  AT (0 17 61 9) FONT 3 NOFRAME
 	REPEATBUTTON "\7" ID MainWordListDownRepeatButton   AT (1 137 61 9) FONT 3 NOFRAME
-	LIST "" ID MainWordList AT (4 28 59 112) VISIBLEITEMS 10
-	LIST  "" ID lstMainPopup AT (12 23 80 90) VISIBLEITEMS 8 NONUSABLE
+	LIST "" ID MainWordList AT (4 28 59 112) VISIBLEITEMS 10	
+	GADGET ID NetworkBatteryGadget AT  (150 0 10 12)  
 END
+
+#define VersionNo "2.51(2008.12.16)"
+VERSION ID ApplicationVersion VersionNo
 
 FORM ID AboutForm AT (2 2 156 156)
     SAVEBEHIND FRAME 
     DEFAULTBTNID AboutOKButton  SAVEBEHIND MODAL
 BEGIN
 	TITLE "About ZDic"
-	LABEL "ZDic 2.50" AUTOID AT (CENTER 21) FONT 7
+	LABEL "ZDic"  AUTOID AT (20 23) FONT 7
+	LABEL VersionNo AUTOID AT (PREVRIGHT+5 PREVTOP) FONT 7
 	LABEL "Copyright © 2003-2004 neisoo" AUTOID AT (CENTER 43)
 	LABEL "Thank you for using ZDic!" AUTOID AT (CENTER 62) FONT 2
 	LABEL "JEMYZHANG(v2.34)" AUTOID AT (35 81)
 	LABEL "BobGreen (v2.34-2.41)" AUTOID AT (CENTER 94)	
-	LABEL "osfans (v2.42-2.50)" AUTOID AT (CENTER 107)
+	LABEL "osfans (v2.42-2.51)" AUTOID AT (CENTER 107)
 	LABEL "Yang Zhiqiang (v2.44)" AUTOID AT (35 120)
 	BUTTON "OK" ID AboutOKButton AT (58 137 40 12)	
 END
@@ -534,7 +544,7 @@ POPUPLIST ID triggerPhonetic  PrefsPhoneticList
 	//PUSHBUTTON  "A" ID PrefsFontLargeTinyPushButton   AT (100 77 12 12) FONT 2 GROUP 1
 	
 	POPUPTRIGGER "Black" ID triggerHeadColor  AT (84 PREVBOTTOM+3 AUTO AUTO)
-	LIST  "Black" "Blue" "Red" "Green" "Yellow" "Purple" "Orange" "Gray"   ID lstFontColor  AT (PREVLEFT+15 PREVTOP AUTO AUTO) VISIBLEITEMS 8 NONUSABLE
+	LIST  "Black" "Blue" "Red" "Green" "Yellow" "Purple" "Orange" "Gray"   ID lstFontColor  AT (PREVLEFT+15 PREVTOP AUTO 90) VISIBLEITEMS 8 NONUSABLE
 	PUSHBUTTON "B" ID chkHeadBold   AT (131 PREVTOP AUTO AUTO)  FONT 1
 
 	POPUPLIST ID triggerHeadColor   lstFontColor
@@ -547,27 +557,30 @@ FORM ID DetailsForm AT ( 2 2 156 156 )
 	SAVEBEHIND MODAL SAVEBEHIND 
 BEGIN
     TITLE "Preferences"
-	CHECKBOX "Get word from Clipboard at start" ID DetailsGetClipBoardAtStart  AT (4 15 AUTO AUTO)
-	CHECKBOX "Enable incremental search" ID DetailsEnableIncSearch  AT (4 75 AUTO AUTO)
-	CHECKBOX "Search word for single tap" ID DetailsEnableSingleTap   AT (4 27 AUTO AUTO)
-	CHECKBOX "Highlight word field" ID DetailsEnableHighlightWord   AT (4 39 AUTO AUTO)   
-	CHECKBOX "Try lower case on search failed" DetailsEnableTryLowerSearch AT (4 51 AUTO AUTO)
-	CHECKBOX "Use skin (need reload)" DetailsEnableSkin AT (4 63 AUTO AUTO)
-	CHECKBOX "Disable font inside (need reload)" DetailsDisablePhoneticFont AT (4 63 AUTO AUTO) NONUSABLE
-	CHECKBOX "Automatic speech" DetailsEnableAutoSpeech AT (4 101 AUTO AUTO)
+	CHECKBOX "Load from Clipboard" ID DetailsGetClipBoardAtStart  AT (4 15 AUTO AUTO)
+	CHECKBOX "Auto search" ID DetailsEnableIncSearch  AT (4 69 AUTO AUTO)
+	POPUPTRIGGER "Single click" ID DetailsEnableSingleTap   AT (4 30 AUTO AUTO)
+	LIST "Double click" "Single click"   ID lstClick  AT (PREVLEFT+10 PREVTOP 60 24) VISIBLEITEMS 2 NONUSABLE
+	POPUPTRIGGER "" ID triggerSearchType  AT (71 30 AUTO AUTO)
+	LIST "select word only" "jump search" "popup DA search" ID lstSearchType  AT (PREVLEFT+10 PREVTOP 71 35) VISIBLEITEMS 3 NONUSABLE
+	CHECKBOX "Highlight field" ID DetailsEnableHighlightWord   AT (4 44 AUTO AUTO)   
+	CHECKBOX "Try lowercase" DetailsEnableTryLowerSearch AT (4 56 AUTO AUTO)
+	CHECKBOX "Use skin" DetailsEnableSkin AT (81 56 AUTO AUTO)
+	CHECKBOX "Disable font inside (need reload)" DetailsDisablePhoneticFont AT (4 77 AUTO AUTO) NONUSABLE DISABLED 
+	CHECKBOX "Auto speech" DetailsEnableAutoSpeech AT (81 44 AUTO AUTO)
 	BUTTON "Done" ID DetailsDoneButton   AT (6 140 40 12)
-	SLIDER DetailSearchDelay AT (50 86 100 12) MIN 0 MAX 10 PAGESIZE 1 VALUE 5
-		BUTTON "Custom Keys" ID DetailsCustomKeys  AT (79 140 70 12)
-	POPUPTRIGGER "Type" ID triggerMenuType  AT (55 125 60 12)
-LIST  "Numerical" "Alphabetic" "User Defined" ID lstMenuType  AT (PREVLEFT PREVBOTTOM+1 PREVWIDTH 35) VISIBLEITEMS 3 NONUSABLE 
-POPUPLIST ID triggerMenuType  lstMenuType
-	LABEL "Menu Type:" AUTOID AT (4 125)
-	POPUPTRIGGER "DA size" ID triggerDAsize  AT (55 113 50 AUTO)
-LIST  "Small DA" "Large DA" "Fullscreen" ID lstDAsize   AT (PREVLEFT PREVBOTTOM+1 PREVWIDTH 35) VISIBLEITEMS 3 NONUSABLE 
-POPUPLIST ID triggerDAsize  listDAsize
-	LABEL "DA Size:" AUTOID AT (4 113)
-	END
-
+	SLIDER DetailSearchDelay AT (71 67 81 AUTO) MIN 0 MAX 10 PAGESIZE 1 VALUE 5
+	BUTTON "Custom Keys" ID DetailsCustomKeys  AT (79 140 70 12)
+	POPUPTRIGGER "Type" ID triggerMenuType  AT (65 85 70 12)
+	LIST  "Numerical menu" "Letter menu" "Customized menu" ID lstMenuType  AT (PREVLEFT+14 PREVTOP-10 76 35) VISIBLEITEMS 3 NONUSABLE 
+	POPUPLIST ID triggerMenuType  lstMenuType
+	POPUPTRIGGER "DA size" ID triggerDAsize  AT (5 85 50 AUTO)
+	LIST  "Small DA" "Large DA" "Full DA" ID lstDAsize   AT (PREVLEFT+14 PREVTOP-10 48 35) VISIBLEITEMS 3 NONUSABLE 
+	POPUPLIST ID triggerDAsize  listDAsize
+	CHECKBOX "Click battery to turn off screen" ID DetailsEnableScreenOff AT (4 101 AUTO AUTO) CHECKED
+	POPUPLIST ID DetailsEnableSingleTap  lstClick
+	POPUPLIST ID triggerSearchType  lstSearchType
+END
 
 FORM ID ExportOptionsForm   AT ( 2 65 156 93 )
 MODAL DEFAULTBTNID ExportOptionsOKBton
@@ -1562,7 +1575,7 @@ BEGIN
 	BITMAP "125.bmp" BPP 16 DENSITY 144
 END
 
-BITMAPFAMILYEX ID 9126 COMPRESS
+/*BITMAPFAMILYEX ID 9126 COMPRESS
 BEGIN
 	BITMAP "126.bmp" BPP 16 DENSITY 144
 END
@@ -1970,7 +1983,7 @@ END
 BITMAPFAMILYEX ID 9216 COMPRESS
 BEGIN
 	BITMAP "216.bmp" BPP 16 DENSITY 144
-END
+END*/
 
 BITMAPFAMILYEX ID 9217 COMPRESS
 BEGIN
