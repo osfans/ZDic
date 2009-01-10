@@ -18,6 +18,9 @@ enc = 'gbk' if enc == 'UTF-8' else enc                  #如果是UTF-8，则改
 bsddb_opt = False                                       #默认不采用bsddb保存
 block_size = 1024 * 32 #读入块大小
 
+zhtrans_opt = False
+zh2hans = {}
+
 replace_ste = [('<hr>', '//STEHORIZONTALLINE//\\n'),
                ('<center>', '//STECENTERALIGN//'), ('</center>','\\n'),
                ('<u>', '//STEHYPERLINK='), ('</u>', '\1//'),
@@ -98,7 +101,7 @@ class ZDic:
         replace_dic = {}                                        #保存需要转换的HTML命名字符，如&nbsp; &lt;等
         for name, codepoint in htmlentitydefs.name2codepoint.items():
             try:
-                char = unichr(codepoint).encode(enc)            #enc编码可显示该HTML对象时，才进行替换
+                char = unichr(codepoint)            #enc编码可显示该HTML对象时，才进行替换
                 replace_dic['&%s;' % name.lower()] = char
             except:
                 pass
@@ -106,14 +109,13 @@ class ZDic:
         
         def trim(s):
             U"处理XML文件标记"
-            s = s.encode(enc, 'replace').replace('&amp;', '&')   #把UTF8编码转换为enc编码，无法编码的用?代替
+            s = s.replace('&amp;', '&')   #把UTF8编码转换为enc编码，无法编码的用?代替
             for name, char in replace_dic.iteritems():          #替换HTML命名字符
                 s = s.replace(name, char)
             s = re.compile('(</?(p|font|br|tr|td|table|div|span|ref).*?>)|(\[\[[a-z]{2,3}(-[a-z]*?)?:[^\]]*?\]\])|(<!--.*?-->)',\
                             re.I|re.DOTALL).sub('', s)          #替换部分HTML标记
             s = re.sub('\n{3,}','\n\n',s).replace('\n', r'\n')  #把连续的多个换行符替换成两个换行符
             return s
-        
         f = bz2.BZ2File(path) if ext == '.bz2' else open(path)  #打开压缩或者不压缩格式均可
         f_size=os.path.getsize(path)
         s = f.read(block_size)
@@ -123,13 +125,15 @@ class ZDic:
                 end = s.index('</page>',start + 6) + 7                #获取page段
                 dom = parseString(s[start:end])
                 word, mean = trim(getData(dom, 'title')), trim(getData(dom, 'text'))
+                word = multiReplace(word.encode('utf-8','replace')).decode('utf-8').encode(enc, 'replace') if zhtrans_opt == True else word.encode(enc, 'replace')
+                mean = multiReplace(ste(mean).encode('utf-8','replace')).decode('utf-8').encode(enc, 'replace') if zhtrans_opt == True else ste(mean).encode(enc, 'replace')
                 if ((word in self.lines) and (mean[:9].lower()=='#redirect')) \
                    or ((':' in word) and word[:word.index(':')] in removed_title):#跳过简繁转换后的重复词条或跳过某些类别词条
                     pass
                 elif word in self.lines:
-                    self.lines[word]+=r'\n\n\n' + ste(mean) #重复词条，合并成一条
+                    self.lines[word]+=r'\n\n\n' + mean #重复词条，合并成一条
                 else:
-                    self.lines[word]=ste(mean)
+                    self.lines[word]= mean
                 s = s[end:]
             except:
                 tmp = f.read(block_size)
@@ -596,14 +600,25 @@ def log(msg):
     print '[%s]%s'%(time.strftime('%X'), msg),
     
 if __name__ == '__main__':   
-    opts, argv = getopt.getopt(sys.argv[1:], 'bt')
+    opts, argv = getopt.getopt(sys.argv[1:], 'btz:')
     if len(argv) != 2:
-        log(U'Syntax: [-b] [-t] filename1 filename2') #参数错误时给出语法提示
+        log(U'Syntax: [-b] [-t] [-ztransfile] filename1 filename2') #参数错误时给出语法提示
     else:
         pathi, patho = argv
         try:
             s = time.time() #记录开始时间
             log(U'Loading...')
+            for o, a in opts:
+                if o == "-z":
+                    zhtrans_opt = True
+                    dict_file = open(a,"r")
+                    for line in dict_file:
+                        p = line.split(',')
+                        zh2hans[p[0]] = p[1]
+                    dict_file.close()
+                    rc = re.compile('|'.join(sorted(zh2hans.keys(),lambda a,b: len(b)-len(a))))
+                    def multiReplace(text):
+                        return rc.sub(lambda mo: zh2hans[mo.string[mo.start():mo.end()]], text)
             app = ZDic()    #初使化ZDic数据结构
             app.pdbName = os.path.splitext(os.path.basename(patho))[0]
             if patho[-3:].lower() == 'txt' or ('-t', '') in opts: #目标文件为文本文件时，转换为文本文件
