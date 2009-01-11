@@ -161,6 +161,8 @@ typedef struct ZDicPreferenceType
 #define appSuperMemoDBType      'SM01'
 #define appName					"ZDic"
 #define appDBType				'Dict'
+#define appSkinResType			'RscS'
+#define appFontResType			'RscF'
 #define appIdxType				'ZIdx'
 #define appVersionNum			0x01
 #define appPrefID				0x00
@@ -302,11 +304,12 @@ typedef struct AppGlobalObj{
 	
 	Char		optflag;						//option key flag, 0: not pressed, 1: pressed once 2: always on
 	Char 		phonetic[MAX_IPA_LEN + MAX_WORD_LEN + 1];					//ipa phonetic
-	UInt16		mainFormID;	
 	UInt8		brightness;
 	Boolean		zlibFound;		//zdiclib or zlib or ste opened
 	Boolean		zdicLibFound;
 	Boolean		STEFound;
+	DmOpenRef	skinResRef;
+	DmOpenRef	fontResRef;
 } AppGlobalType;
 
 #endif /* ZDIC_COMMON_H_ */

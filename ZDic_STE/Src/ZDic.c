@@ -123,7 +123,7 @@ static void FormPopupSearch( void ) //调用DA查询单词
 	  dbID = DmFindDatabase(0, appName);
 	  if (dbID)
 	  {
-	    SysAppLaunch(0, dbID, 0, 60000, NULL, &result);//60000,50011,50012,50013
+	    SysAppLaunch(0, dbID, 0, 50011, NULL, &result);//60000,50011,50012,50013
 	  }
 	  //DmGetResource
 }
@@ -1084,14 +1084,16 @@ static void ToolsScrollWord ( WinDirectionType direction, UInt16 inputFieldID,
         frmP = FrmGetActiveForm ();
         if ( ZDicVoiceIsExist ( ( Char * ) explainPtr ) )
         {
-        	HideObject ( frmP, hidePlayerBtonID );
+        	if(global->skinResRef)
+        		HideObject ( frmP, hidePlayerBtonID );
             ShowObject ( frmP, playerBtonID );
             if ( global->prefs.enableAutoSpeech )
                 ToolsPlayVoice ();
         }
         else{
             HideObject ( frmP, playerBtonID );
-            ShowObject ( frmP, hidePlayerBtonID );
+            if(global->skinResRef)
+            	ShowObject ( frmP, hidePlayerBtonID );
         }
     }
 }
@@ -1778,7 +1780,7 @@ static void ToolsNextDictionaryCommand(WinDirectionType direction,  UInt16 wordF
 		    dicIndex = 0;
 		}
 	}
-	formId = (wordFieldID==MainWordField) ? global->mainFormID: ( global->prefs.daSize ? DAFormLarge : DAForm);
+	formId = (wordFieldID==MainWordField) ? MainForm: ( global->prefs.daSize ? DAFormLarge : DAForm);
     ToolsChangeDictionaryCommand(formId, dicIndex + ZDIC_DICT_MENUID);
 }
 /***********************************************************************
@@ -1863,7 +1865,7 @@ static Err FormCreateDictList( void )
     selection = LstPopupList ( lstP );
     
     if ( selection != noListSelection )
-		ToolsChangeListDictionaryCommand(global->mainFormID, global->prefs.dictMenu ? shortcutInfo->dictIndex[selection]: selection ); 
+		ToolsChangeListDictionaryCommand(MainForm, global->prefs.dictMenu ? shortcutInfo->dictIndex[selection]: selection ); 
     return errNone;
 }
 /***********************************************************************
@@ -2412,8 +2414,7 @@ static void AppEventLoop()
 
     // Remember the original form
     originalForm = FrmGetActiveForm();
-    global->mainFormID = global->prefs.enableSkin ? MainFormSkin : MainFormNoSkin;
-    form = FrmInitForm( global->mainFormID );
+    form = FrmInitForm( MainForm );
     FrmSetActiveForm( form );
 
     event.eType = frmOpenEvent;
@@ -2421,7 +2422,7 @@ static void AppEventLoop()
 
     
 	WinSetDrawMode(winOverlay);
-	if (global->mainFormID == MainFormSkin)
+	if (global->skinResRef)
 		WinPaintChars(global->dictTriggerName,StrLen(global->dictTriggerName),90,2);
 	else
 		CtlSetLabel ( GetObjectPtr ( DictSelButton ), &global->dictTriggerName[0] );
@@ -2540,7 +2541,7 @@ static void AppDAEventLoop( Boolean enableSmallDA, Boolean *bGotoMainForm )
     {
         MainFormHandleEvent( &event );
         WinSetDrawMode(winOverlay);
-        if (global->mainFormID == MainFormSkin)
+        if (global->skinResRef)
         	WinPaintChars(global->dictTriggerName,StrLen(global->dictTriggerName),90,2);
 	}
 
@@ -2924,8 +2925,11 @@ static Err AppStart( Boolean subLaunch,UInt8 dictMenu )
 
     // Get initial word;
     global->prvActiveForm = FrmGetActiveForm();
-    ToolsGetStartWord(global);
-
+    ToolsGetStartWord(global);    
+    
+    global->skinResRef=global->prefs.enableSkin?DmOpenDatabaseByTypeCreator(appSkinResType, appFileCreator, dmModeReadOnly):0;//打开皮肤资源
+    global->fontResRef=DmOpenDatabaseByTypeCreator(appFontResType, appFileCreator, dmModeReadOnly);//打开音标资源   
+    
     return err;
     
 exit:
@@ -2994,6 +2998,16 @@ static void AppStop(void)
     // Release all memory that used by ZDicSpeech.
     ZDicVoiceRelease();
     
+    if(global->skinResRef)//关闭资源文件
+    {
+    	 DmCloseDatabase(global->skinResRef);
+    	 global->skinResRef = 0; 
+    }
+    if(global->fontResRef)//关闭字体资源文件
+    {
+    	 DmCloseDatabase(global->fontResRef);
+    	 global->fontResRef = 0; 
+    }	      	   
     return;
 }
 
@@ -3118,11 +3132,10 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags )
                 return error;
 
             global = AppGetGlobal();
-            global->mainFormID = global->prefs.enableSkin ? MainFormSkin : MainFormNoSkin;
 
             // Remember the original form
             originalForm = FrmGetActiveForm();
-            form = FrmInitForm( global->prefs.daSize == 0 ? DAForm : (global->prefs.daSize == 1 ?DAFormLarge: global->mainFormID) );
+            form = FrmInitForm( global->prefs.daSize == 0 ? DAForm : (global->prefs.daSize == 1 ?DAFormLarge: MainForm));
             FrmSetActiveForm( form ); 
             AppDAEventLoop( global->prefs.daSize < 2, &bGotoMainForm );
 
@@ -3134,7 +3147,7 @@ UInt32 PilotMain( UInt16 cmd, MemPtr cmdPBP, UInt16 launchFlags )
             {
                 // Remember the original form
                 originalForm = FrmGetActiveForm();
-                form = FrmInitForm( global->mainFormID );
+                form = FrmInitForm( MainForm );
                 FrmSetActiveForm( form );
 
                 AppDAEventLoop( false, &bGotoMainForm );
@@ -3367,7 +3380,7 @@ static void ShortcutPopEventHandler()
 	    		if( event.data.keyDown.chr == (WChar)dictInfo->keyShortcutChr[shortcutInfo->dictIndex[i]] && 
 	    			event.data.keyDown.keyCode == (WChar)dictInfo->keyShortcutKeycode[shortcutInfo->dictIndex[i]] )
 	    		{
-	    			ToolsChangeListDictionaryCommand(global->mainFormID,shortcutInfo->dictIndex[i]);
+	    			ToolsChangeListDictionaryCommand(MainForm,shortcutInfo->dictIndex[i]);
 					exit = true;
 					goto pupopformexit;
 	    		}
@@ -3453,7 +3466,7 @@ static void ShortcutPopEventHandler()
 			{
 		        if ( event.data.lstSelect.listID == PopShortcutList )
 		        {
-		            ToolsChangeListDictionaryCommand(global->mainFormID,shortcutInfo->dictIndex[LstGetSelection(lstP)] );
+		            ToolsChangeListDictionaryCommand(MainForm, shortcutInfo->dictIndex[LstGetSelection(lstP)] );
 		            exit = true;
 		        }
 		        break;
@@ -4883,7 +4896,8 @@ static Err DAFormSearch( Boolean putinHistory, Boolean highlight, Boolean bEnabl
         frmP = FrmGetActiveForm ();
         if ( ZDicVoiceIsExist ( ( Char * ) explainPtr ) )
         {
-        	HideObject ( frmP, DAPlayNoneVoice);
+        	if(global->skinResRef)
+        		HideObject ( frmP, DAPlayNoneVoice);
             ShowObject ( frmP, DAPlayVoice );
             if ( bEnableAutoSpeech )
                 ToolsPlayVoice ();
@@ -4891,7 +4905,8 @@ static Err DAFormSearch( Boolean putinHistory, Boolean highlight, Boolean bEnabl
         else
         {
             HideObject ( frmP, DAPlayVoice );
-            ShowObject ( frmP, DAPlayNoneVoice );
+            if(global->skinResRef)
+            	ShowObject ( frmP, DAPlayNoneVoice );
         }
         FrmSetFocus( frmP, FrmGetObjectIndex( frmP, DAWordField ) );
     }
@@ -5276,25 +5291,32 @@ static void DAFormInit( FormType *frmP )
     global->smtEngineRefNum=0;
     // Initial word for word field.
     ToolsSetFieldPtr( DAWordField, &global->initKeyWord[ 0 ], global->initKeyWord[ 0 ]?StrLen( &global->initKeyWord[ 0 ] ):2, false );
-
-    // Set get word source.
-    if(!global->prefs.getClipBoardAtStart)
-    {
-    	HideObject(frmP, DAClipboardPushButton);
-    	ShowObject(frmP, DASelectPushButton);
-    }else{
-    	HideObject(frmP, DASelectPushButton);
-    	ShowObject(frmP, DAClipboardPushButton);
-    }
     
-    // Set enable jump search group selection.
-    if(global->prefs.searchType){
-		HideObject( frmP, DANoJumpPushButton);
-		ShowObject( frmP, DAJumpPushButton);
-    }else{
-    	HideObject( frmP, DAJumpPushButton);
-    	ShowObject( frmP, DANoJumpPushButton);
-    }
+    if(global->skinResRef)
+    {
+	    // Set get word source.
+	    if(global->prefs.getClipBoardAtStart)
+	    {
+	    	HideObject(frmP, DASelectPushButton);
+	    	ShowObject(frmP, DAClipboardPushButton);
+	    }else{
+	    	HideObject(frmP, DAClipboardPushButton);
+	    	ShowObject(frmP, DASelectPushButton);
+	    }
+	    // Set enable jump search group selection.
+	    if(global->prefs.searchType){
+			HideObject( frmP, DANoJumpPushButton);
+			ShowObject( frmP, DAJumpPushButton);
+	    }else{
+	    	HideObject( frmP, DAJumpPushButton);
+	    	ShowObject( frmP, DANoJumpPushButton);
+	    }
+	}
+	else
+	{
+		CtlSetValue ( GetObjectPtr (DAClipboardPushButton), global->prefs.getClipBoardAtStart);
+		CtlSetValue ( GetObjectPtr (DAJumpPushButton), global->prefs.searchType);
+	}
     /*
     FrmSetControlGroupSelection ( frmP, 1,
                                   global->prefs.getClipBoardAtStart ?
@@ -5705,31 +5727,45 @@ static Boolean DAFormHandleEvent( EventType * eventP )
             if ( eventP->data.ctlSelect.controlID == DAClipboardPushButton
                     || eventP->data.ctlSelect.controlID == DASelectPushButton )
             {
-                global->prefs.getClipBoardAtStart =
-                    eventP->data.ctlSelect.controlID == DAClipboardPushButton ? false : true;
-                frmP = FrmGetActiveForm();
-                if(global->prefs.getClipBoardAtStart){
-                	HideObject( frmP, DASelectPushButton);
-                	ShowObject( frmP, DAClipboardPushButton);
-                }else{
-                	HideObject( frmP, DAClipboardPushButton);
-                	ShowObject( frmP, DASelectPushButton);
-                }
+                
+                if(global->skinResRef)
+                {
+                	global->prefs.getClipBoardAtStart =
+	                    eventP->data.ctlSelect.controlID == DAClipboardPushButton ? false : true;
+	                frmP = FrmGetActiveForm();
+	                if(global->prefs.getClipBoardAtStart){
+	                	HideObject( frmP, DASelectPushButton);
+	                	ShowObject( frmP, DAClipboardPushButton);
+	                }else{
+	                	HideObject( frmP, DAClipboardPushButton);
+	                	ShowObject( frmP, DASelectPushButton);
+	                }
+	            }
+	            else
+	            	global->prefs.getClipBoardAtStart = !global->prefs.getClipBoardAtStart;
+                	//CtlSetValue ( GetObjectPtr (DAClipboardPushButton), global->prefs.getClipBoardAtStart);
                 handled = true;
             }
             if ( eventP->data.ctlSelect.controlID == DANoJumpPushButton
                     || eventP->data.ctlSelect.controlID == DAJumpPushButton )
             {
-                global->prefs.searchType =
-                    eventP->data.ctlSelect.controlID == DAJumpPushButton ? false : true;
-                frmP = FrmGetActiveForm();
-                if(global->prefs.searchType){
-					HideObject( frmP, DANoJumpPushButton);
-					ShowObject( frmP, DAJumpPushButton);
-			    }else{
-			    	HideObject( frmP, DAJumpPushButton);
-			    	ShowObject( frmP, DANoJumpPushButton);
-			    }
+
+                if(global->skinResRef)
+                {
+	                global->prefs.searchType =
+	                    eventP->data.ctlSelect.controlID == DAJumpPushButton ? false : true;
+	                frmP = FrmGetActiveForm();
+	                if(global->prefs.searchType){
+						HideObject( frmP, DANoJumpPushButton);
+						ShowObject( frmP, DAJumpPushButton);
+				    }else{
+				    	HideObject( frmP, DAJumpPushButton);
+				    	ShowObject( frmP, DANoJumpPushButton);
+				    }
+				}
+			    else
+			    	global->prefs.searchType = !global->prefs.searchType;
+			    	//CtlSetValue ( GetObjectPtr (DAJumpPushButton), global->prefs.searchType);
                 handled = true;
             }
 
@@ -5823,7 +5859,7 @@ Err MainFormAdjustObject ( const RectanglePtr toBoundsP )
         descFieldBound.topLeft.x = COORD_START_X;
         descFieldBound.topLeft.y = COORD_START_Y;
         descFieldBound.extent.x = ( toBoundsP->extent.x - COORD_SCROLLBAR_WIDTH - COORD_SPACE);
-        descFieldBound.extent.y = ( toBoundsP->extent.y + (global->mainFormID==MainFormSkin?3:0) - COORD_START_Y - COORD_TOOLBAR_HEIGHT );
+        descFieldBound.extent.y = ( toBoundsP->extent.y + (global->skinResRef?3:0) - COORD_START_Y - COORD_TOOLBAR_HEIGHT );
         //FrmSetObjectBounds( frmP, descFieldIndex, &descFieldBound );
 
         descScrollBarBound.topLeft.x = descFieldBound.topLeft.x + descFieldBound.extent.x;
@@ -5846,7 +5882,7 @@ Err MainFormAdjustObject ( const RectanglePtr toBoundsP )
         HideObject( frmP, MainDescScrollBar );
 
         wordListBound.topLeft.x = COORD_START_X ;
-        wordListBound.topLeft.y = toBoundsP->extent.y + (global->mainFormID==MainFormSkin?3:0) - COORD_SPACE - COORD_TOOLBAR_HEIGHT - wordListBound.extent.y;
+        wordListBound.topLeft.y = toBoundsP->extent.y + (global->skinResRef?3:0) - COORD_SPACE - COORD_TOOLBAR_HEIGHT - wordListBound.extent.y;
         wordListBound.extent.x = toBoundsP->extent.x - COORD_SPACE * 4 - COORD_SCROLLBAR_WIDTH;
         FrmSetObjectBounds ( frmP, wordListIndex, &wordListBound );
 
@@ -5922,7 +5958,7 @@ Err MainFormAdjustObject ( const RectanglePtr toBoundsP )
         descFieldBound.topLeft.x = wordListBound.topLeft.x + wordListBound.extent.x + 2 * COORD_SPACE + 1;
         descFieldBound.topLeft.y = COORD_START_Y;
         descFieldBound.extent.x = ( toBoundsP->extent.x - COORD_SCROLLBAR_WIDTH ) - descFieldBound.topLeft.x;
-        descFieldBound.extent.y = ( toBoundsP->extent.y +  (global->mainFormID==MainFormSkin?3:0) - COORD_START_Y - COORD_TOOLBAR_HEIGHT);
+        descFieldBound.extent.y = ( toBoundsP->extent.y +  (global->skinResRef?3:0) - COORD_START_Y - COORD_TOOLBAR_HEIGHT);
         //FrmSetObjectBounds( frmP, descFieldIndex, &descFieldBound );
 
         descScrollBarBound.topLeft.x = descFieldBound.topLeft.x + descFieldBound.extent.x;
@@ -6010,7 +6046,7 @@ static Err FormHistorySeekBack( UInt16 formId )
         return ~errNone;
     }
 	
-	if(formId == global->mainFormID)
+	if(formId == MainForm)
 	{
 	    // put history word to search, but not put it to history list.
 	    ToolsSetFieldPtr ( MainWordField, &global->prefs.history[ global->historySeekIdx ][ 0 ],
@@ -6417,7 +6453,7 @@ static Err FormPopupDictList( UInt16 formId )
 
     LstSetListChoices ( lstP, itemsPtr, count );
     
-    if(formId == global->mainFormID)//设置list行数
+    if(formId == MainForm)//设置list行数
 	{
 		LstSetHeight ( lstP, count < 13 ? count : 13 );
 	}
@@ -6705,7 +6741,7 @@ static void MainFormUpdateDisplay( UInt16 updateCode )
         
         frmP = FrmGetActiveForm ();
         
-        if (global->mainFormID == MainFormSkin)
+        if (global->skinResRef)
 	    {    
 	        ShowObject(frmP, DictSelButton);
 			WinSetDrawMode(winOverlay);
@@ -6881,7 +6917,7 @@ static void MainFormInit( FormType *frmP )
     MainFormWordListUseAble( false, false );
 
     
-    if(global->mainFormID == MainFormSkin)
+    if(global->skinResRef)
     {
 	    // Set enable jump search group selection.
 	    if(global->prefs.searchType){
@@ -6949,7 +6985,7 @@ static Boolean MainFormDoCommand( UInt16 command )
     
     if ( command >= ZDIC_DICT_MENUID )
     {
-        handled = ToolsChangeDictionaryCommand( global->mainFormID, command );
+        handled = ToolsChangeDictionaryCommand( MainForm, command );
         return handled;
     }
 
@@ -7221,7 +7257,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
             frmP = FrmGetActiveForm ();
             FrmDrawForm ( frmP );
             WinSetDrawMode(winOverlay);
-            if (global->mainFormID == MainFormSkin)
+            if (global->skinResRef)
 				WinPaintChars(global->dictTriggerName,StrLen(global->dictTriggerName),90,2);
 			MainFormUpdateDisplay(updateDictionaryChanged);			
         }        
@@ -7418,7 +7454,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
                 break;
 
             case MainBackHistoryRepeatButton:
-                FormHistorySeekBack (global->mainFormID);
+                FormHistorySeekBack (MainForm);
                 break;
             }
         }
@@ -7514,7 +7550,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 	                		}
 	                		case 5:
 	                		{
-	                			FormHistorySeekBack (global->mainFormID);
+	                			FormHistorySeekBack (MainForm);
 	                			break;
 	                		}
 	                		case 6:
@@ -7529,7 +7565,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 	                		}
 	                		case 8:
 	                		{
-	                			FormPopupDictList(global->mainFormID);
+	                			FormPopupDictList(MainForm);
 	                			break;
 	                		}
 	                		case 9:
@@ -7581,7 +7617,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 	                		}
 	                		case 5:
 	                		{
-	                			FormHistorySeekBack (global->mainFormID);
+	                			FormHistorySeekBack (MainForm);
 	                			break;
 	                		}
 	                		case 6:
@@ -7596,7 +7632,7 @@ static Boolean MainFormHandleEvent( EventType * eventP )
 	                		}
 	                		case 8:
 	                		{
-	                			FormPopupDictList(global->mainFormID);
+	                			FormPopupDictList(MainForm);
 	                			break;
 	                		}
 	                		case 9:
@@ -7664,13 +7700,13 @@ static Boolean MainFormHandleEvent( EventType * eventP )
                 else if( eventP->data.keyDown.chr == (WChar)global->prefs.keyPopupChr &&
                 		 eventP->data.keyDown.keyCode == (WChar)global->prefs.keyPopupKeycode)
                 {
-                	FormPopupDictList(global->mainFormID);
+                	FormPopupDictList(MainForm);
                 	handled = true;
                 }
                 else if( eventP->data.keyDown.chr == (WChar)global->prefs.keyGobackChr &&
                 		 eventP->data.keyDown.keyCode == (WChar)global->prefs.keyGobackKeycode)
                 {
-                	FormHistorySeekBack (global->mainFormID);
+                	FormHistorySeekBack (MainForm);
                 	handled = true;
                 }
                 else if( eventP->data.keyDown.chr == (WChar)global->prefs.keySearchAllChr &&

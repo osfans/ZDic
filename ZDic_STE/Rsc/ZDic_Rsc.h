@@ -148,7 +148,7 @@
 #define MainAutoSearchPushButton 1081
 #define MainAutoVoicePushButton 1080
 #define MainJumpPushButton 1079
-#define MainFormNoSkin 1078
+#define MainForm 1078
 #define lstMainPopup 1077
 #define SettingBitmapFamily 1076
 #define MainSettingButton 1075
